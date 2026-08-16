@@ -1,0 +1,14 @@
+{
+  "name": "cloclo-backend",
+  "version": "1.0.0",
+  "description": "Backend API pour CLO-CLO (Yaoundé / Nkolfoulou) — Node.js natif, sans dépendance externe",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

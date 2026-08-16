@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Créer un Compte – Clo-Clo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="inscription.css"/>
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo">🍹</div>
+      <div>
+        <div class="nav-brand-name">Clo-Clo</div>
+        <div class="nav-brand-sub">Bar à Fruits &amp; Délices</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Accueil
+      </a></li>
+      <li><a href="menu.html">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Menu
+      </a></li>
+      <li><a href="suivie.html">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Suivi
+      </a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-points">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="points-label">0 pts</span></button>
+      <button class="cart-btn" aria-label="Panier">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge">0</span>
+      </button>
+      <button class="btn-profile" onclick="window.location.href='profil.html'">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profil
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ FOND ═══ -->
+  <div class="page-bg">
+    <div class="form-card">
+
+      <!-- En-tête -->
+      <div class="card-header">
+        <div class="card-icon">🍹</div>
+        <h1 class="card-title">Créer un Compte</h1>
+        <p class="card-sub">Rejoignez Clo-Clo et gagnez des points</p>
+      </div>
+
+      <!-- Avantages -->
+      <div class="avantages">
+        <div class="avantages-title">Avantages de l'inscription :</div>
+        <ul class="avantages-list">
+          <li><span>⭐</span> 50 points de bienvenue offerts</li>
+          <li><span>🎁</span> Offres exclusives et promotions</li>
+          <li><span>📍</span> Suivi de livraison en temps réel</li>
+          <li><span>💳</span> Programme de fidélité avec récompenses</li>
+        </ul>
+      </div>
+
+      <!-- Grille de champs -->
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label class="form-label">Nom Complet</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="input-nom" placeholder="Jean Dupont"/>
+          </div>
+          <span class="error-msg" id="err-nom"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" id="input-email" placeholder="jean@email.com"/>
+          </div>
+          <span class="error-msg" id="err-email"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.53 5.53l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <input type="tel" id="input-tel" placeholder="+237 6 XX XXX XXX"/>
+          </div>
+          <span class="error-msg" id="err-tel"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <input type="text" id="input-adresse" placeholder="123 Avenue..."/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="input-mdp" placeholder="••••••••"/>
+            <button type="button" class="toggle-pwd" data-target="input-mdp">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="error-msg" id="err-mdp"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="input-mdp2" placeholder="••••••••"/>
+          </div>
+          <span class="error-msg" id="err-mdp2"></span>
+        </div>
+
+      </div>
+
+      <!-- CGU -->
+      <label class="cgu-label">
+        <input type="checkbox" id="cgu-check"/>
+        J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>
+      </label>
+      <span class="error-msg" id="err-cgu"></span>
+
+      <!-- Bouton -->
+      <button class="btn-creer" id="btn-creer">Créer mon Compte</button>
+
+      <!-- Lien connexion -->
+      <p class="link-connexion">
+        Vous avez déjà un compte ? <a href="connexion.html">Se connecter</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script type="module" src="inscription.js"></script>
+</body>
+</html>

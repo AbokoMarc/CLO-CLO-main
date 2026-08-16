@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Espace Directeur – Clo-Clo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="connexion.css"/>
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- Plein écran sombre -->
+  <div class="page-bg bg-directeur" style="min-height:100vh;">
+    <div class="form-card">
+
+      <div class="card-header">
+        <div class="card-icon card-icon-green">🍹</div>
+        <h1 class="card-title">Espace Directeur</h1>
+        <p class="card-sub">Connexion Administrateur</p>
+      </div>
+
+      <!-- Bannière accès restreint -->
+      <div class="info-banner banner-yellow">
+        <span style="font-size:1.2rem;">⚠️</span>
+        <div>
+          <div class="info-banner-title">Accès Restreint</div>
+          <div class="info-banner-sub">Réservé au personnel autorisé uniquement</div>
+        </div>
+      </div>
+
+      <!-- Nom d'utilisateur -->
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="input-user" placeholder="admin"/>
+        </div>
+        <span class="error-msg" id="err-user"></span>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="input-mdp" placeholder="••••••••"/>
+          <button type="button" class="toggle-pwd" data-target="input-mdp">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="error-msg" id="err-mdp"></span>
+      </div>
+
+      <button class="btn-main" id="btn-login">Se Connecter</button>
+
+      <div class="demo-hint">Demo : admin / admin123</div>
+
+      <div class="bottom-links">
+        <a href="index.html">← Retour au site</a>
+        <span class="sep">|</span>
+        <a href="connexion-livreur.html">Espace Livreur</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="connexion.js"></script>
+</body>
+</html>

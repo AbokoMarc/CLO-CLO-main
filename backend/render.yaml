@@ -1,0 +1,25 @@
+# Déploiement du backend sur Render.com (render.com/docs/blueprint-spec)
+# Utilisation : sur render.com → New → Blueprint → pointer sur ce dépôt.
+services:
+  - type: web
+    name: cloclo-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: "echo 'Aucune dépendance à installer (Node natif)'"
+    startCommand: "node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+    disk:
+      name: cloclo-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1

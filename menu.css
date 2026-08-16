@@ -1,0 +1,565 @@
+/* ============================================================
+   CLO-CLO – Bar à Fruits & Délices | menu.css
+   ============================================================ */
+
+/* ── Variables globales ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --green:          #22c55e;
+  --green-dark:     #16a34a;
+  --yellow:         #facc15;
+  --text-dark:      #1a1a2e;
+  --text-gray:      #6b7280;
+  --bg-light:       #f9f9f9;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+nav {
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.nav-logo {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.nav-brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+}
+
+.nav-brand-sub {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  opacity: 1;
+}
+
+.nav-links a.active {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.nav-links svg {
+  width: 17px;
+  height: 17px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-points {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 30px;
+  padding: 8px 18px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-points:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-points svg {
+  width: 17px;
+  height: 17px;
+  fill: var(--yellow);
+}
+
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.cart-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--green);
+}
+
+.btn-profile {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 30px;
+  padding: 8px 18px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-profile:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
+
+.btn-profile svg {
+  width: 17px;
+  height: 17px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   EN-TÊTE DU MENU
+   ============================================================ */
+.menu-header {
+  background: white;
+  text-align: center;
+  padding: 50px 80px 40px;
+  border-bottom: 1px solid #eee;
+}
+
+.menu-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+  animation: fadeUp 0.5s ease both;
+}
+
+.menu-sub {
+  font-size: 1rem;
+  color: var(--text-gray);
+  font-weight: 500;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+/* ── Filtres ── */
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.filter-btn {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 50px;
+  padding: 9px 22px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.filter-btn.active {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+/* ============================================================
+   GRILLE DES PRODUITS
+   ============================================================ */
+.menu-section {
+  padding: 40px 80px 60px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* ── Carte produit ── */
+.product-card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Masquer les cartes filtrées */
+.product-card.hidden {
+  display: none;
+}
+
+/* ── Image ── */
+.product-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-img-wrap img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s;
+}
+
+.product-card:hover .product-img-wrap img {
+  transform: scale(1.05);
+}
+
+/* Badge "Populaire" */
+.badge-popular {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: var(--yellow);
+  color: #1a1a1a;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 30px;
+}
+
+/* Badge prix */
+.product-price {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--green);
+  color: white;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 5px 14px;
+  border-radius: 30px;
+}
+
+/* ── Infos produit ── */
+.product-info {
+  padding: 18px 20px 20px;
+}
+
+.product-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.product-desc {
+  font-size: 0.85rem;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* ── Bouton Ajouter ── */
+.btn-add {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-add svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-add:hover {
+  background: var(--green-dark);
+  transform: scale(1.02);
+}
+
+.btn-add:active {
+  transform: scale(0.98);
+}
+
+/* ── Message aucun résultat ── */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-gray);
+}
+
+.no-results span {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 14px;
+}
+
+.no-results p {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  background: #0f172a;
+  padding: 50px 80px 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-brand-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+
+.footer-brand-desc {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+
+footer p {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  line-height: 2;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  color: #9ca3af;
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid #1e293b;
+  margin-bottom: 22px;
+}
+
+.footer-copy {
+  text-align: center;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 0 20px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .menu-header {
+    padding: 36px 24px 28px;
+  }
+
+  .menu-title {
+    font-size: 2rem;
+  }
+
+  .menu-section {
+    padding: 28px 24px 50px;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  footer {
+    padding: 40px 24px 24px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    gap: 8px;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    font-size: 0.88rem;
+  }
+}

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil – Clo-Clo Bar à Fruits & Délices</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="profil.css"/>
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════
+       NAVBAR
+  ════════════════════════════════ -->
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo">🍹</div>
+      <div>
+        <div class="nav-brand-name">Clo-Clo</div>
+        <div class="nav-brand-sub">Bar à Fruits &amp; Délices</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Accueil
+      </a></li>
+      <li><a href="menu.html">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Menu
+      </a></li>
+      <li><a href="suivie.html">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Suivi
+      </a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-points">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span id="points-label">0 pts</span>
+      </button>
+      <button class="cart-btn" aria-label="Panier">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+      <button class="btn-profile active-nav">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profil
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════
+       BANNIÈRE PROFIL
+  ════════════════════════════════ -->
+  <div class="profil-banner">
+    <div class="banner-inner">
+      <div class="banner-left">
+        <div class="avatar">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="banner-info">
+          <h1 class="banner-name">Marie Kambale</h1>
+          <p class="banner-email">marie.kambale@email.com</p>
+          <div class="banner-meta">
+            <span class="badge-or">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Membre Or
+            </span>
+            <span class="banner-cmds">24 commandes</span>
+          </div>
+        </div>
+      </div>
+      <div class="banner-points-box">
+        <div class="bp-label">Vos Points</div>
+        <div class="bp-value">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          350
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       ONGLETS
+  ════════════════════════════════ -->
+  <div class="profil-container">
+
+    <!-- Navigation par onglets -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="vue">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Vue d'ensemble
+      </button>
+      <button class="tab-btn" data-tab="recompenses">
+        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><line x1="12" y1="13" x2="12" y2="17"/></svg>
+        Récompenses
+      </button>
+      <button class="tab-btn" data-tab="historique">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Historique
+      </button>
+      <button class="tab-btn" data-tab="parametres">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Paramètres
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════
+         ONGLET 1 : VUE D'ENSEMBLE
+    ═══════════════════════════════ -->
+    <div class="tab-content active" id="tab-vue">
+
+      <h2 class="tab-section-title">Progression du Niveau</h2>
+
+      <!-- Barre de niveau -->
+      <div class="niveau-card">
+        <div class="niveau-top">
+          <span class="niveau-actuel">Niveau Actuel : <strong>Or</strong></span>
+          <span class="niveau-objectif">350 / 1000 points pour Platine</span>
+        </div>
+        <div class="niveau-bar-bg">
+          <div class="niveau-bar-fill" style="width: 35%;"></div>
+        </div>
+        <div class="niveau-tiers">
+          <div class="tier tier-done">
+            <div class="tier-name">Bronze</div>
+            <div class="tier-pts">0 pts</div>
+          </div>
+          <div class="tier tier-done">
+            <div class="tier-name">Argent</div>
+            <div class="tier-pts">200 pts</div>
+          </div>
+          <div class="tier tier-active">
+            <div class="tier-name">Or</div>
+            <div class="tier-pts">500 pts</div>
+          </div>
+          <div class="tier">
+            <div class="tier-name">Platine</div>
+            <div class="tier-pts">1000 pts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-label">Commandes</div>
+          <div class="stat-value blue">24</div>
+          <div class="stat-sub">Total de commandes</div>
+        </div>
+        <div class="stat-card stat-yellow">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="stat-label">Points Gagnés</div>
+          <div class="stat-value yellow">350</div>
+          <div class="stat-sub">Points disponibles</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-label">Favori</div>
+          <div class="stat-value green">Smoothie Tropical</div>
+          <div class="stat-sub">Votre préféré</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         ONGLET 2 : RÉCOMPENSES
+    ═══════════════════════════════ -->
+    <div class="tab-content" id="tab-recompenses">
+
+      <h2 class="tab-section-title">Récompenses Disponibles</h2>
+
+      <div class="rewards-grid" id="rewards-grid"></div>
+    </div>
+
+    <!-- ══════════════════════════════
+         ONGLET 3 : HISTORIQUE
+    ═══════════════════════════════ -->
+    <div class="tab-content" id="tab-historique">
+
+      <h2 class="tab-section-title">Historique des Points</h2>
+
+      <div class="historique-list">
+
+        <div class="histo-item">
+          <div class="histo-left">
+            <div class="histo-name">Commande #CMD-2026-001</div>
+            <div class="histo-date">15 Mars 2026</div>
+          </div>
+          <div class="histo-pts gain">+50 pts</div>
+        </div>
+
+        <div class="histo-item">
+          <div class="histo-left">
+            <div class="histo-name">Bonus de parrainage</div>
+            <div class="histo-date">10 Mars 2026</div>
+          </div>
+          <div class="histo-pts gain">+100 pts</div>
+        </div>
+
+        <div class="histo-item">
+          <div class="histo-left">
+            <div class="histo-name">Récompense utilisée</div>
+            <div class="histo-date">8 Mars 2026</div>
+          </div>
+          <div class="histo-pts loss">-75 pts</div>
+        </div>
+
+        <div class="histo-item">
+          <div class="histo-left">
+            <div class="histo-name">Commande #CMD-2026-002</div>
+            <div class="histo-date">5 Mars 2026</div>
+          </div>
+          <div class="histo-pts gain">+40 pts</div>
+        </div>
+
+        <div class="histo-item">
+          <div class="histo-left">
+            <div class="histo-name">Commande #CMD-2026-003</div>
+            <div class="histo-date">1 Mars 2026</div>
+          </div>
+          <div class="histo-pts gain">+30 pts</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         ONGLET 4 : PARAMÈTRES
+    ═══════════════════════════════ -->
+    <div class="tab-content" id="tab-parametres">
+
+      <h2 class="tab-section-title">Paramètres du Compte</h2>
+
+      <div class="params-form">
+
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input class="form-input" type="text" id="input-nom" value=""/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="input-email" value=""/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone</label>
+          <input class="form-input" type="tel" id="input-tel" value=""/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse</label>
+          <input class="form-input" type="text" id="input-adresse" value=""/>
+        </div>
+
+        <div class="params-actions">
+          <button class="btn-enregistrer" id="btn-save">Enregistrer</button>
+          <button class="btn-deconnexion" id="btn-logout">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Déconnexion
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /profil-container -->
+
+  <!-- ═══════════════════════════════
+       FOOTER
+  ════════════════════════════════ -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">Clo-Clo Bar à Fruits</div>
+        <p class="footer-brand-desc">Des fruits frais, des jus naturels et des délices glacés pour tous les goûts.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Horaires</div>
+        <p>Lundi - Samedi : 8h – 20h</p>
+        <p>Dimanche : 10h – 18h</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Contact</div>
+        <div class="contact-item"><span>📞</span><span>+237 6 XX XXX XXX</span></div>
+        <div class="contact-item"><span>📧</span><span>contact@cloclo.cm</span></div>
+        <div class="contact-item"><span>📍</span><span>Nkolfoulou, Yaoundé, Cameroun</span></div>
+      </div>
+    </div>
+    <hr class="divider"/>
+    <p class="footer-copy">© 2026 Clo-Clo Bar à Fruits &amp; Délices. Tous droits réservés.</p>
+  </footer>
+
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="profil.js"></script>
+</body>
+</html>

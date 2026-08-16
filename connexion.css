@@ -1,0 +1,215 @@
+/* ============================================================
+   CLO-CLO | connexion.css  (partagé : client + livreur + directeur)
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:      #22c55e;
+  --green-dark: #16a34a;
+  --yellow:     #facc15;
+  --text-dark:  #1a1a2e;
+  --text-gray:  #6b7280;
+}
+
+body { font-family: 'Nunito', sans-serif; }
+
+/* ── NAVBAR (client uniquement) ── */
+nav {
+  background: var(--green);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 70px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-logo {
+  width: 50px; height: 50px; background: white; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.nav-brand-name { font-size: 1.1rem; font-weight: 800; color: white; line-height: 1.1; }
+.nav-brand-sub  { font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 500; }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+.nav-links a {
+  color: white; text-decoration: none; font-size: 0.95rem; font-weight: 600;
+  display: flex; align-items: center; gap: 7px; opacity: 0.85; transition: opacity 0.2s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-links svg { width: 17px; height: 17px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.btn-points {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 30px;
+  padding: 8px 18px; color: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.btn-points svg { width: 17px; height: 17px; fill: var(--yellow); }
+.cart-btn { position: relative; background: none; border: none; cursor: pointer; padding: 6px; display: flex; }
+.cart-btn svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cart-badge {
+  position: absolute; top: 0; right: 0; background: #ef4444; color: white;
+  font-size: 0.65rem; font-weight: 800; width: 18px; height: 18px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--green);
+}
+.btn-profile {
+  background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 30px; padding: 8px 18px; color: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 7px; cursor: pointer;
+}
+.btn-profile svg { width: 17px; height: 17px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── FOND DE PAGE ── */
+.page-bg {
+  min-height: calc(100vh - 70px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 50px 20px 60px;
+}
+/* Variantes de fond */
+.bg-client    { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+.bg-livreur   { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.bg-directeur { background: #0f172a; min-height: 100vh; }
+
+/* ── CARTE ── */
+.form-card {
+  background: white; border-radius: 24px;
+  padding: 40px 36px 36px; width: 100%; max-width: 480px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  animation: fadeUp 0.45s ease both;
+}
+
+/* ── En-tête carte ── */
+.card-header { text-align: center; margin-bottom: 28px; }
+.card-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 16px;
+  box-shadow: 0 6px 20px rgba(34,197,94,0.35);
+}
+.card-icon-green { background: var(--green); }
+.card-icon-dark  { background: #1e293b; }
+
+.card-title { font-size: 1.8rem; font-weight: 900; color: var(--text-dark); margin-bottom: 6px; }
+.card-sub   { font-size: 0.92rem; color: var(--text-gray); font-weight: 500; }
+
+/* ── Bannière info ── */
+.info-banner {
+  display: flex; align-items: flex-start; gap: 12px;
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 24px;
+  border-left: 4px solid;
+}
+.info-banner svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+.info-banner-title { font-size: 0.9rem; font-weight: 800; margin-bottom: 2px; }
+.info-banner-sub   { font-size: 0.82rem; font-weight: 500; }
+
+/* Variantes bannière */
+.banner-green  { background: #f0fdf4; border-color: var(--green); }
+.banner-green  svg, .banner-green .info-banner-title { color: var(--green); fill: none; stroke: var(--green); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.banner-green  .info-banner-sub { color: var(--green); }
+
+.banner-yellow { background: #fffbeb; border-color: #f59e0b; }
+.banner-yellow .info-banner-title { color: #d97706; }
+.banner-yellow .info-banner-sub   { color: #d97706; }
+.banner-yellow svg { color: #f59e0b; }
+
+/* ── Champs de formulaire ── */
+.form-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.form-label { font-size: 0.88rem; font-weight: 700; color: var(--text-gray); }
+
+.input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border: 1.5px solid #e5e7eb; border-radius: 12px;
+  padding: 13px 14px; background: #fafafa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-wrap:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+  background: white;
+}
+.input-wrap.error { border-color: #ef4444; }
+.input-wrap svg {
+  width: 17px; height: 17px; flex-shrink: 0;
+  stroke: #9ca3af; fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.input-wrap input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--text-dark);
+}
+.input-wrap input::placeholder { color: #9ca3af; font-weight: 500; }
+
+.toggle-pwd { background: none; border: none; cursor: pointer; padding: 0; display: flex; }
+.toggle-pwd svg { width: 17px; height: 17px; stroke: #9ca3af; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.toggle-pwd:hover svg { stroke: var(--green); }
+
+.error-msg { font-size: 0.78rem; font-weight: 700; color: #ef4444; min-height: 14px; }
+
+/* ── Ligne souvenir / oublié ── */
+.remember-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.remember-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.88rem; font-weight: 600; color: var(--text-gray); cursor: pointer;
+}
+.remember-label input { accent-color: var(--green); width: 16px; height: 16px; }
+.forgot-link { font-size: 0.88rem; font-weight: 700; color: var(--green); text-decoration: none; }
+.forgot-link:hover { text-decoration: underline; }
+
+/* ── Bouton principal ── */
+.btn-main {
+  width: 100%; background: var(--green); color: white; border: none; border-radius: 14px;
+  padding: 16px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; box-shadow: 0 6px 20px rgba(34,197,94,0.35);
+  transition: background 0.2s, transform 0.15s;
+  margin-bottom: 20px;
+}
+.btn-main:hover { background: var(--green-dark); transform: translateY(-2px); }
+
+/* ── Séparateur ── */
+.separator {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.85rem; color: var(--text-gray); font-weight: 600; margin-bottom: 16px;
+}
+.separator::before, .separator::after {
+  content: ''; flex: 1; height: 1px; background: #e5e7eb;
+}
+
+/* ── Bouton secondaire (créer compte) ── */
+.btn-secondary {
+  width: 100%; background: transparent; color: var(--green);
+  border: 2px solid var(--green); border-radius: 14px;
+  padding: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+  cursor: pointer; transition: background 0.2s, color 0.2s; margin-bottom: 24px;
+}
+.btn-secondary:hover { background: var(--green); color: white; }
+
+/* ── Demo hint ── */
+.demo-hint {
+  background: #f9f9f9; border-radius: 10px; padding: 10px 16px;
+  text-align: center; font-size: 0.82rem; color: var(--text-gray); font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* ── Liens bas de page ── */
+.bottom-links {
+  text-align: center; font-size: 0.88rem; color: var(--text-gray); font-weight: 600;
+}
+.bottom-links a { color: var(--text-gray); text-decoration: none; font-weight: 700; }
+.bottom-links a:hover { color: var(--green); }
+.bottom-links .sep { margin: 0 10px; }
+
+/* ── Animation ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .form-card { padding: 28px 20px; }
+}

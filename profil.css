@@ -1,0 +1,414 @@
+/* ============================================================
+   CLO-CLO – Bar à Fruits & Délices | profil.css
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:      #22c55e;
+  --green-dark: #16a34a;
+  --yellow:     #facc15;
+  --text-dark:  #1a1a2e;
+  --text-gray:  #6b7280;
+  --bg-light:   #f4f4f5;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+nav {
+  background: var(--green);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 70px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-logo {
+  width: 50px; height: 50px; background: white; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0;
+}
+.nav-brand-name { font-size: 1.1rem; font-weight: 800; color: white; line-height: 1.1; }
+.nav-brand-sub  { font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 500; }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+.nav-links a {
+  color: white; text-decoration: none; font-size: 0.95rem; font-weight: 600;
+  display: flex; align-items: center; gap: 7px; opacity: 0.85; transition: opacity 0.2s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-links svg { width: 17px; height: 17px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.btn-points {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 30px;
+  padding: 8px 18px; color: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.btn-points svg { width: 17px; height: 17px; fill: var(--yellow); }
+.cart-btn { position: relative; background: none; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; }
+.cart-btn svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cart-badge {
+  position: absolute; top: 0; right: 0; background: #ef4444; color: white;
+  font-size: 0.65rem; font-weight: 800; width: 18px; height: 18px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--green);
+}
+.btn-profile {
+  background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 30px; padding: 8px 18px; color: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 7px; cursor: pointer;
+}
+.btn-profile.active-nav { background: rgba(255,255,255,0.35); border-color: white; }
+.btn-profile svg { width: 17px; height: 17px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ============================================================
+   BANNIÈRE PROFIL
+   ============================================================ */
+.profil-banner {
+  background: var(--green);
+  padding: 28px 40px;
+}
+
+.banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  animation: fadeUp 0.5s ease both;
+}
+
+.banner-left { display: flex; align-items: center; gap: 22px; }
+
+.avatar {
+  width: 80px; height: 80px; background: rgba(255,255,255,0.25);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 3px solid rgba(255,255,255,0.5); flex-shrink: 0;
+}
+.avatar svg { width: 40px; height: 40px; stroke: white; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.banner-name  { font-size: 1.7rem; font-weight: 900; color: white; margin-bottom: 4px; }
+.banner-email { font-size: 0.9rem; color: rgba(255,255,255,0.85); font-weight: 500; margin-bottom: 12px; }
+
+.banner-meta { display: flex; align-items: center; gap: 16px; }
+
+.badge-or {
+  background: var(--yellow); color: #1a1a1a;
+  border-radius: 30px; padding: 5px 14px;
+  font-size: 0.85rem; font-weight: 800;
+  display: flex; align-items: center; gap: 6px;
+}
+.badge-or svg { width: 14px; height: 14px; stroke: #1a1a1a; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.banner-cmds { color: rgba(255,255,255,0.85); font-size: 0.9rem; font-weight: 600; }
+
+/* Points box */
+.banner-points-box {
+  background: rgba(255,255,255,0.2);
+  border-radius: 16px; padding: 18px 28px;
+  text-align: center; flex-shrink: 0;
+}
+.bp-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 600; margin-bottom: 6px; }
+.bp-value {
+  font-size: 2rem; font-weight: 900; color: white;
+  display: flex; align-items: center; gap: 8px;
+}
+.bp-value svg { width: 28px; height: 28px; fill: var(--yellow); }
+
+/* ============================================================
+   CONTENEUR PRINCIPAL + ONGLETS
+   ============================================================ */
+.profil-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 60px;
+}
+
+/* ── Navigation par onglets ── */
+.tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  background: white;
+  margin-bottom: 32px;
+  border-radius: 0;
+}
+
+.tab-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 18px 28px;
+  background: none; border: none; border-bottom: 3px solid transparent;
+  font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600;
+  color: var(--text-gray); cursor: pointer;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn svg {
+  width: 17px; height: 17px; stroke: currentColor; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.tab-btn:hover { color: var(--green); }
+.tab-btn.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  font-weight: 800;
+}
+
+/* ── Contenu des onglets ── */
+.tab-content { display: none; animation: fadeUp 0.35s ease both; }
+.tab-content.active { display: block; }
+
+.tab-section-title {
+  font-size: 1.5rem; font-weight: 900; color: var(--text-dark);
+  margin-bottom: 24px;
+}
+
+/* ============================================================
+   ONGLET 1 – VUE D'ENSEMBLE
+   ============================================================ */
+
+/* Carte niveau */
+.niveau-card {
+  background: #fffbeb;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+.niveau-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.niveau-actuel { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); }
+.niveau-actuel strong { color: #d97706; }
+.niveau-objectif { font-size: 0.85rem; color: var(--text-gray); font-weight: 500; }
+
+/* Barre de progression */
+.niveau-bar-bg {
+  background: #e5e7eb; border-radius: 8px; height: 10px; margin-bottom: 24px; overflow: hidden;
+}
+.niveau-bar-fill {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  height: 100%; border-radius: 8px;
+  transition: width 1.2s ease;
+}
+
+/* Tiers */
+.niveau-tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tier {
+  border: 2px solid #e5e7eb; border-radius: 12px; padding: 14px 18px;
+  background: white;
+}
+.tier-done { border-color: var(--green); }
+.tier-active { background: var(--green); border-color: var(--green); }
+.tier-active .tier-name, .tier-active .tier-pts { color: white; }
+.tier-name { font-size: 0.95rem; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+.tier-pts  { font-size: 0.82rem; color: var(--text-gray); font-weight: 500; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.stat-card {
+  border-radius: 16px; padding: 24px 22px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-blue   { background: #eff6ff; }
+.stat-yellow { background: #fffbeb; }
+.stat-green  { background: #f0fdf4; }
+
+.stat-icon { margin-bottom: 8px; }
+.stat-icon svg {
+  width: 28px; height: 28px; stroke-width: 2; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.stat-blue   .stat-icon svg { stroke: #3b82f6; }
+.stat-yellow .stat-icon svg { stroke: #f59e0b; fill: #f59e0b; }
+.stat-green  .stat-icon svg { stroke: var(--green); }
+
+.stat-label { font-size: 0.88rem; font-weight: 700; color: var(--text-gray); }
+.stat-value { font-size: 1.6rem; font-weight: 900; margin: 2px 0; }
+.stat-value.blue   { color: #3b82f6; }
+.stat-value.yellow { color: #d97706; }
+.stat-value.green  { color: var(--green); font-size: 1.1rem; }
+.stat-sub { font-size: 0.82rem; color: var(--text-gray); font-weight: 500; }
+
+/* ============================================================
+   ONGLET 2 – RÉCOMPENSES
+   ============================================================ */
+.rewards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.reward-card {
+  border-radius: 16px; padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.reward-card.available { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.reward-card.locked    { background: #f9f9f9; border: 1px solid #e5e7eb; }
+
+.reward-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.reward-name { font-size: 1.05rem; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+.reward-desc { font-size: 0.85rem; color: var(--text-gray); font-weight: 500; }
+
+.reward-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  stroke: var(--green); fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.locked-icon { stroke: #9ca3af; }
+
+.reward-bottom { display: flex; justify-content: space-between; align-items: center; }
+
+.reward-pts {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.9rem; font-weight: 700; color: #d97706;
+}
+.reward-pts svg { width: 15px; height: 15px; fill: #d97706; stroke: none; }
+
+.locked-pts { color: #9ca3af; }
+.locked-pts svg { fill: #9ca3af; }
+
+.btn-utiliser {
+  background: var(--green); color: white; border: none; border-radius: 30px;
+  padding: 9px 22px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+}
+.btn-utiliser:hover { background: var(--green-dark); transform: scale(1.03); }
+
+.bientot { font-size: 0.85rem; color: #9ca3af; font-weight: 600; }
+
+/* ============================================================
+   ONGLET 3 – HISTORIQUE
+   ============================================================ */
+.historique-list { display: flex; flex-direction: column; gap: 0; }
+
+.histo-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 24px;
+  background: white;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+}
+.histo-item:first-child { border-radius: 16px 16px 0 0; }
+.histo-item:last-child  { border-radius: 0 0 16px 16px; border-bottom: none; }
+.histo-item:only-child  { border-radius: 16px; }
+.histo-item:hover { background: #f9fafb; }
+
+.histo-name { font-size: 0.95rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+.histo-date { font-size: 0.82rem; color: var(--text-gray); font-weight: 500; }
+
+.histo-pts { font-size: 1rem; font-weight: 800; }
+.histo-pts.gain { color: var(--green); }
+.histo-pts.loss { color: #ef4444; }
+
+/* ============================================================
+   ONGLET 4 – PARAMÈTRES
+   ============================================================ */
+.params-form {
+  background: white; border-radius: 16px; padding: 32px;
+  display: flex; flex-direction: column; gap: 24px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+
+.form-label {
+  font-size: 0.9rem; font-weight: 700; color: var(--text-gray);
+}
+
+.form-input {
+  border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 14px 16px; font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem; font-weight: 600; color: var(--text-dark);
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fafafa;
+}
+.form-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+  background: white;
+}
+
+.params-actions { display: flex; gap: 16px; padding-top: 8px; flex-wrap: wrap; }
+
+.btn-enregistrer {
+  background: var(--green); color: white; border: none; border-radius: 12px;
+  padding: 14px 32px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+}
+.btn-enregistrer:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+.btn-deconnexion {
+  background: transparent; color: #ef4444; border: 2px solid #ef4444;
+  border-radius: 12px; padding: 14px 28px;
+  font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-deconnexion svg {
+  width: 18px; height: 18px; stroke: #ef4444; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.btn-deconnexion:hover { background: #ef4444; color: white; }
+.btn-deconnexion:hover svg { stroke: white; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer { background: #0f172a; padding: 50px 80px 30px; }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.footer-brand-name { font-size: 1.15rem; font-weight: 800; color: var(--green); margin-bottom: 12px; }
+.footer-brand-desc { font-size: 0.88rem; color: #9ca3af; line-height: 1.7; }
+.footer-col-title  { font-size: 0.95rem; font-weight: 800; color: var(--green); margin-bottom: 14px; }
+footer p { font-size: 0.88rem; color: #9ca3af; line-height: 2; }
+.contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 0.88rem; color: #9ca3af; }
+hr.divider { border: none; border-top: 1px solid #1e293b; margin-bottom: 22px; }
+.footer-copy { text-align: center; font-size: 0.83rem; color: #6b7280; }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .stats-grid    { grid-template-columns: 1fr 1fr; }
+  .rewards-grid  { grid-template-columns: 1fr; }
+  .niveau-tiers  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+
+  .profil-banner { padding: 24px 20px; }
+  .banner-inner  { flex-direction: column; align-items: flex-start; }
+  .banner-points-box { width: 100%; text-align: left; }
+
+  .profil-container { padding: 0 16px 50px; }
+
+  .tabs-nav { overflow-x: auto; }
+  .tab-btn  { padding: 14px 18px; font-size: 0.85rem; white-space: nowrap; }
+
+  .stats-grid { grid-template-columns: 1fr; }
+  .niveau-tiers { grid-template-columns: repeat(2, 1fr); }
+
+  footer { padding: 40px 24px 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+
+@media (max-width: 480px) {
+  .banner-left { flex-direction: column; align-items: flex-start; }
+  .params-actions { flex-direction: column; }
+  .btn-enregistrer, .btn-deconnexion { width: 100%; justify-content: center; }
+}

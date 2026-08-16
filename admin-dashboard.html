@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tableau de Bord – Clo-Clo Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="config.js"></script>
+  <style>
+    /* Graphiques canvas */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    canvas { width: 100% !important; }
+
+    /* Produits populaires */
+    .product-rank { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+    .product-rank:last-child { border-bottom: none; }
+    .rank-num { width: 36px; height: 36px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
+    .rank-info { flex: 1; }
+    .rank-name { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; }
+    .rank-cmds { font-size: 0.8rem; color: var(--text-gray); font-weight: 500; }
+    .rank-rev  { font-weight: 800; color: var(--green); font-size: 0.95rem; }
+
+    /* Commandes récentes */
+    .cmd-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+    .cmd-item:last-child { border-bottom: none; }
+    .cmd-id   { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; }
+    .cmd-meta { font-size: 0.82rem; color: var(--text-gray); font-weight: 500; margin-top: 2px; }
+    .cmd-right { text-align: right; }
+    .cmd-price { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">🍹</div>
+      <div>
+        <div class="sidebar-brand-name">Clo-Clo Admin</div>
+        <div class="sidebar-brand-sub">Espace Directeur</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin-dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tableau de Bord
+      </a>
+            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
+<a href="admin-livraisons.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Livraisons en Cours
+      </a>
+      <a href="admin-historique.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Historique
+      </a>
+      <a href="admin-clients.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </a>
+      <a href="admin-livreurs.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Livreurs
+      </a>
+    </nav>
+    <div class="sidebar-logout">
+      <button class="btn-logout js-admin-logout">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Déconnexion
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ CONTENU ═══ -->
+  <main class="main-content">
+
+    <div class="page-header anim">
+      <h1 class="page-title">Tableau de Bord</h1>
+      <p class="page-sub">Vue d'ensemble des opérations</p>
+    </div>
+
+    <!-- KPI -->
+    <div class="stats-grid stats-grid-4 anim">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#dcfce7;">💰</div>
+          <span class="stat-badge badge-green">+12%</span>
+        </div>
+        <div class="stat-label">Revenus du Jour</div>
+        <div class="stat-value" id="stat-revenus">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#dbeafe;">🛍️</div>
+          <span class="stat-badge badge-blue" id="stat-cmd-badge"></span>
+        </div>
+        <div class="stat-label">Commandes</div>
+        <div class="stat-value" id="stat-commandes">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#f3e8ff;">👥</div>
+          <span class="stat-badge badge-purple" id="stat-clients-badge"></span>
+        </div>
+        <div class="stat-label">Clients Actifs</div>
+        <div class="stat-value" id="stat-clients">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#fff7ed;">🚚</div>
+          <span class="stat-badge badge-red" id="stat-livraison-badge"></span>
+        </div>
+        <div class="stat-label">En Livraison</div>
+        <div class="stat-value" id="stat-livreurs">—</div>
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-title">Ventes de la Semaine</div>
+        <canvas id="chartVentes" height="220"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Commandes Aujourd'hui</div>
+        <canvas id="chartCommandes" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Produits + Commandes récentes -->
+    <div class="bottom-grid">
+      <div class="card">
+        <div class="card-title">Produits Populaires</div>
+        <div class="product-rank">
+          <div class="rank-num">1</div>
+          <div class="rank-info"><div class="rank-name">Smoothie Tropical</div><div class="rank-cmds">45 commandes</div></div>
+          <div class="rank-rev">202,500 FC</div>
+        </div>
+        <div class="product-rank">
+          <div class="rank-num">2</div>
+          <div class="rank-info"><div class="rank-name">Jus d'Orange</div><div class="rank-cmds">38 commandes</div></div>
+          <div class="rank-rev">114,000 FC</div>
+        </div>
+        <div class="product-rank">
+          <div class="rank-num">3</div>
+          <div class="rank-info"><div class="rank-name">Salade de Fruits</div><div class="rank-cmds">32 commandes</div></div>
+          <div class="rank-rev">112,000 FC</div>
+        </div>
+        <div class="product-rank">
+          <div class="rank-num">4</div>
+          <div class="rank-info"><div class="rank-name">Glace Vanille</div><div class="rank-cmds">28 commandes</div></div>
+          <div class="rank-rev">70,000 FC</div>
+        </div>
+        <div class="product-rank">
+          <div class="rank-num">5</div>
+          <div class="rank-info"><div class="rank-name">Smoothie Berry</div><div class="rank-cmds">25 commandes</div></div>
+          <div class="rank-rev">105,000 FC</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Commandes Récentes</div>
+        <div class="cmd-item">
+          <div><div class="cmd-id">CMD-001</div><div class="cmd-meta">Marie K. • 3 articles</div></div>
+          <div class="cmd-right"><div class="cmd-price">12,500 FC</div><span class="badge badge-en-route">En Route</span></div>
+        </div>
+        <div class="cmd-item">
+          <div><div class="cmd-id">CMD-002</div><div class="cmd-meta">Jean M. • 2 articles</div></div>
+          <div class="cmd-right"><div class="cmd-price">8,000 FC</div><span class="badge badge-preparation">Préparation</span></div>
+        </div>
+        <div class="cmd-item">
+          <div><div class="cmd-id">CMD-003</div><div class="cmd-meta">Sophie L. • 4 articles</div></div>
+          <div class="cmd-right"><div class="cmd-price">15,200 FC</div><span class="badge badge-livre">Livré</span></div>
+        </div>
+        <div class="cmd-item">
+          <div><div class="cmd-id">CMD-004</div><div class="cmd-meta">Pierre D. • 1 article</div></div>
+          <div class="cmd-right"><div class="cmd-price">4,500 FC</div><span class="badge badge-pret">Prêt</span></div>
+        </div>
+        <div class="cmd-item">
+          <div><div class="cmd-id">CMD-005</div><div class="cmd-meta">Alice B. • 2 articles</div></div>
+          <div class="cmd-right"><div class="cmd-price">7,000 FC</div><span class="badge badge-en-route">En Route</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

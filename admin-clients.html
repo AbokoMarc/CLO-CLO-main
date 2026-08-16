@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clients – Clo-Clo Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="config.js"></script>
+  <style>
+    .clients-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .client-card { border-radius: 18px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,0.07); }
+
+    .client-header {
+      background: var(--green);
+      padding: 22px 24px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .client-name { font-size: 1.3rem; font-weight: 900; color: white; margin-bottom: 4px; }
+    .client-id   { font-size: 0.82rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-bottom: 14px; }
+    .client-stats { display: flex; gap: 10px; }
+    .cstat { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 8px 14px; text-align: center; }
+    .cstat-label { font-size: 0.7rem; color: rgba(255,255,255,0.75); font-weight: 600; }
+    .cstat-val   { font-size: 1rem; font-weight: 900; color: white; display: flex; align-items: center; gap: 4px; }
+    .cstat-val svg { width: 13px; height: 13px; fill: var(--yellow); }
+
+    .niveau-badge {
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; height: fit-content;
+    }
+    .niveau-or      { background: #fef9c3; color: #d97706; }
+    .niveau-argent  { background: #f1f5f9; color: #64748b; }
+    .niveau-bronze  { background: #fff7ed; color: #c2410c; }
+    .niveau-platine { background: #f3e8ff; color: #7c3aed; }
+    .niveau-badge svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .client-body { background: white; padding: 20px 24px; }
+    .client-info { display: flex; align-items: center; gap: 9px; font-size: 0.88rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+    .client-info svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .client-dates { display: flex; gap: 30px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f3f4f6; }
+    .cdate-label { font-size: 0.75rem; color: var(--text-gray); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .cdate-val   { font-size: 0.92rem; font-weight: 700; color: var(--text-dark); }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-logo">🍹</div><div><div class="sidebar-brand-name">Clo-Clo Admin</div><div class="sidebar-brand-sub">Espace Directeur</div></div></div>
+    <nav class="sidebar-nav">
+      <a href="admin-dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de Bord</a>
+            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
+<a href="admin-livraisons.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons en Cours</a>
+      <a href="admin-historique.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Historique</a>
+      <a href="admin-clients.html" class="nav-item active"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients</a>
+      <a href="admin-livreurs.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Livreurs</a>
+    </nav>
+    <div class="sidebar-logout"><button class="btn-logout js-admin-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button></div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header anim">
+      <h1 class="page-title">Gestion des Clients</h1>
+      <p class="page-sub">Vue d'ensemble de tous les clients</p>
+    </div>
+
+    <!-- Stats niveaux -->
+    <div class="stats-grid stats-grid-5 anim">
+      <div class="stat-card"><div class="stat-label">Total Clients</div><div class="stat-value">5</div></div>
+      <div class="stat-card"><div class="stat-label">Bronze</div><div class="stat-value val-orange">1</div></div>
+      <div class="stat-card"><div class="stat-label">Argent</div><div class="stat-value" style="color:#64748b;">1</div></div>
+      <div class="stat-card"><div class="stat-label">Or</div><div class="stat-value val-yellow">2</div></div>
+      <div class="stat-card"><div class="stat-label">Platine</div><div class="stat-value val-purple">1</div></div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="card anim" style="padding:16px 20px;margin-bottom:20px;">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="client-search" placeholder="Rechercher un client par nom, email ou téléphone..."/>
+      </div>
+    </div>
+
+    <!-- Grille clients -->
+    <div class="clients-grid" id="clients-grid">
+      <!-- Rendu dynamiquement par admin.js depuis /api/admin/clients -->
+
+        </div>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

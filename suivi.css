@@ -1,0 +1,804 @@
+/* ============================================================
+   CLO-CLO – Bar à Fruits & Délices | suivi.css
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --green:      #22c55e;
+  --green-dark: #16a34a;
+  --yellow:     #facc15;
+  --text-dark:  #1a1a2e;
+  --text-gray:  #6b7280;
+  --bg-light:   #f4f4f5;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+nav {
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 70px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.nav-logo {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+
+.nav-brand-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+}
+
+.nav-brand-sub {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  opacity: 1;
+}
+
+.nav-links a.active {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.nav-links svg {
+  width: 17px;
+  height: 17px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-points {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 30px;
+  padding: 8px 18px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-points:hover { background: rgba(255,255,255,0.3); }
+
+.btn-points svg {
+  width: 17px;
+  height: 17px;
+  fill: var(--yellow);
+}
+
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.cart-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--green);
+}
+
+.btn-profile {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 30px;
+  padding: 8px 18px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-profile:hover {
+  background: rgba(255,255,255,0.3);
+  border-color: white;
+}
+
+.btn-profile svg {
+  width: 17px;
+  height: 17px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   EN-TÊTE SUIVI
+   ============================================================ */
+.suivi-header {
+  background: white;
+  padding: 40px 80px 30px;
+  border-bottom: 1px solid #e5e7eb;
+  animation: fadeUp 0.5s ease both;
+}
+
+.suivi-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.suivi-sub {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+/* ============================================================
+   CONTENU PRINCIPAL
+   ============================================================ */
+.suivi-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 40px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   CARTE COMMANDE EN COURS
+   ============================================================ */
+.order-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+/* ── En-tête verte ── */
+.order-card-header {
+  background: var(--green);
+  padding: 28px 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.order-label {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-id {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.order-time {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.order-time svg {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(255,255,255,0.9);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Badge statut */
+.status-badge {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border-radius: 30px;
+  padding: 8px 18px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.status-badge svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Barre de progression ── */
+.progress-wrap {
+  padding: 32px 32px 24px;
+  position: relative;
+}
+
+.progress-line {
+  position: absolute;
+  top: 48px;
+  left: calc(32px + 30px);
+  right: calc(32px + 30px);
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+}
+
+.progress-line-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+.steps-row {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.step-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #9ca3af;
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #e5e7eb;
+  transition: all 0.3s;
+}
+
+.step-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-gray);
+}
+
+/* Étape terminée */
+.step-item.done .step-circle {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+
+.step-item.done .step-label {
+  color: var(--green);
+}
+
+/* Étape en cours */
+.step-item.current .step-circle {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(34,197,94,0.25);
+  animation: pulse 1.8s infinite;
+}
+
+.step-item.current .step-label {
+  color: var(--green);
+  font-weight: 800;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(34,197,94,0.25); }
+  50%       { box-shadow: 0 0 0 8px rgba(34,197,94,0.1);  }
+}
+
+/* ── Détails de commande ── */
+.order-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 0 32px 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.detail-block {
+  padding: 20px 16px;
+}
+
+.detail-block:first-child {
+  border-right: 1px solid #f3f4f6;
+  padding-left: 0;
+}
+
+.detail-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 14px;
+}
+
+/* Articles */
+.articles-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.articles-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.articles-list li::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+.order-total {
+  font-size: 1rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.order-total strong {
+  font-weight: 900;
+}
+
+/* Adresse */
+.address-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 18px;
+}
+
+.address-row svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--green);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Livreur */
+.livreur-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.livreur-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.livreur-header svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-gray);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.livreur-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.livreur-phone {
+  font-size: 0.88rem;
+  color: var(--text-gray);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.livreur-distance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+/* ── Carte de suivi ── */
+.map-placeholder {
+  margin: 0 32px 28px;
+  background: #f4f4f5;
+  border-radius: 16px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-gray);
+}
+
+.map-placeholder svg {
+  width: 40px;
+  height: 40px;
+  stroke: var(--green);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: bounce 1.6s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0);   }
+  50%       { transform: translateY(-8px); }
+}
+
+.map-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.map-sub {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--green);
+}
+
+/* ============================================================
+   COMMANDES RÉCENTES
+   ============================================================ */
+.recent-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+  animation: fadeUp 0.5s 0.2s ease both;
+  gap: 20px;
+}
+
+.recent-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recent-id {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.recent-address {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.recent-items {
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.recent-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.badge-livre {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f4f4f5;
+  border-radius: 30px;
+  padding: 7px 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.badge-livre svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--green);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.recent-price {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  background: #0f172a;
+  padding: 50px 80px 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-brand-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+
+.footer-brand-desc {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  line-height: 1.7;
+}
+
+.footer-col-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+
+footer p {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  line-height: 2;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  color: #9ca3af;
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid #1e293b;
+  margin-bottom: 22px;
+}
+
+.footer-copy {
+  text-align: center;
+  font-size: 0.83rem;
+  color: #6b7280;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .order-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-block:first-child {
+    border-right: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding-left: 16px;
+  }
+
+  .suivi-header {
+    padding: 30px 24px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+
+  .suivi-main { padding: 28px 16px 50px; }
+
+  .order-card-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .progress-line {
+    left: calc(16px + 22px);
+    right: calc(16px + 22px);
+  }
+
+  .progress-wrap { padding: 28px 16px 20px; }
+
+  .order-details-grid { padding: 0 16px 16px; }
+  .map-placeholder { margin: 0 16px 20px; }
+
+  .recent-card { flex-direction: column; align-items: flex-start; }
+  .recent-right { align-items: flex-start; }
+
+  footer { padding: 40px 24px 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+
+@media (max-width: 480px) {
+  .steps-row { gap: 4px; }
+  .step-circle { width: 36px; height: 36px; font-size: 0.85rem; }
+  .step-label { font-size: 0.75rem; }
+}
