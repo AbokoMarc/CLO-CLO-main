@@ -6,7 +6,6 @@
   <title>Historique – Clo-Clo Livreur</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="livreur.css"/>
-  <script src="config.js"></script>
 </head>
 <body>
 
@@ -34,7 +33,7 @@
     </nav>
     <div class="sidebar-bottom">
       <a href="#" class="nav-item"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications<span class="notif-badge">2</span></a>
-      <button class="btn-logout js-livreur-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button>
+      <button class="btn-logout" onclick="window.location.href='connexion-livreur.html'"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button>
     </div>
   </aside>
 
@@ -73,11 +72,85 @@
 
     <!-- Liste historique -->
     <div id="histo-list">
-      <!-- Rendu dynamiquement par livreur.js -->
-    
+
+      <!-- DEL-045 Complétée -->
+      <div class="histo-item" data-status="complete">
+        <div class="histo-header">
+          <div class="histo-icon-done"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="histo-id">DEL-045</div><div class="histo-cmd">CMD-2026-045</div></div>
+          <div class="histo-date">15 Mars 2026<br>13:45</div>
+        </div>
+        <div class="histo-body">
+          <div class="histo-col"><div class="histo-col-label">Client</div><div class="histo-col-val">Sophie Laurent</div><div class="histo-col-sub">456 Avenue Kasa-Vubu</div></div>
+          <div class="histo-col"><div class="histo-col-label">Détails</div><div class="histo-col-val">3 articles</div><div class="histo-col-sub">12 500 FC</div></div>
+          <div class="histo-col"><div class="histo-col-label">Performance</div><div class="histo-col-val">⏱ 25 min</div><div class="histo-col-sub">3.2 km</div></div>
+          <div class="histo-col"><div class="histo-col-label">Gains</div><div class="gains-val">1 875 FC</div><div class="histo-col-sub">⭐ 5/5</div></div>
+        </div>
+      </div>
+
+      <!-- DEL-044 Complétée -->
+      <div class="histo-item" data-status="complete">
+        <div class="histo-header">
+          <div class="histo-icon-done"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="histo-id">DEL-044</div><div class="histo-cmd">CMD-2026-044</div></div>
+          <div class="histo-date">15 Mars 2026<br>13:20</div>
+        </div>
+        <div class="histo-body">
+          <div class="histo-col"><div class="histo-col-label">Client</div><div class="histo-col-val">Marc Dubois</div><div class="histo-col-sub">23 Rue Kasai</div></div>
+          <div class="histo-col"><div class="histo-col-label">Détails</div><div class="histo-col-val">2 articles</div><div class="histo-col-sub">8 000 FC</div></div>
+          <div class="histo-col"><div class="histo-col-label">Performance</div><div class="histo-col-val">⏱ 18 min</div><div class="histo-col-sub">2.1 km</div></div>
+          <div class="histo-col"><div class="histo-col-label">Gains</div><div class="gains-val">1 200 FC</div><div class="histo-col-sub">⭐ 5/5</div></div>
+        </div>
+      </div>
+
+      <!-- DEL-043 Annulée -->
+      <div class="histo-item annule" data-status="annule">
+        <div class="histo-header">
+          <div class="histo-icon-annule"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div><div class="histo-id">DEL-043</div><div class="histo-cmd">CMD-2026-043</div></div>
+          <div class="histo-date">15 Mars 2026<br>12:50</div>
+        </div>
+        <div class="histo-body">
+          <div class="histo-col"><div class="histo-col-label">Client</div><div class="histo-col-val">Lisa Chen</div><div class="histo-col-sub">789 Rue de la Paix</div></div>
+          <div class="histo-col"><div class="histo-col-label">Détails</div><div class="histo-col-val">1 article</div><div class="histo-col-sub">4 500 FC</div></div>
+          <div class="histo-col"><div class="histo-col-label">Performance</div><div class="histo-col-val">⏱ -</div><div class="histo-col-sub">-</div></div>
+          <div class="histo-col"><div class="histo-col-label">Gains</div><div class="gains-val gains-val-zero">0 FC</div><div class="histo-col-sub">-</div></div>
+        </div>
+      </div>
+
+      <!-- DEL-042 Complétée -->
+      <div class="histo-item" data-status="complete">
+        <div class="histo-header">
+          <div class="histo-icon-done"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="histo-id">DEL-042</div><div class="histo-cmd">CMD-2026-042</div></div>
+          <div class="histo-date">15 Mars 2026<br>12:30</div>
+        </div>
+        <div class="histo-body">
+          <div class="histo-col"><div class="histo-col-label">Client</div><div class="histo-col-val">Ahmed Hassan</div><div class="histo-col-sub">45 Avenue Victoire</div></div>
+          <div class="histo-col"><div class="histo-col-label">Détails</div><div class="histo-col-val">4 articles</div><div class="histo-col-sub">15 200 FC</div></div>
+          <div class="histo-col"><div class="histo-col-label">Performance</div><div class="histo-col-val">⏱ 22 min</div><div class="histo-col-sub">4.1 km</div></div>
+          <div class="histo-col"><div class="histo-col-label">Gains</div><div class="gains-val">2 280 FC</div><div class="histo-col-sub">⭐ 4/5</div></div>
+        </div>
+      </div>
+
+      <!-- DEL-041 Complétée -->
+      <div class="histo-item" data-status="complete">
+        <div class="histo-header">
+          <div class="histo-icon-done"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="histo-id">DEL-041</div><div class="histo-cmd">CMD-2026-041</div></div>
+          <div class="histo-date">15 Mars 2026<br>12:00</div>
+        </div>
+        <div class="histo-body">
+          <div class="histo-col"><div class="histo-col-label">Client</div><div class="histo-col-val">Emma Wilson</div><div class="histo-col-sub">12 Blvd du 30 Juin</div></div>
+          <div class="histo-col"><div class="histo-col-label">Détails</div><div class="histo-col-val">2 articles</div><div class="histo-col-sub">7 000 FC</div></div>
+          <div class="histo-col"><div class="histo-col-label">Performance</div><div class="histo-col-val">⏱ 20 min</div><div class="histo-col-sub">2.8 km</div></div>
+          <div class="histo-col"><div class="histo-col-label">Gains</div><div class="gains-val">1 050 FC</div><div class="histo-col-sub">⭐ 5/5</div></div>
+        </div>
+      </div>
+
     </div>
   </main>
 
-  <script type="module" src="livreur.js"></script>
+  <script src="livreur.js"></script>
 </body>
 </html>

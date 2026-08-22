@@ -6,7 +6,6 @@
   <title>Historique – Clo-Clo Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="admin.css"/>
-  <script src="config.js"></script>
   <style>
     .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar .search-bar { flex: 1; min-width: 260px; }
@@ -19,13 +18,12 @@
     <div class="sidebar-brand"><div class="sidebar-logo">🍹</div><div><div class="sidebar-brand-name">Clo-Clo Admin</div><div class="sidebar-brand-sub">Espace Directeur</div></div></div>
     <nav class="sidebar-nav">
       <a href="admin-dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de Bord</a>
-            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
-<a href="admin-livraisons.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons en Cours</a>
+      <a href="admin-livraisons.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons en Cours</a>
       <a href="admin-historique.html" class="nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Historique</a>
       <a href="admin-clients.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients</a>
       <a href="admin-livreurs.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Livreurs</a>
     </nav>
-    <div class="sidebar-logout"><button class="btn-logout js-admin-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button></div>
+    <div class="sidebar-logout"><button class="btn-logout" onclick="window.location.href='connexion-directeur.html'"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button></div>
   </aside>
 
   <main class="main-content">
@@ -85,7 +83,14 @@
             </tr>
           </thead>
           <tbody id="hist-body">
-            <tr><td colspan="9" style="text-align:center;color:#9ca3af;font-weight:700;">Chargement…</td></tr>
+            <tr data-status="livre"><td>DEL-045</td><td>CMD-2026-045</td><td><strong>Sophie Laurent</strong></td><td>Jean Mukendi</td><td>15 Mars 2026<br><small style="color:#9ca3af;">13:45</small></td><td>3</td><td>12 500 FC</td><td>25 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="livre"><td>DEL-044</td><td>CMD-2026-044</td><td><strong>Marc Dubois</strong></td><td>Sophie Tshombe</td><td>15 Mars 2026<br><small style="color:#9ca3af;">13:20</small></td><td>2</td><td>8 000 FC</td><td>18 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="annule"><td>DEL-043</td><td>CMD-2026-043</td><td><strong>Lisa Chen</strong></td><td>Pierre Kabongo</td><td>15 Mars 2026<br><small style="color:#9ca3af;">12:50</small></td><td>1</td><td>4 500 FC</td><td>-</td><td><span class="badge badge-annule">❌ Annulé</span></td></tr>
+            <tr data-status="livre"><td>DEL-042</td><td>CMD-2026-042</td><td><strong>Ahmed Hassan</strong></td><td>Jean Mukendi</td><td>15 Mars 2026<br><small style="color:#9ca3af;">12:30</small></td><td>4</td><td>15 200 FC</td><td>22 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="livre"><td>DEL-041</td><td>CMD-2026-041</td><td><strong>Emma Wilson</strong></td><td>Sophie Tshombe</td><td>15 Mars 2026<br><small style="color:#9ca3af;">12:00</small></td><td>2</td><td>7 000 FC</td><td>20 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="livre"><td>DEL-040</td><td>CMD-2026-040</td><td><strong>David Martin</strong></td><td>Pierre Kabongo</td><td>14 Mars 2026<br><small style="color:#9ca3af;">19:30</small></td><td>3</td><td>10 500 FC</td><td>28 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="livre"><td>DEL-039</td><td>CMD-2026-039</td><td><strong>Anna Schmidt</strong></td><td>Jean Mukendi</td><td>14 Mars 2026<br><small style="color:#9ca3af;">18:45</small></td><td>1</td><td>3 500 FC</td><td>15 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
+            <tr data-status="livre"><td>DEL-038</td><td>CMD-2026-038</td><td><strong>Carlos Rodriguez</strong></td><td>Sophie Tshombe</td><td>14 Mars 2026<br><small style="color:#9ca3af;">18:00</small></td><td>5</td><td>18 000 FC</td><td>30 min</td><td><span class="badge badge-livre">✅ Livré</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -93,6 +98,6 @@
 
   </main>
 
-  <script type="module" src="admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

@@ -1,86 +1,145 @@
 /* ============================================================
-   CLO-CLO | suivi.js — Page Suivi de commande
-   Toutes les données viennent de l'API (commande en cours,
-   historique). L'ID de commande vient du paramètre ?order=
-   (posé par checkout.js) sinon on prend la plus récente.
+   CLO-CLO – Bar à Fruits & Délices | suivi.js
    ============================================================ */
-import { APP } from "./app-data.js";
-import { OrderService } from "./services/orderService.js";
 
-const STEP_LABELS = ["Préparation", "Prêt", "En Route", "Livré"];
-const STATUS_PROGRESS = { en_preparation: 1, en_livraison: 3, livree: 4, annulee: 0 };
+/* ── État ── */
+let points = 150;
+let cartCount = 3;
 
-function activeOrderHtml(o) {
-  const step = STATUS_PROGRESS[o.statut] ?? 1;
-  const pct = Math.round((step / 4) * 100);
-  const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
-  return `
-    <div class="order-card active-order">
-      <div class="order-card-header">
-        <div>
-          <div class="order-label">Commande</div>
-          <div class="order-id">CMD-${o.id}</div>
-        </div>
-        <div class="status-badge">${o.statut.replace("_", " ")}</div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-line"><div class="progress-line-fill" style="width:${pct}%;"></div></div>
-        <div class="steps-row">
-          ${STEP_LABELS.map((label, i) => `
-            <div class="step-item ${i < step ? "done" : i === step ? "current" : ""}">
-              <div class="step-circle">${i < step ? "✓" : i + 1}</div>
-              <div class="step-label">${label}</div>
-            </div>`).join("")}
-        </div>
-      </div>
-      <div class="order-details-grid">
-        <div class="detail-block">
-          <div class="detail-title">Articles Commandés</div>
-          <ul class="articles-list">${o.items.map(i => `<li>${i.qty}× ${i.name}</li>`).join("")}</ul>
-          <div class="order-total">Total : <strong>${o.total.toLocaleString()} FCFA</strong></div>
-        </div>
-        <div class="detail-block">
-          <div class="detail-title">Adresse de Livraison</div>
-          <div class="address-row">📍 ${o.adresse || "—"}</div>
-        </div>
-      </div>
-    </div>`;
+/* ── Sélecteurs DOM ── */
+const cartBadge   = document.getElementById("cart-badge");
+const pointsLabel = document.getElementById("points-label");
+
+/* ─────────────────────────────────────
+   MISE À JOUR UI
+───────────────────────────────────── */
+function updateCartBadge() {
+  if (!cartBadge) return;
+  cartBadge.textContent = cartCount;
+  cartBadge.style.display = cartCount === 0 ? "none" : "flex";
 }
 
-function recentOrderHtml(o) {
-  return `
-    <div class="recent-card">
-      <div class="recent-left">
-        <div class="recent-id">CMD-${o.id}</div>
-        <div class="recent-address">${o.adresse || "—"}</div>
-        <div class="recent-items">${o.items.map(i => i.name).join(", ")}</div>
-      </div>
-      <div class="recent-right">
-        <div class="badge-livre">${o.statut === "livree" ? "✅ Livré" : o.statut === "annulee" ? "❌ Annulé" : "🚚 " + o.statut.replace("_", " ")}</div>
-        <div class="recent-price">${o.total.toLocaleString()} FCFA</div>
-      </div>
-    </div>`;
+function updatePoints() {
+  if (pointsLabel) {
+    pointsLabel.textContent = `${points} pts`;
+  }
 }
 
-document.addEventListener("cloclo:ready", async () => {
-  if (!APP.isLoggedIn()) {
-    window.location.href = "connexion.html";
-    return;
+/* ─────────────────────────────────────
+   MINUTEUR EN TEMPS RÉEL
+   Décompte du temps estimé de livraison
+───────────────────────────────────── */
+let minutesLeft = 15;
+
+function startDeliveryTimer() {
+  const timeEl = document.querySelector(".order-time strong");
+  if (!timeEl) return;
+
+  const interval = setInterval(() => {
+    if (minutesLeft <= 0) {
+      clearInterval(interval);
+      timeEl.textContent = "Livraison imminente !";
+      return;
+    }
+    minutesLeft--;
+    timeEl.textContent = `${minutesLeft} min`;
+  }, 60000); // toutes les 60 secondes
+}
+
+/* ─────────────────────────────────────
+   SIMULATION DE PROGRESSION
+   (démo visuelle : avance la barre après 3s)
+───────────────────────────────────── */
+function simulateProgress() {
+  const fillBar = document.querySelector(".progress-line-fill");
+  if (!fillBar) return;
+
+  // Déjà à 66% (En Route), on simule une légère avance
+  setTimeout(() => {
+    fillBar.style.width = "72%";
+  }, 3000);
+}
+
+/* ─────────────────────────────────────
+   SCROLL REVEAL
+───────────────────────────────────── */
+function initScrollReveal() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity   = "1";
+          entry.target.style.transform = "translateY(0)";
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08 }
+  );
+
+  const targets = document.querySelectorAll(".order-card, .recent-card");
+  targets.forEach((el, i) => {
+    Object.assign(el.style, {
+      opacity:    "0",
+      transform:  "translateY(24px)",
+      transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`,
+    });
+    observer.observe(el);
+  });
+}
+
+/* ─────────────────────────────────────
+   INITIALISATION
+───────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  updateCartBadge();
+  updatePoints();
+  initScrollReveal();
+  startDeliveryTimer();
+  simulateProgress();
+});
+const profileBtn = document.querySelector(".btn-profile");
+if (profileBtn){
+    profileBtn.addEventListener("click", () => {
+        window.location.href = "profil.html";
+    });
+}
+/* ============================================================
+   CLO-CLO | suivi.js — Page Suivi
+   ============================================================ */
+document.addEventListener("DOMContentLoaded",()=>{
+  // Mettre à jour avec la vraie commande
+  const order=typeof APP!=="undefined"?APP.getLastOrder():null;
+  if(order){
+    const idEl=document.querySelector(".order-id");
+    if(idEl)idEl.textContent=order.id;
+    const cmdEl=document.querySelector(".order-cmd");
+    if(cmdEl)cmdEl.textContent="Commande : "+order.id;
   }
 
-  const wrap = document.getElementById("suivi-content");
-  const params = new URLSearchParams(window.location.search);
-  const orderId = params.get("order");
-  const orders = await OrderService.myOrders();
+  // Timer
+  let mins=15;
+  const timeEl=document.querySelector(".order-time strong");
+  if(timeEl){
+    const iv=setInterval(()=>{
+      mins--;
+      if(mins<=0){clearInterval(iv);timeEl.textContent="Livraison imminente !";timeEl.style.color="#facc15";return;}
+      timeEl.textContent=mins+" min";
+    },60000);
+  }
 
-  const active = orderId ? orders.find(o => String(o.id) === orderId) : orders.find(o => o.statut === "en_preparation" || o.statut === "en_livraison");
-  const recents = orders.filter(o => o.id !== active?.id).slice(0, 5);
+  // Barre progression animée
+  const fill=document.querySelector(".progress-line-fill");
+  if(fill){fill.style.width="0%";setTimeout(()=>fill.style.width="66%",600);}
 
-  let html = `<section class="section-block"><h2 class="section-title">Commande en Cours</h2>`;
-  html += active ? activeOrderHtml(active) : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:24px 0;">Aucune commande en cours. <a href="menu.html" style="color:#22c55e;">Commander →</a></p>`;
-  html += `</section><section class="section-block"><h2 class="section-title">Commandes Récentes</h2>`;
-  html += recents.length ? recents.map(recentOrderHtml).join("") : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:16px 0;">Aucune commande récente.</p>`;
-  html += `</section>`;
+  // Statut badge pulse
+  const badge=document.querySelector(".status-badge");
+  if(badge){setInterval(()=>{badge.style.opacity="0.6";setTimeout(()=>badge.style.opacity="1",600);},3000);}
 
-  wrap.innerHTML = html;
+  // Scroll reveal
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.style.opacity="1";x.target.style.transform="translateY(0)";obs.unobserve(x.target);}});},{threshold:.08});
+  document.querySelectorAll(".order-card,.recent-card").forEach((el,i)=>{
+    Object.assign(el.style,{opacity:"0",transform:"translateY(22px)",transition:`opacity .5s ease ${i*.1}s,transform .5s ease ${i*.1}s`});
+    obs.observe(el);
+  });
 });
