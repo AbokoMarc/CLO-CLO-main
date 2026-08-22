@@ -10,6 +10,7 @@
 
   <!-- Feuille de style externe -->
   <link rel="stylesheet" href="suivi.css"/>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -49,12 +50,12 @@
     <div class="nav-actions">
       <button class="btn-points">
         <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span id="points-label">150 pts</span>
+        <span id="points-label">0 pts</span>
       </button>
 
       <button class="cart-btn" aria-label="Panier">
         <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        <span class="cart-badge" id="cart-badge">3</span>
+        <span class="cart-badge" id="cart-badge">0</span>
       </button>
 
       <button class="btn-profile">
@@ -76,128 +77,8 @@
        CONTENU PRINCIPAL
   ════════════════════════════════ -->
   <main class="suivi-main">
-
-    <!-- ── Commande en cours ── -->
-    <section class="section-block">
-      <h2 class="section-title">Commandes en Cours</h2>
-
-      <div class="order-card active-order">
-
-        <!-- En-tête de la commande -->
-        <div class="order-card-header">
-          <div>
-            <div class="order-label">Commande</div>
-            <div class="order-id">CMD-2026-001</div>
-            <div class="order-time">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Temps estimé : <strong>15 min</strong>
-            </div>
-          </div>
-          <div class="status-badge">
-            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            En Livraison
-          </div>
-        </div>
-
-        <!-- Barre de progression -->
-        <div class="progress-wrap">
-          <!-- Ligne de fond -->
-          <div class="progress-line">
-            <div class="progress-line-fill" style="width: 66%;"></div>
-          </div>
-
-          <!-- Étapes -->
-          <div class="steps-row">
-            <div class="step-item done">
-              <div class="step-circle">✓</div>
-              <div class="step-label">Préparation</div>
-            </div>
-            <div class="step-item done">
-              <div class="step-circle">✓</div>
-              <div class="step-label">Prêt</div>
-            </div>
-            <div class="step-item current">
-              <div class="step-circle">3</div>
-              <div class="step-label">En Route</div>
-            </div>
-            <div class="step-item">
-              <div class="step-circle">4</div>
-              <div class="step-label">Livré</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Détails de la commande -->
-        <div class="order-details-grid">
-
-          <!-- Articles commandés -->
-          <div class="detail-block">
-            <div class="detail-title">Articles Commandés</div>
-            <ul class="articles-list">
-              <li>Jus Tropical</li>
-              <li>Smoothie Berry</li>
-              <li>Glace Vanille</li>
-            </ul>
-            <div class="order-total">Total : <strong>9 700 FC</strong></div>
-          </div>
-
-          <!-- Adresse + livreur -->
-          <div class="detail-block">
-
-            <div class="detail-title">Adresse de Livraison</div>
-            <div class="address-row">
-              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              123 Avenue Kasa-Vubu, Kinshasa
-            </div>
-
-            <!-- Livreur -->
-            <div class="livreur-card">
-              <div class="livreur-header">
-                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Votre Livreur
-              </div>
-              <div class="livreur-name">Jean Mukendi</div>
-              <div class="livreur-phone">+243 123 456 789</div>
-              <div class="livreur-distance">
-                <span class="dot-red">📍</span>
-                À 2 km de votre position
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Carte de suivi -->
-        <div class="map-placeholder">
-          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <p class="map-title">Carte de suivi en temps réel</p>
-          <p class="map-sub">Votre livreur arrive bientôt</p>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── Commandes récentes ── -->
-    <section class="section-block">
-      <h2 class="section-title">Commandes Récentes</h2>
-
-      <div class="recent-card">
-        <div class="recent-left">
-          <div class="recent-id">CMD-2026-002</div>
-          <div class="recent-address">456 Boulevard Lumumba, Kinshasa</div>
-          <div class="recent-items">Salade Tropicale, Jus d'Orange</div>
-        </div>
-        <div class="recent-right">
-          <div class="badge-livre">
-            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Livré
-          </div>
-          <div class="recent-price">6 200 FC</div>
-        </div>
-      </div>
-
-    </section>
-
+    <div id="suivi-content"></div>
+  
   </main>
 
   <!-- ═══════════════════════════════
@@ -216,16 +97,18 @@
       </div>
       <div>
         <div class="footer-col-title">Contact</div>
-        <div class="contact-item"><span>📞</span><span>+243 123 456 789</span></div>
-        <div class="contact-item"><span>📧</span><span>contact@cloclo.cd</span></div>
-        <div class="contact-item"><span>📍</span><span>Kinshasa, RD Congo</span></div>
+        <div class="contact-item"><span>📞</span><span>+237 6 XX XXX XXX</span></div>
+        <div class="contact-item"><span>📧</span><span>contact@cloclo.cm</span></div>
+        <div class="contact-item"><span>📍</span><span>Nkolfoulou, Yaoundé, Cameroun</span></div>
       </div>
     </div>
     <hr class="divider"/>
     <p class="footer-copy">© 2026 Clo-Clo Bar à Fruits &amp; Délices. Tous droits réservés.</p>
   </footer>
 
-  <script src="suivi.js"></script>
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="suivi.js"></script>
 
 </body>
 </html>

@@ -10,6 +10,7 @@
 
   <!-- Feuille de style externe -->
   <link rel="stylesheet" href="menu.css"/>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -61,7 +62,7 @@
         <svg viewBox="0 0 24 24">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
-        <span id="points-label">150 pts</span>
+        <span id="points-label">0 pts</span>
       </button>
 
       <button class="cart-btn" aria-label="Panier">
@@ -70,7 +71,7 @@
           <line x1="3" y1="6" x2="21" y2="6"/>
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        <span class="cart-badge" id="cart-badge">3</span>
+        <span class="cart-badge" id="cart-badge">0</span>
       </button>
 
       <button class="btn-profile">
@@ -105,138 +106,8 @@
   ════════════════════════════════ -->
   <section class="menu-section">
     <div class="products-grid" id="products-grid">
-
-      <!-- Jus d'Orange Pressé -->
-      <div class="product-card" data-category="jus">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=600&q=80" alt="Jus d'Orange Pressé"/>
-          <span class="badge-popular">⭐ Populaire</span>
-          <span class="product-price">3000 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Jus d'Orange Pressé</div>
-          <p class="product-desc">Oranges fraîches pressées à la minute</p>
-          <button class="btn-add" data-id="1">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Smoothie Tropical -->
-      <div class="product-card" data-category="smoothies">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=600&q=80" alt="Smoothie Tropical"/>
-          <span class="badge-popular">⭐ Populaire</span>
-          <span class="product-price">4500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Smoothie Tropical</div>
-          <p class="product-desc">Mangue, ananas, banane et lait de coco</p>
-          <button class="btn-add" data-id="2">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Glace Vanille -->
-      <div class="product-card" data-category="glaces">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&q=80" alt="Glace Vanille"/>
-          <span class="product-price">2500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Glace Vanille</div>
-          <p class="product-desc">Glace artisanale à la vanille de Madagascar</p>
-          <button class="btn-add" data-id="3">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Salade de Fruits Exotiques -->
-      <div class="product-card" data-category="salades">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1568158879083-c42860933ed7?w=600&q=80" alt="Salade de Fruits Exotiques"/>
-          <span class="badge-popular">⭐ Populaire</span>
-          <span class="product-price">3500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Salade de Fruits Exotiques</div>
-          <p class="product-desc">Ananas, mangue, papaye, fruits de la passion</p>
-          <button class="btn-add" data-id="4">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Jus de Pastèque -->
-      <div class="product-card" data-category="jus">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=600&q=80" alt="Jus de Pastèque"/>
-          <span class="product-price">2800 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Jus de Pastèque</div>
-          <p class="product-desc">Pastèque fraîche avec menthe</p>
-          <button class="btn-add" data-id="5">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Smoothie Berry -->
-      <div class="product-card" data-category="smoothies">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=600&q=80" alt="Smoothie Berry"/>
-          <span class="product-price">4200 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Smoothie Berry</div>
-          <p class="product-desc">Fraises, framboises, myrtilles et yaourt</p>
-          <button class="btn-add" data-id="6">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Glace Chocolat -->
-      <div class="product-card" data-category="glaces">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&q=80" alt="Glace Chocolat"/>
-          <span class="product-price">2800 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Glace Chocolat</div>
-          <p class="product-desc">Glace onctueuse au chocolat belge</p>
-          <button class="btn-add" data-id="7">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
-      <!-- Salade Tropicale -->
-      <div class="product-card" data-category="salades">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1568158879083-c42860933ed7?w=600&q=80" alt="Salade Tropicale"/>
-          <span class="product-price">3200 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Salade Tropicale</div>
-          <p class="product-desc">Fruits tropicaux avec sirop de citron vert</p>
-          <button class="btn-add" data-id="8">
-            <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            Ajouter
-          </button>
-        </div>
-      </div>
-
+      <!-- Rendu dynamiquement par menu.js depuis l'API -->
+    
     </div>
 
     <!-- Message si aucun résultat -->
@@ -269,7 +140,7 @@
       <div>
         <div class="footer-col-title">Contact</div>
         <div class="contact-item"><span>📞</span><span>+237 123 456 789</span></div>
-        <div class="contact-item"><span>📧</span><span>contact@cloclo.cd</span></div>
+        <div class="contact-item"><span>📧</span><span>contact@cloclo.cm</span></div>
         <div class="contact-item"><span>📍</span><span>Yaoundé, Cameroun</span></div>
       </div>
 
@@ -280,7 +151,9 @@
   </footer>
 
   <!-- Script externe -->
-  <script src="menu.js"></script>
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="menu.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "name": "cloclo-backend",
+  "version": "2.0.0",
+  "description": "Backend API pour CLO-CLO (Yaoundé / Nkolfoulou) — Node.js natif + Turso (libSQL) pour une persistance réelle",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

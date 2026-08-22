@@ -6,6 +6,7 @@
   <title>Livraisons – Clo-Clo Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="admin.css"/>
+  <script src="config.js"></script>
   <style>
     .livraison-block { margin-bottom: 24px; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,0.07); }
 
@@ -75,12 +76,13 @@
     </div>
     <nav class="sidebar-nav">
       <a href="admin-dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Tableau de Bord</a>
-      <a href="admin-livraisons.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons en Cours</a>
+            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
+<a href="admin-livraisons.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Livraisons en Cours</a>
       <a href="admin-historique.html" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Historique</a>
       <a href="admin-clients.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</a>
       <a href="admin-livreurs.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Livreurs</a>
     </nav>
-    <div class="sidebar-logout"><button class="btn-logout" onclick="window.location.href='connexion-directeur.html'"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button></div>
+    <div class="sidebar-logout"><button class="btn-logout js-admin-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button></div>
   </aside>
 
   <main class="main-content">
@@ -89,130 +91,10 @@
       <p class="page-sub">Gérez et suivez les livraisons actives</p>
     </div>
 
-    <!-- DEL-001 : En Livraison -->
-    <div class="livraison-block anim">
-      <div class="liv-header">
-        <div>
-          <div class="liv-id-label">Livraison</div>
-          <div class="liv-id">DEL-001</div>
-          <div class="liv-cmd">Commande : CMD-2026-048</div>
-          <div class="liv-meta">
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Commandé à 14:30</div>
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ETA : 10 min</div>
-          </div>
-        </div>
-        <span class="badge badge-en-livraison" style="font-size:0.9rem;padding:8px 18px;">🚚 En Livraison</span>
-      </div>
-      <div class="liv-body">
-        <div class="liv-grid">
-          <div class="liv-col liv-col-blue col-blue">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Client</div>
-            <div class="liv-name">Marie Kambale</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12"/></svg>+243 987 654 321</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>456 Avenue Kasa-Vubu, Kinshasa</div>
-          </div>
-          <div class="liv-col liv-col-green col-green">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Livreur</div>
-            <div class="liv-name">Jean Mukendi</div>
-            <div class="liv-info" style="color:var(--green);"><svg style="stroke:var(--green);" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg>+243 123 456 789</div>
-            <button class="btn-green btn-sm" style="margin-top:10px;width:100%;">Contacter le Livreur</button>
-          </div>
-          <div class="liv-col liv-col-purple col-purple">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> Détails Commande</div>
-            <ul class="articles-list"><li>Smoothie Tropical</li><li>Jus d'Orange Pressé</li><li>Glace Vanille</li></ul>
-            <div class="liv-total">Total : 9,700 FC</div>
-          </div>
-        </div>
-        <div class="liv-actions">
-          <button class="btn-action-green">Démarrer la Livraison</button>
-          <button class="btn-action-outline">Voir Détails</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DEL-002 : Prêt à Livrer -->
-    <div class="livraison-block anim">
-      <div class="liv-header">
-        <div>
-          <div class="liv-id-label">Livraison</div>
-          <div class="liv-id">DEL-002</div>
-          <div class="liv-cmd">Commande : CMD-2026-047</div>
-          <div class="liv-meta">
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Commandé à 14:45</div>
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ETA : En attente</div>
-          </div>
-        </div>
-        <span class="badge badge-pret" style="font-size:0.9rem;padding:8px 18px;">✅ Prêt à Livrer</span>
-      </div>
-      <div class="liv-body">
-        <div class="liv-grid">
-          <div class="liv-col liv-col-blue col-blue">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Client</div>
-            <div class="liv-name">Pierre Kabongo</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2"/></svg>+243 456 789 123</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>123 Boulevard Lumumba, Kinshasa</div>
-          </div>
-          <div class="liv-col liv-col-green col-green">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Livreur</div>
-            <div class="liv-name">Sophie Tshombe</div>
-            <div class="liv-info" style="color:var(--green);"><svg style="stroke:var(--green);" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2"/></svg>+243 321 654 987</div>
-            <button class="btn-green btn-sm" style="margin-top:10px;width:100%;">Contacter le Livreur</button>
-          </div>
-          <div class="liv-col liv-col-purple col-purple">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8"/></svg> Détails Commande</div>
-            <ul class="articles-list"><li>Salade de Fruits</li><li>Smoothie Berry</li></ul>
-            <div class="liv-total">Total : 7,700 FC</div>
-          </div>
-        </div>
-        <div class="liv-actions">
-          <button class="btn-action-green">Démarrer la Livraison</button>
-          <button class="btn-action-outline">Voir Détails</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DEL-003 : En Préparation -->
-    <div class="livraison-block anim">
-      <div class="liv-header">
-        <div>
-          <div class="liv-id-label">Livraison</div>
-          <div class="liv-id">DEL-003</div>
-          <div class="liv-cmd">Commande : CMD-2026-046</div>
-          <div class="liv-meta">
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Commandé à 15:00</div>
-            <div class="liv-meta-item"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> ETA : 15 min</div>
-          </div>
-        </div>
-        <span class="badge badge-preparation" style="font-size:0.9rem;padding:8px 18px;">📦 En Préparation</span>
-      </div>
-      <div class="liv-body">
-        <div class="liv-grid">
-          <div class="liv-col liv-col-blue col-blue">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Client</div>
-            <div class="liv-name">Alice Mbuyi</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2"/></svg>+243 789 123 456</div>
-            <div class="liv-info" style="color:#3b82f6;"><svg style="stroke:#3b82f6;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>789 Rue de la Paix, Kinshasa</div>
-          </div>
-          <div class="liv-col liv-col-green col-green">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Livreur</div>
-            <p class="no-livreur">Aucun livreur assigné</p>
-            <button class="btn-green btn-sm" style="width:100%;">Assigner un Livreur</button>
-          </div>
-          <div class="liv-col liv-col-purple col-purple">
-            <div class="liv-col-title"><svg viewBox="0 0 24 24"><path d="M21 16V8"/></svg> Détails Commande</div>
-            <ul class="articles-list"><li>Jus de Pastèque</li><li>Glace Chocolat</li><li>Salade Tropicale</li></ul>
-            <div class="liv-total">Total : 8,500 FC</div>
-          </div>
-        </div>
-        <div class="liv-actions">
-          <button class="btn-action-blue">Marquer comme Prêt</button>
-          <button class="btn-action-outline">Voir Détails</button>
-        </div>
-      </div>
-    </div>
+    <div id="livraisons-list"></div>
 
   </main>
 
-  <script src="admin.js"></script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>

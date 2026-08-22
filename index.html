@@ -10,6 +10,7 @@
 
   <!-- Feuille de style externe -->
   <link rel="stylesheet" href="style.css"/>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -60,9 +61,7 @@
       <button class="btn-points">
         <svg viewBox="0 0 24 24">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-        150 pts
-      </button>
+        </svg><span id="points-label">0 pts</span></button>
 
       <button class="cart-btn" aria-label="Panier">
         <svg viewBox="0 0 24 24">
@@ -70,7 +69,7 @@
           <line x1="3" y1="6" x2="21" y2="6"/>
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        <span class="cart-badge">3</span>
+        <span class="cart-badge">0</span>
       </button>
 
       <button class="btn-profile">
@@ -153,52 +152,8 @@
       <p class="section-sub">Les favoris de nos clients</p>
     </div>
 
-    <div class="products-grid">
-
-      <div class="product-card">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=600&q=80" alt="Jus Tropical"/>
-          <span class="product-price">3500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Jus Tropical</div>
-          <button class="product-order">Commander →</button>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=600&q=80" alt="Smoothie Bowl"/>
-          <span class="product-price">4500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Smoothie Bowl</div>
-          <button class="product-order">Commander →</button>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=600&q=80" alt="Glace Artisanale"/>
-          <span class="product-price">2500 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Glace Artisanale</div>
-          <button class="product-order">Commander →</button>
-        </div>
-      </div>
-
-      <div class="product-card">
-        <div class="product-img-wrap">
-          <img src="https://images.unsplash.com/photo-1568158879083-c42860933ed7?w=600&q=80" alt="Salade de Fruits"/>
-          <span class="product-price">3000 FC</span>
-        </div>
-        <div class="product-info">
-          <div class="product-name">Salade de Fruits</div>
-          <button class="product-order">Commander →</button>
-        </div>
-      </div>
-
+    <div class="products-grid" id="products-grid">
+      <p class="products-loading" style="grid-column:1/-1;text-align:center;color:#9ca3af;font-weight:700;">Chargement des produits…</p>
     </div>
 
     <div class="products-cta">
@@ -266,7 +221,7 @@
       <div>
         <div class="footer-col-title">Contact</div>
         <div class="contact-item"><span>📞</span><span>+237 123 456 789</span></div>
-        <div class="contact-item"><span>📧</span><span>contact@cloclo.cd</span></div>
+        <div class="contact-item"><span>📧</span><span>contact@cloclo.cm</span></div>
         <div class="contact-item"><span>📍</span><span>Yaoundé, Cameroun</span></div>
       </div>
 
@@ -277,7 +232,9 @@
   </footer>
 
   <!-- Script externe -->
-  <script src="script.js"></script>
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="script.js"></script>
 
 </body>
 </html>

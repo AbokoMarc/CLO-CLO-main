@@ -6,6 +6,7 @@
   <title>Profil – Clo-Clo Bar à Fruits & Délices</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="profil.css"/>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -37,11 +38,11 @@
     <div class="nav-actions">
       <button class="btn-points">
         <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span id="points-label">150 pts</span>
+        <span id="points-label">0 pts</span>
       </button>
       <button class="cart-btn" aria-label="Panier">
         <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        <span class="cart-badge" id="cart-badge">3</span>
+        <span class="cart-badge" id="cart-badge">0</span>
       </button>
       <button class="btn-profile active-nav">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -179,77 +180,7 @@
 
       <h2 class="tab-section-title">Récompenses Disponibles</h2>
 
-      <div class="rewards-grid">
-
-        <div class="reward-card available">
-          <div class="reward-top">
-            <div class="reward-info">
-              <div class="reward-name">Boisson Gratuite</div>
-              <div class="reward-desc">Un jus ou smoothie de votre choix</div>
-            </div>
-            <svg class="reward-icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
-          </div>
-          <div class="reward-bottom">
-            <span class="reward-pts">
-              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              150 points
-            </span>
-            <button class="btn-utiliser" data-reward="Boisson Gratuite" data-cost="150">Utiliser</button>
-          </div>
-        </div>
-
-        <div class="reward-card available">
-          <div class="reward-top">
-            <div class="reward-info">
-              <div class="reward-name">Réduction 20%</div>
-              <div class="reward-desc">Sur votre prochaine commande</div>
-            </div>
-            <svg class="reward-icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
-          </div>
-          <div class="reward-bottom">
-            <span class="reward-pts">
-              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              100 points
-            </span>
-            <button class="btn-utiliser" data-reward="Réduction 20%" data-cost="100">Utiliser</button>
-          </div>
-        </div>
-
-        <div class="reward-card available">
-          <div class="reward-top">
-            <div class="reward-info">
-              <div class="reward-name">Livraison Gratuite</div>
-              <div class="reward-desc">Pour votre prochaine commande</div>
-            </div>
-            <svg class="reward-icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
-          </div>
-          <div class="reward-bottom">
-            <span class="reward-pts">
-              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              50 points
-            </span>
-            <button class="btn-utiliser" data-reward="Livraison Gratuite" data-cost="50">Utiliser</button>
-          </div>
-        </div>
-
-        <div class="reward-card locked">
-          <div class="reward-top">
-            <div class="reward-info">
-              <div class="reward-name">Menu VIP</div>
-              <div class="reward-desc">Accès aux produits exclusifs</div>
-            </div>
-            <svg class="reward-icon locked-icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>
-          </div>
-          <div class="reward-bottom">
-            <span class="reward-pts locked-pts">
-              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              500 points
-            </span>
-            <span class="bientot">Bientôt disponible</span>
-          </div>
-        </div>
-
-      </div>
+      <div class="rewards-grid" id="rewards-grid"></div>
     </div>
 
     <!-- ══════════════════════════════
@@ -315,22 +246,22 @@
 
         <div class="form-group">
           <label class="form-label">Nom</label>
-          <input class="form-input" type="text" id="input-nom" value="Marie Kambale"/>
+          <input class="form-input" type="text" id="input-nom" value=""/>
         </div>
 
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input class="form-input" type="email" id="input-email" value="marie.kambale@email.com"/>
+          <input class="form-input" type="email" id="input-email" value=""/>
         </div>
 
         <div class="form-group">
           <label class="form-label">Téléphone</label>
-          <input class="form-input" type="tel" id="input-tel" value="+243 987 654 321"/>
+          <input class="form-input" type="tel" id="input-tel" value=""/>
         </div>
 
         <div class="form-group">
           <label class="form-label">Adresse</label>
-          <input class="form-input" type="text" id="input-adresse" value="456 Avenue Kasa-Vubu, Kinshasa"/>
+          <input class="form-input" type="text" id="input-adresse" value=""/>
         </div>
 
         <div class="params-actions">
@@ -362,15 +293,17 @@
       </div>
       <div>
         <div class="footer-col-title">Contact</div>
-        <div class="contact-item"><span>📞</span><span>+243 123 456 789</span></div>
-        <div class="contact-item"><span>📧</span><span>contact@cloclo.cd</span></div>
-        <div class="contact-item"><span>📍</span><span>Kinshasa, RD Congo</span></div>
+        <div class="contact-item"><span>📞</span><span>+237 6 XX XXX XXX</span></div>
+        <div class="contact-item"><span>📧</span><span>contact@cloclo.cm</span></div>
+        <div class="contact-item"><span>📍</span><span>Nkolfoulou, Yaoundé, Cameroun</span></div>
       </div>
     </div>
     <hr class="divider"/>
     <p class="footer-copy">© 2026 Clo-Clo Bar à Fruits &amp; Délices. Tous droits réservés.</p>
   </footer>
 
-  <script src="profil.js"></script>
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="profil.js"></script>
 </body>
 </html>

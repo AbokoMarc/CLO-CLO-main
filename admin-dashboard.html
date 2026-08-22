@@ -6,6 +6,7 @@
   <title>Tableau de Bord – Clo-Clo Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="admin.css"/>
+  <script src="config.js"></script>
   <style>
     /* Graphiques canvas */
     .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
@@ -46,7 +47,8 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Tableau de Bord
       </a>
-      <a href="admin-livraisons.html" class="nav-item">
+            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
+<a href="admin-livraisons.html" class="nav-item">
         <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         Livraisons en Cours
       </a>
@@ -64,7 +66,7 @@
       </a>
     </nav>
     <div class="sidebar-logout">
-      <button class="btn-logout" onclick="window.location.href='connexion-directeur.html'">
+      <button class="btn-logout js-admin-logout">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Déconnexion
       </button>
@@ -87,31 +89,31 @@
           <span class="stat-badge badge-green">+12%</span>
         </div>
         <div class="stat-label">Revenus du Jour</div>
-        <div class="stat-value">245,000 FC</div>
+        <div class="stat-value" id="stat-revenus">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-box" style="background:#dbeafe;">🛍️</div>
-          <span class="stat-badge badge-blue">+8%</span>
+          <span class="stat-badge badge-blue" id="stat-cmd-badge"></span>
         </div>
         <div class="stat-label">Commandes</div>
-        <div class="stat-value">48</div>
+        <div class="stat-value" id="stat-commandes">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-box" style="background:#f3e8ff;">👥</div>
-          <span class="stat-badge badge-purple">+15%</span>
+          <span class="stat-badge badge-purple" id="stat-clients-badge"></span>
         </div>
         <div class="stat-label">Clients Actifs</div>
-        <div class="stat-value">324</div>
+        <div class="stat-value" id="stat-clients">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-top">
           <div class="stat-icon-box" style="background:#fff7ed;">🚚</div>
-          <span class="stat-badge badge-red">-3</span>
+          <span class="stat-badge badge-red" id="stat-livraison-badge"></span>
         </div>
         <div class="stat-label">En Livraison</div>
-        <div class="stat-value">12</div>
+        <div class="stat-value" id="stat-livreurs">—</div>
       </div>
     </div>
 
@@ -186,6 +188,6 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-  <script src="admin.js"></script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
