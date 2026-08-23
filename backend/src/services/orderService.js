@@ -76,11 +76,11 @@ export const OrderService = {
 
   async listOrdersForLivreur(livreurId) {
     const orders = await Store.all("orders");
-    return orders.filter((o) => o.livreurId === livreurId);
+    return orders.filter((o) => Number(o.livreurId) === Number(livreurId));
   },
 
   async assignLivreur(orderId, livreurId) {
-    const order = await Store.update("orders", orderId, { livreurId, statut: "en_livraison" });
+    const order = await Store.update("orders", orderId, { livreurId: Number(livreurId), statut: "en_livraison" });
     notifyOrderEvent("order:assigned", order);
     return order;
   },

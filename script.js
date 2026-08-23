@@ -32,6 +32,7 @@ function renderPopularProducts() {
 function bindNavButtons() {
   document.querySelector(".btn-white-solid")?.addEventListener("click", () => window.location.href = "menu.html");
   document.querySelector(".btn-outline-white")?.addEventListener("click", () => window.location.href = "inscription.html");
+  document.querySelector(".btn-login-hero")?.addEventListener("click", () => window.location.href = "connexion.html");
   document.querySelector(".btn-cta")?.addEventListener("click", () => window.location.href = "inscription.html");
   document.querySelector(".btn-green-solid")?.addEventListener("click", () => window.location.href = "menu.html");
 }

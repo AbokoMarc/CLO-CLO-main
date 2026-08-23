@@ -54,6 +54,9 @@ window.updateNavbar = function () {
     const label = profileBtn.querySelector(".btn-profile-label");
     if (label) label.textContent = APP.isLoggedIn() ? "Profil" : "Se Connecter";
   }
+  // Bouton "Se Connecter" du hero (accueil) : inutile si déjà connecté
+  const loginHeroBtn = document.querySelector(".btn-login-hero");
+  if (loginHeroBtn) loginHeroBtn.style.display = APP.isLoggedIn() ? "none" : "";
 };
 
 /* ─── MINI-PANIER ─── */

@@ -49,6 +49,8 @@ router.get("/api/admin/livreurs", AdminController.listLivreurs);
 router.post("/api/admin/livreurs", AdminController.createLivreur);
 router.patch("/api/admin/livreurs/:id/statut", AdminController.updateLivreurStatut);
 router.patch("/api/admin/livreurs/:id/paie", AdminController.setLivreurPaie);
+router.post("/api/admin/livreurs/:id/reset-password", AdminController.resetLivreurPassword);
+router.delete("/api/admin/livreurs/:id", AdminController.deleteLivreur);
 
 // Notifications temps réel (SSE)
 router.get("/api/notifications/stream", NotificationController.stream);

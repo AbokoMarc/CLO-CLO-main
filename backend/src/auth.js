@@ -26,7 +26,7 @@ function base64url(input) {
 }
 
 /** Émet un token signé (équivalent JWT léger, HMAC-SHA256) */
-export function signToken(payload, expiresInSeconds = 60 * 60 * 24 * 7) {
+export function signToken(payload, expiresInSeconds = 60 * 60 * 24 * 30) {
   const header = { alg: "HS256", typ: "CLOCLO" };
   const body = { ...payload, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + expiresInSeconds };
   const data = `${base64url(JSON.stringify(header))}.${base64url(JSON.stringify(body))}`;

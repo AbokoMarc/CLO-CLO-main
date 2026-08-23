@@ -65,10 +65,13 @@
     </div>
 
     <!-- Filtres -->
-    <div class="filter-row">
-      <button class="filter-chip active" data-filter="toutes">Toutes (8)</button>
-      <button class="filter-chip" data-filter="complete">Complétées (7)</button>
-      <button class="filter-chip" data-filter="annule">Annulées (1)</button>
+    <div class="filter-row" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="filter-chip active" data-filter="toutes">Toutes (8)</button>
+        <button class="filter-chip" data-filter="complete">Complétées (7)</button>
+        <button class="filter-chip" data-filter="annule">Annulées (1)</button>
+      </div>
+      <button id="btn-export-pdf-livreur" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:9px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📄 Exporter en PDF</button>
     </div>
 
     <!-- Liste historique -->

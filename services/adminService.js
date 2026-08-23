@@ -38,4 +38,11 @@ export const AdminService = {
   setLivreurPaie(livreurId, paieType, paieMontant) {
     return ApiClient.patch(`/admin/livreurs/${livreurId}/paie`, { paieType, paieMontant }, { auth: true });
   },
+  /** Réinitialise le mot de passe d'un livreur — retourne un mot de passe temporaire à communiquer. */
+  resetLivreurPassword(livreurId) {
+    return ApiClient.post(`/admin/livreurs/${livreurId}/reset-password`, {}, { auth: true });
+  },
+  deleteLivreur(livreurId) {
+    return ApiClient.delete(`/admin/livreurs/${livreurId}`, { auth: true });
+  },
 };

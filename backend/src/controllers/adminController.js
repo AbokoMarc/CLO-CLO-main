@@ -35,6 +35,15 @@ export const AdminController = {
     requireRole(requireAuth(req), "admin");
     sendJson(res, 200, await AdminService.resetClientPassword(params.id));
   },
+  /** Même principe pour un livreur — voir AdminService.resetLivreurPassword. */
+  async resetLivreurPassword({ req, res, params }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await AdminService.resetLivreurPassword(params.id));
+  },
+  async deleteLivreur({ req, res, params }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await AdminService.deleteLivreur(params.id));
+  },
   /** Déverrouille l'accès aux données confidentielles des clients : l'admin re-saisit
       son propre mot de passe avant de pouvoir consulter tel/email/adresse en clair. */
   async verifyPassword({ req, res, body }) {

@@ -91,6 +91,33 @@ export const AdminService = {
     return { id, tempPassword };
   },
 
+  /** Même principe pour un livreur : le mot de passe original n'est jamais stocké en
+      clair nulle part (haché dès sa création, irréversible) — pour "redonner" ses
+      identifiants à un livreur, l'admin génère un nouveau mot de passe temporaire.
+      Le matricule (identifiant de connexion), lui, reste toujours visible dans la liste. */
+  async resetLivreurPassword(id) {
+    const livreur = await Store.findById("livreurs", id);
+    if (!livreur) {
+      const e = new Error("Livreur introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    const tempPassword = generateTempPassword();
+    await Store.update("livreurs", id, { passwordHash: hashPassword(tempPassword) });
+    return { id, matricule: livreur.matricule, tempPassword };
+  },
+
+  async deleteLivreur(id) {
+    const livreur = await Store.findById("livreurs", id);
+    if (!livreur) {
+      const e = new Error("Livreur introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    await Store.remove("livreurs", id);
+    return { deleted: true };
+  },
+
   /** Statistiques calculées à partir des VRAIES commandes en base (aucune donnée inventée) */
   async dashboardStats() {
     const orders = await Store.all("orders");

@@ -379,6 +379,10 @@ function livreurCardHtml(l) {
           <div><div class="lm-label">Paie</div><div class="lm-val">${paieLabel}</div></div>
         </div>
         <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">💰 Définir la paie</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🔑 Mot de passe</button>
+          <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🗑️ Supprimer</button>
+        </div>
       </div>
     </div>`;
 }
@@ -405,6 +409,31 @@ async function initLivreurs() {
           renderLivreurs();
         } catch (err) {
           showToast(err.message || "Impossible de mettre à jour la paie.", "red");
+        }
+      });
+    });
+
+    grid.querySelectorAll(".btn-reset-livreur-pwd").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`Réinitialiser le mot de passe de "${btn.dataset.nom}" ?`)) return;
+        try {
+          const { matricule, tempPassword } = await AdminService.resetLivreurPassword(btn.dataset.id);
+          alert(`✅ Mot de passe réinitialisé !\n\nMatricule : ${matricule}\nNouveau mot de passe temporaire : ${tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
+        } catch (err) {
+          showToast(err.message || "Impossible de réinitialiser ce mot de passe.", "red");
+        }
+      });
+    });
+
+    grid.querySelectorAll(".btn-delete-livreur").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`Supprimer définitivement le livreur "${btn.dataset.nom}" ?\n\nCette action est irréversible.`)) return;
+        try {
+          await AdminService.deleteLivreur(btn.dataset.id);
+          showToast("🗑️ Livreur supprimé.");
+          renderLivreurs();
+        } catch (err) {
+          showToast(err.message || "Impossible de supprimer ce livreur.", "red");
         }
       });
     });
@@ -527,6 +556,37 @@ async function initHistorique() {
     const q = e.target.value.toLowerCase();
     rows().forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none"; });
   });
+
+  document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
+    exportTableToPdf("hist-table", "Historique des livraisons — Clo-Clo");
+  });
+}
+
+/** Export PDF via l'impression native du navigateur (aucune dépendance externe,
+    aucun serveur nécessaire) : on masque tout sauf le tableau ciblé, puis on
+    déclenche l'impression — l'utilisateur choisit "Enregistrer en PDF" comme
+    destination dans la boîte de dialogue d'impression. */
+function exportTableToPdf(tableId, title) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const printWin = window.open("", "_blank");
+  printWin.document.write(`
+    <html><head><title>${title}</title>
+    <style>
+      body { font-family: 'Nunito', Arial, sans-serif; padding: 24px; color: #1a1a2e; }
+      h1 { font-size: 1.2rem; margin-bottom: 16px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+      th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
+      th { background: #f4f4f5; }
+    </style></head>
+    <body>
+      <h1>${title}</h1>
+      <p style="color:#6b7280;font-size:0.8rem;margin-bottom:16px;">Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</p>
+      ${table.outerHTML}
+    </body></html>
+  `);
+  printWin.document.close();
+  printWin.onload = () => { printWin.print(); };
 }
 
 /* ── DÉCONNEXION ── */

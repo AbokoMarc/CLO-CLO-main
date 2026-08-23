@@ -73,7 +73,7 @@ function initLivreurNotifications(livreur) {
     if (event === "order:new") {
       showToast(`🆕 Nouvelle demande de livraison — CMD-${order.id}`, "orange");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
-    } else if (event === "order:cancelled" && order.livreurId === livreur.id) {
+    } else if (event === "order:cancelled" && Number(order.livreurId) === Number(livreur.id)) {
       showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
       if (page.includes("livreur-livraison")) initLivraison();
@@ -215,6 +215,43 @@ async function initHistorique() {
       });
     });
   });
+
+  document.getElementById("btn-export-pdf-livreur")?.addEventListener("click", () => {
+    exportHistoriqueLivreurToPdf(done);
+  });
+}
+
+/** Export PDF via l'impression native du navigateur (aucune dépendance externe). */
+function exportHistoriqueLivreurToPdf(deliveries) {
+  const rows = deliveries.map(o => `
+    <tr>
+      <td>CMD-${o.id}</td>
+      <td>${o.adresse || "—"}</td>
+      <td>${new Date(o.createdAt).toLocaleDateString("fr-FR")}</td>
+      <td>${o.total.toLocaleString()} FCFA</td>
+      <td>${o.statut === "livree" ? "Livrée" : "Annulée"}</td>
+    </tr>`).join("");
+  const printWin = window.open("", "_blank");
+  printWin.document.write(`
+    <html><head><title>Mon historique de livraisons — Clo-Clo</title>
+    <style>
+      body { font-family: 'Nunito', Arial, sans-serif; padding: 24px; color: #1a1a2e; }
+      h1 { font-size: 1.2rem; margin-bottom: 4px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 16px; }
+      th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
+      th { background: #f4f4f5; }
+    </style></head>
+    <body>
+      <h1>Mon historique de livraisons</h1>
+      <p style="color:#6b7280;font-size:0.8rem;">Généré le ${new Date().toLocaleDateString("fr-FR")}</p>
+      <table>
+        <thead><tr><th>Commande</th><th>Adresse</th><th>Date</th><th>Total</th><th>Statut</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="5">Aucune livraison.</td></tr>'}</tbody>
+      </table>
+    </body></html>
+  `);
+  printWin.document.close();
+  printWin.onload = () => { printWin.print(); };
 }
 
 /* ── INIT ── */

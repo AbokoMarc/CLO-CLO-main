@@ -314,6 +314,9 @@ tbody td { padding: 14px 16px; color: var(--text-dark); font-weight: 600; }
 @media (max-width: 1024px) {
   .stats-grid-4, .stats-grid-5 { grid-template-columns: repeat(2, 1fr); }
 }
+@media (max-width: 420px) {
+  .stats-grid-4, .stats-grid-5 { grid-template-columns: 1fr; }
+}
 
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
