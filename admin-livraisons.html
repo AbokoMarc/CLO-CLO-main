@@ -27,6 +27,12 @@
 
     /* Grille 3 colonnes */
     .liv-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (max-width: 900px) {
+      .liv-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .liv-grid { grid-template-columns: 1fr; }
+    }
 
     .liv-col { border-radius: 14px; padding: 18px 20px; }
     .liv-col-blue   { background: #eff6ff; }

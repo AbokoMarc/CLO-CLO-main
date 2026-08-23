@@ -47,9 +47,13 @@ window.updateNavbar = function () {
       if (s) s.textContent = `${pts} pts`;
     }
   }
-  // Bouton profil : redirige vers connexion si pas connecté
+  // Bouton profil : affiche "Se Connecter" si pas connecté, "Profil" sinon
   const profileBtn = document.querySelector(".btn-profile");
-  if (profileBtn) profileBtn.dataset.authRequired = APP.isLoggedIn() ? "0" : "1";
+  if (profileBtn) {
+    profileBtn.dataset.authRequired = APP.isLoggedIn() ? "0" : "1";
+    const label = profileBtn.querySelector(".btn-profile-label");
+    if (label) label.textContent = APP.isLoggedIn() ? "Profil" : "Se Connecter";
+  }
 };
 
 /* ─── MINI-PANIER ─── */
@@ -235,7 +239,7 @@ function initNotifBell() {
 }
 
 function initClientNotifications() {
-  if (!APP.isLoggedIn()) return;
+  if (!APP.isLoggedIn() || APP.user?.role !== "client") return;
   initNotifBell();
   NotificationService.connect((event, order) => {
     if (!order || order.userId !== APP.user?.id) return;
@@ -246,6 +250,23 @@ function initClientNotifications() {
       showToast(`📦 Commande CMD-${order.id} : ${label}`, "info");
     }
   });
+}
+
+/* ─── BANDEAU "RETOUR ADMIN" quand l'admin navigue sur le site en mode client ─── */
+function initAdminReturnBanner() {
+  if (APP.user?.role !== "admin" || document.querySelector(".admin-return-banner")) return;
+  const banner = document.createElement("div");
+  banner.className = "admin-return-banner";
+  banner.innerHTML = `👁️ Vous consultez le site en tant qu'administrateur — <a href="admin-dashboard.html">🔙 Retour au tableau de bord</a>`;
+  Object.assign(banner.style, {
+    position: "fixed", top: "0", left: "0", right: "0", zIndex: "9998",
+    background: "#1a1a2e", color: "white", textAlign: "center",
+    padding: "9px 12px", fontFamily: "'Nunito', sans-serif", fontWeight: "700",
+    fontSize: "0.82rem",
+  });
+  banner.querySelector("a").style.cssText = "color:#22c55e;text-decoration:underline;margin-left:6px;";
+  document.body.prepend(banner);
+  document.body.style.paddingTop = banner.offsetHeight + "px";
 }
 
 /* ─── HAMBURGER MOBILE ─── */
@@ -286,6 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initHamburger();
   initImgFallback();
   initClientNotifications();
+  initAdminReturnBanner();
   I18n.injectToggle(document.querySelector(".nav-actions"));
   document.dispatchEvent(new CustomEvent("cloclo:ready", { detail: { APP } }));
   initScrollReveal(); // après le rendu dynamique des pages spécifiques

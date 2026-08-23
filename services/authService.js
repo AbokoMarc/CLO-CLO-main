@@ -35,9 +35,18 @@ export const AuthService = {
     if (!ApiClient.getToken()) return null;
     try {
       return await ApiClient.get("/auth/me", { auth: true });
-    } catch {
-      ApiClient.clearToken();
-      return null;
+    } catch (err) {
+      if (err.status === 401) { ApiClient.clearToken(); return null; }
+      // Le serveur (Render, plan gratuit) peut mettre 30-50s à se "réveiller"
+      // après une période d'inactivité. On retente une fois après un court
+      // délai avant d'abandonner — le token, lui, n'est jamais effacé ici.
+      await new Promise((r) => setTimeout(r, 4000));
+      try {
+        return await ApiClient.get("/auth/me", { auth: true });
+      } catch (err2) {
+        if (err2.status === 401) ApiClient.clearToken();
+        return null;
+      }
     }
   },
   isAuthenticated() {

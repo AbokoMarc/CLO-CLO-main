@@ -62,15 +62,22 @@ const DICT = {
   "jour": "day", "mois": "month",
 };
 
-const REVERSE_DICT = Object.fromEntries(Object.entries(DICT).map(([fr, en]) => [en, fr]));
-
 const STORAGE_KEY = "cloclo_lang";
 let currentLang = localStorage.getItem(STORAGE_KEY) || "fr";
 
+// Mémorise le texte FR d'origine de chaque nœud traduit, pour pouvoir
+// revenir au français à l'identique après un passage en anglais (le
+// dictionnaire ne connaît que le sens FR → EN, jamais l'inverse).
+const originalText = new WeakMap();
+
 function translateNode(node) {
-  const original = node.nodeValue;
+  if (!originalText.has(node)) {
+    const trimmed = node.nodeValue.trim();
+    if (!trimmed || !DICT[trimmed]) return; // rien à traduire, on ignore ce nœud
+    originalText.set(node, node.nodeValue);
+  }
+  const original = originalText.get(node);
   const trimmed = original.trim();
-  if (!trimmed || !DICT[trimmed]) return;
   const leading = original.slice(0, original.indexOf(trimmed));
   const trailing = original.slice(original.indexOf(trimmed) + trimmed.length);
   node.nodeValue = leading + (currentLang === "en" ? DICT[trimmed] : trimmed) + trailing;

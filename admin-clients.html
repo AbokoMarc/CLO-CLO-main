@@ -9,6 +9,9 @@
   <script src="config.js"></script>
   <style>
     .clients-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) {
+      .clients-grid { grid-template-columns: 1fr; }
+    }
 
     .client-card { border-radius: 18px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,0.07); }
 

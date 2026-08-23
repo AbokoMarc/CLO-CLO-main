@@ -60,7 +60,7 @@ function injectAdminToolbar() {
   I18n.injectToggle(bar);
 
   bar.querySelector(".notif-bell").addEventListener("click", () => NotificationService.clearUnread());
-  bar.querySelector(".btn-view-site").addEventListener("click", () => window.open("index.html", "_blank"));
+  bar.querySelector(".btn-view-site").addEventListener("click", () => window.location.href = "index.html");
   bar.querySelector(".btn-change-pwd").addEventListener("click", handleChangeOwnPassword);
 }
 
@@ -166,8 +166,12 @@ async function initDashboard() {
 /* ── CLIENTS ── */
 const CLIENT_UNLOCK_KEY = "cloclo_admin_clients_unlocked";
 
-function clientCardHtml(c) {
-  const initials = c.nom.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+function clientCardHtml(c, unlocked) {
+  const contactBlock = unlocked
+    ? `<div class="client-info"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${c.email}</div>
+       <div class="client-info"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg>${c.tel}</div>
+       <div class="client-info"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.adresse}</div>`
+    : `<div class="client-info" style="color:#9ca3af;">🔒 Coordonnées masquées — déverrouillez pour les voir</div>`;
   return `
     <div class="client-card anim">
       <div class="client-header">
@@ -181,44 +185,29 @@ function clientCardHtml(c) {
         </div>
         <div class="niveau-badge niveau-${(c.niveau || "bronze").toLowerCase()}"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${c.niveau}</div>
       </div>
-      <div class="client-body">
-        <div class="client-info"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${c.email}</div>
-        <div class="client-info"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg>${c.tel}</div>
-        <div class="client-info"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.adresse}</div>
-      </div>
-      <div class="client-body" style="padding-top:0;">
+      <div class="client-body">${contactBlock}</div>
+      ${unlocked ? `<div class="client-body" style="padding-top:0;">
         <button class="btn-reset-pwd" data-id="${c.id}" data-nom="${c.nom}" style="width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">🔑 Réinitialiser le mot de passe</button>
-      </div>
+      </div>` : ""}
     </div>`;
 }
 
-/** Confidentialité : les données clients (tel, email, adresse) ne s'affichent qu'après
-    re-saisie du mot de passe admin — comme sur Roomia. Déverrouillage valable pour
+/** Confidentialité : la liste des clients (nom, points, commandes) est visible
+    directement — seules les coordonnées (email/tel/adresse) et la réinitialisation
+    de mot de passe nécessitent une re-saisie du mot de passe admin, valable pour
     la session en cours (jusqu'à déconnexion). */
 function isClientsUnlocked() {
   return sessionStorage.getItem(CLIENT_UNLOCK_KEY) === "1";
 }
 
-function renderLockScreen(onUnlock) {
-  const grid = document.getElementById("clients-grid");
-  grid.innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;padding:50px 20px;background:white;border-radius:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
-      <div style="font-size:2.4rem;margin-bottom:12px;">🔒</div>
-      <div style="font-weight:900;font-size:1.05rem;color:#1a1a2e;margin-bottom:6px;">Données clients confidentielles</div>
-      <div style="color:#6b7280;font-weight:600;margin-bottom:18px;font-size:0.9rem;">Ressaisissez votre mot de passe administrateur pour consulter les coordonnées des clients.</div>
-      <button id="btn-unlock-clients" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 24px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Déverrouiller</button>
-    </div>`;
-  document.getElementById("btn-unlock-clients").addEventListener("click", async () => {
-    const mdp = prompt("Confirmez votre mot de passe administrateur :");
-    if (!mdp) return;
-    try {
-      await AdminService.verifyPassword(mdp);
-      sessionStorage.setItem(CLIENT_UNLOCK_KEY, "1");
-      onUnlock();
-    } catch (err) {
-      showToast(err.message || "Mot de passe incorrect.", "red");
-    }
-  });
+function unlockBarHtml(unlocked) {
+  if (unlocked) {
+    return `<div style="grid-column:1/-1;background:#dcfce7;color:#166534;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;">🔓 Coordonnées déverrouillées pour cette session</div>`;
+  }
+  return `<div style="grid-column:1/-1;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <span style="font-weight:700;font-size:0.85rem;color:#6b7280;">🔒 Coordonnées clients masquées par confidentialité</span>
+    <button id="btn-unlock-clients" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:9px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">Déverrouiller</button>
+  </div>`;
 }
 
 async function initClients() {
@@ -226,9 +215,25 @@ async function initClients() {
 
   async function renderClients() {
     const clients = await AdminService.listClients();
-    grid.innerHTML = clients.length
-      ? clients.map(clientCardHtml).join("")
-      : `<p style="grid-column:1/-1;text-align:center;color:#9ca3af;font-weight:700;">Aucun client pour l'instant.</p>`;
+    const unlocked = isClientsUnlocked();
+
+    grid.innerHTML = unlockBarHtml(unlocked) + `<div class="clients-list-grid" style="display:contents;">` +
+      (clients.length
+        ? clients.map(c => clientCardHtml(c, unlocked)).join("")
+        : `<p style="grid-column:1/-1;text-align:center;color:#9ca3af;font-weight:700;">Aucun client pour l'instant.</p>`) + `</div>`;
+
+    document.getElementById("btn-unlock-clients")?.addEventListener("click", async () => {
+      const mdp = prompt("Confirmez votre mot de passe administrateur :");
+      if (!mdp) return;
+      try {
+        await AdminService.verifyPassword(mdp);
+        sessionStorage.setItem(CLIENT_UNLOCK_KEY, "1");
+        showToast("✅ Coordonnées déverrouillées.");
+        renderClients();
+      } catch (err) {
+        showToast(err.status === 401 ? "Mot de passe incorrect." : (err.message || "Erreur, réessayez."), "red");
+      }
+    });
 
     grid.querySelectorAll(".btn-reset-pwd").forEach(btn => {
       btn.addEventListener("click", async () => {
@@ -250,8 +255,7 @@ async function initClients() {
     });
   }
 
-  if (isClientsUnlocked()) await renderClients();
-  else renderLockScreen(renderClients);
+  await renderClients();
 }
 
 /* ── PRODUITS (ajouter / modifier / retirer) ── */
