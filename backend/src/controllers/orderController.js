@@ -52,4 +52,15 @@ export const OrderController = {
     requireRole(auth, "client");
     sendJson(res, 200, await OrderService.cancelOrder(auth.sub, params.id));
   },
+  /** Le client ou le livreur partage sa position pendant une livraison active. */
+  async updateLocation({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "client", "livreur");
+    sendJson(res, 200, await OrderService.updateLocation(params.id, auth.role, auth.sub, body.lat, body.lng));
+  },
+  /** Admin, client ou livreur concerné peuvent consulter la position en direct. */
+  async getLocation({ req, res, params }) {
+    requireRole(requireAuth(req), "admin", "client", "livreur");
+    sendJson(res, 200, await OrderService.getLocation(params.id));
+  },
 };

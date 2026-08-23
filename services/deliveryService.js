@@ -14,4 +14,7 @@ export const DeliveryService = {
   updateMyStatut(livreurId, statut) {
     return ApiClient.patch(`/admin/livreurs/${livreurId}/statut`, { statut }, { auth: true });
   },
+  updateLocation(orderId, lat, lng) {
+    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng }, { auth: true });
+  },
 };

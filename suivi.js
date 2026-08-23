@@ -6,6 +6,7 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 import { OrderService } from "./services/orderService.js";
+import { NotificationService } from "./services/notificationService.js";
 
 const STEP_LABELS = ["Préparation", "Prêt", "En Route", "Livré"];
 const STATUS_PROGRESS = { en_preparation: 1, en_livraison: 3, livree: 4, annulee: 0 };
@@ -16,6 +17,12 @@ function activeOrderHtml(o) {
   const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
   const cancelBtn = o.statut === "en_preparation"
     ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">✕ Annuler ma commande</button>`
+    : "";
+  const locationBlock = o.statut === "en_livraison"
+    ? `<div class="detail-block" id="location-block" style="grid-column:1/-1;">
+         <div class="detail-title">Localisation en direct</div>
+         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.88rem;">📡 En attente de la position du livreur…</div>
+       </div>`
     : "";
   return `
     <div class="order-card active-order">
@@ -46,6 +53,7 @@ function activeOrderHtml(o) {
           <div class="detail-title">Adresse de Livraison</div>
           <div class="address-row">📍 ${o.adresse || "—"}</div>
         </div>
+        ${locationBlock}
       </div>
       ${cancelBtn}
     </div>`;
@@ -104,5 +112,45 @@ async function loadSuivi() {
       btn.disabled = false;
       btn.textContent = "✕ Annuler ma commande";
     }
+  });
+
+  if (active?.statut === "en_livraison") {
+    setupLocationSharing(active.id);
+  }
+}
+
+/* ── LOCALISATION EN TEMPS RÉEL (pendant une livraison active) ──
+   Le client partage sa position (pour aider le livreur à le localiser)
+   et voit en direct celle du livreur, via le flux SSE de notifications. */
+let clientLocationIntervalId = null;
+
+function setupLocationSharing(orderId) {
+  if (clientLocationIntervalId) clearInterval(clientLocationIntervalId);
+
+  // 1) Le client envoie sa propre position (aide le livreur à le trouver).
+  if (navigator.geolocation) {
+    const sendPosition = () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { OrderService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude).catch(() => {}); },
+        () => { /* le client peut refuser — pas bloquant, on affiche quand même la position du livreur */ },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    };
+    sendPosition();
+    clientLocationIntervalId = setInterval(sendPosition, 15000);
+  }
+
+  // 2) Affiche la dernière position connue du livreur, puis se met à jour en direct via SSE.
+  const statusEl = document.getElementById("location-livreur-status");
+  const renderLivreurPosition = (loc) => {
+    if (!statusEl || !loc?.livreur) return;
+    const { lat, lng, at } = loc.livreur;
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+    statusEl.innerHTML = `🛵 Livreur en route — <a href="${mapsUrl}" target="_blank" style="color:#22c55e;font-weight:800;">voir sur la carte →</a> <span style="color:#9ca3af;font-size:0.8rem;">(màj ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })})</span>`;
+  };
+
+  OrderService.getLocation(orderId).then(renderLivreurPosition).catch(() => {});
+  NotificationService.connect((event, data) => {
+    if (event === "order:location" && data?.id === orderId) renderLivreurPosition(data.location);
   });
 }

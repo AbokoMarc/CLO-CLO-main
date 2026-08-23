@@ -46,6 +46,7 @@ function fillProfile(livreur) {
     : "Non définie par l'administrateur";
   document.querySelectorAll(".profile-paie").forEach(el => el.textContent = paieLabel);
   I18n.injectToggle(document.querySelector(".sidebar-bottom"));
+}
 
 function initLogout() {
   document.querySelector(".js-livreur-logout")?.addEventListener("click", () => {
@@ -162,17 +163,21 @@ async function initLivraison() {
         <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🗺️ Itinéraire</button>
         <button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✓ Marquer comme livrée</button>
       </div>
+      <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
     </div>`;
 
   document.querySelector(".btn-gmaps")?.addEventListener("click", () => {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.adresse)}`, "_blank");
   });
 
+  startLocationSharing(order.id);
+
   document.getElementById("btn-livre")?.addEventListener("click", async (e) => {
     e.target.disabled = true;
     e.target.textContent = "Envoi…";
     try {
       await DeliveryService.updateStatus(order.id, "livree");
+      stopLocationSharing();
       showToast("🎉 Livraison complétée !");
       setTimeout(() => window.location.href = "livreur-historique.html", 1200);
     } catch (err) {
@@ -180,6 +185,39 @@ async function initLivraison() {
       showToast(err.message || "Erreur", "red");
     }
   });
+}
+
+/* ── PARTAGE DE POSITION EN TEMPS RÉEL (pendant une livraison active) ──
+   Le livreur envoie sa position toutes les 15s ; le client et l'admin
+   peuvent la suivre en direct (voir suivi.js et admin-livraisons). */
+let locationWatchId = null;
+let locationIntervalId = null;
+
+function startLocationSharing(orderId) {
+  const statusEl = document.getElementById("location-share-status");
+  if (!navigator.geolocation) {
+    if (statusEl) statusEl.textContent = "⚠️ Géolocalisation non disponible sur cet appareil.";
+    return;
+  }
+  const sendPosition = () => {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          await DeliveryService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude);
+          if (statusEl) statusEl.textContent = "📍 Position partagée avec le client et l'admin";
+        } catch { /* silencieux — pas grave si un envoi échoue, le suivant réessaiera */ }
+      },
+      () => { if (statusEl) statusEl.textContent = "⚠️ Partage de position refusé — activez la localisation pour que le client vous suive."; },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+  sendPosition();
+  locationIntervalId = setInterval(sendPosition, 15000);
+}
+
+function stopLocationSharing() {
+  if (locationIntervalId) clearInterval(locationIntervalId);
+  locationIntervalId = null;
 }
 
 /* ── HISTORIQUE ── */

@@ -38,6 +38,8 @@ router.get("/api/orders", OrderController.listAll);
 router.patch("/api/orders/:id/assign", OrderController.assign);
 router.patch("/api/orders/:id/status", OrderController.updateStatus);
 router.patch("/api/orders/:id/cancel", OrderController.cancel);
+router.post("/api/orders/:id/location", OrderController.updateLocation);
+router.get("/api/orders/:id/location", OrderController.getLocation);
 router.get("/api/orders/:id", OrderController.getOne);
 
 // Admin

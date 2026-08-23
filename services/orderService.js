@@ -23,6 +23,13 @@ export const OrderService = {
   cancelOrder(id) {
     return ApiClient.patch(`/orders/${id}/cancel`, {}, { auth: true });
   },
+  /** Partage de localisation en temps réel (client ou livreur). */
+  updateLocation(orderId, lat, lng) {
+    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng }, { auth: true });
+  },
+  getLocation(orderId) {
+    return ApiClient.get(`/orders/${orderId}/location`, { auth: true });
+  },
   listRewards() {
     return ApiClient.get("/rewards");
   },

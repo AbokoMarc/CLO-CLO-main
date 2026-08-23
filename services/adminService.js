@@ -26,6 +26,9 @@ export const AdminService = {
   updateOrderStatus(orderId, statut) {
     return ApiClient.patch(`/orders/${orderId}/status`, { statut }, { auth: true });
   },
+  updateLivreurStatut(livreurId, statut) {
+    return ApiClient.patch(`/admin/livreurs/${livreurId}/statut`, { statut }, { auth: true });
+  },
   /** Réinitialise le mot de passe d'un client — retourne un mot de passe temporaire à communiquer. */
   resetClientPassword(clientId) {
     return ApiClient.post(`/admin/clients/${clientId}/reset-password`, {}, { auth: true });
@@ -44,5 +47,9 @@ export const AdminService = {
   },
   deleteLivreur(livreurId) {
     return ApiClient.delete(`/admin/livreurs/${livreurId}`, { auth: true });
+  },
+  /** Position en direct du client et du livreur pendant une livraison active. */
+  getLocation(orderId) {
+    return ApiClient.get(`/orders/${orderId}/location`, { auth: true });
   },
 };

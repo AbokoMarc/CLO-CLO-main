@@ -161,6 +161,62 @@ async function initDashboard() {
       },
     });
   }
+
+  await renderTopProducts();
+  await renderRecentOrders();
+}
+
+const STATUT_BADGE = {
+  en_preparation: { cls: "badge-preparation", label: "Préparation" },
+  en_livraison:   { cls: "badge-en-route",    label: "En Route" },
+  livree:         { cls: "badge-livre",       label: "Livré" },
+  annulee:        { cls: "badge-annule",      label: "Annulé" },
+};
+
+/** Classement des produits les plus vendus, calculé à partir des VRAIES commandes en base. */
+async function renderTopProducts() {
+  const el = document.getElementById("top-products-list");
+  if (!el) return;
+  const orders = await AdminService.listOrders();
+  const tally = new Map(); // productId -> { name, qty, revenue }
+  for (const o of orders) {
+    if (o.statut === "annulee") continue;
+    for (const item of o.items) {
+      const cur = tally.get(item.productId) || { name: item.name, qty: 0, revenue: 0 };
+      cur.qty += item.qty;
+      cur.revenue += item.qty * item.price;
+      tally.set(item.productId, cur);
+    }
+  }
+  const top5 = [...tally.values()].sort((a, b) => b.qty - a.qty).slice(0, 5);
+  el.innerHTML = top5.length
+    ? top5.map((p, i) => `
+      <div class="product-rank">
+        <div class="rank-num">${i + 1}</div>
+        <div class="rank-info"><div class="rank-name">${p.name}</div><div class="rank-cmds">${p.qty} commande${p.qty > 1 ? "s" : ""}</div></div>
+        <div class="rank-rev">${p.revenue.toLocaleString()} FC</div>
+      </div>`).join("")
+    : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Aucune commande pour l'instant.</p>`;
+}
+
+/** Les 5 dernières commandes, avec le vrai nom du client, calculées à partir de l'API. */
+async function renderRecentOrders() {
+  const el = document.getElementById("recent-orders-list");
+  if (!el) return;
+  const [orders, clients] = await Promise.all([AdminService.listOrders(), AdminService.listClients()]);
+  const clientById = new Map(clients.map(c => [c.id, c.nom]));
+  const recent = [...orders].sort((a, b) => b.id - a.id).slice(0, 5);
+  el.innerHTML = recent.length
+    ? recent.map(o => {
+        const badge = STATUT_BADGE[o.statut] || { cls: "badge-preparation", label: o.statut };
+        const nbArticles = o.items.reduce((s, i) => s + i.qty, 0);
+        return `
+      <div class="cmd-item">
+        <div><div class="cmd-id">CMD-${o.id}</div><div class="cmd-meta">${clientById.get(o.userId) || "Client"} • ${nbArticles} article${nbArticles > 1 ? "s" : ""}</div></div>
+        <div class="cmd-right"><div class="cmd-price">${o.total.toLocaleString()} FC</div><span class="badge ${badge.cls}">${badge.label}</span></div>
+      </div>`;
+      }).join("")
+    : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Aucune commande pour l'instant.</p>`;
 }
 
 /* ── CLIENTS ── */
@@ -379,6 +435,7 @@ function livreurCardHtml(l) {
           <div><div class="lm-label">Paie</div><div class="lm-val">${paieLabel}</div></div>
         </div>
         <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">💰 Définir la paie</button>
+        <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#22c55e" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#22c55e" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? "✅ Remettre en service" : "⛔ Mettre hors service"}</button>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🔑 Mot de passe</button>
           <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🗑️ Supprimer</button>
@@ -413,6 +470,20 @@ async function initLivreurs() {
       });
     });
 
+    grid.querySelectorAll(".btn-toggle-service").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const nouveauStatut = btn.dataset.statut === "hors_service" ? "disponible" : "hors_service";
+        try {
+          await AdminService.updateLivreurStatut(btn.dataset.id, nouveauStatut);
+          showToast(nouveauStatut === "hors_service" ? "⛔ Livreur mis hors service." : "✅ Livreur remis en service.");
+          renderLivreurs();
+          renderLivreurStats();
+        } catch (err) {
+          showToast(err.message || "Impossible de changer le statut.", "red");
+        }
+      });
+    });
+
     grid.querySelectorAll(".btn-reset-livreur-pwd").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (!confirm(`Réinitialiser le mot de passe de "${btn.dataset.nom}" ?`)) return;
@@ -432,6 +503,7 @@ async function initLivreurs() {
           await AdminService.deleteLivreur(btn.dataset.id);
           showToast("🗑️ Livreur supprimé.");
           renderLivreurs();
+          renderLivreurStats();
         } catch (err) {
           showToast(err.message || "Impossible de supprimer ce livreur.", "red");
         }
@@ -440,6 +512,7 @@ async function initLivreurs() {
   }
 
   await renderLivreurs();
+  await renderLivreurStats();
 
   document.querySelector(".btn-green")?.addEventListener("click", async () => {
     const nom = prompt("Nom du livreur :");
@@ -451,16 +524,32 @@ async function initLivreurs() {
       const created = await AdminService.createLivreur({ nom, tel, vehicule });
       alert(`✅ Livreur créé !\n\nMatricule : ${created.matricule}\nMot de passe temporaire : ${created.tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
       renderLivreurs();
+      renderLivreurStats();
     } catch (err) {
       showToast(err.message || "Impossible d'ajouter le livreur.", "red");
     }
   });
 }
 
+/** Statistiques calculées à partir des VRAIES données (livreurs + commandes du jour). */
+async function renderLivreurStats() {
+  const [livreurs, orders] = await Promise.all([AdminService.listLivreurs(), AdminService.listOrders()]);
+  const today = new Date().toDateString();
+  document.getElementById("stat-liv-total").textContent = livreurs.length;
+  document.getElementById("stat-liv-dispo").textContent = livreurs.filter(l => l.statut === "disponible").length;
+  document.getElementById("stat-liv-encours").textContent = livreurs.filter(l => l.statut === "en_livraison").length;
+  document.getElementById("stat-liv-horsservice").textContent = livreurs.filter(l => l.statut === "hors_service").length;
+  document.getElementById("stat-liv-aujourdhui").textContent = orders.filter(o => o.livreurId && new Date(o.createdAt).toDateString() === today).length;
+}
+
 /* ── LIVRAISONS EN COURS ── */
-function livraisonBlockHtml(o, livreurs) {
+function livraisonBlockHtml(o, livreurs, clients) {
   const livreur = livreurs.find(l => l.id === o.livreurId);
+  const client = clients?.find(c => c.id === o.userId);
   const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
+  const locationBlock = o.statut === "en_livraison"
+    ? `<div class="location-block" data-order="${o.id}" style="margin-bottom:14px;font-size:0.82rem;color:#6b7280;font-weight:700;">📡 Chargement des positions…</div>`
+    : "";
   return `
     <div class="livraison-block anim" style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
@@ -473,7 +562,8 @@ function livraisonBlockHtml(o, livreurs) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
         <div>
           <div style="font-size:0.78rem;color:#3b82f6;font-weight:800;margin-bottom:4px;">CLIENT</div>
-          <div style="font-weight:700;color:#1a1a2e;">${o.adresse || "—"}</div>
+          <div style="font-weight:700;color:#1a1a2e;">${client ? client.nom : "—"}</div>
+          <div style="color:#6b7280;font-size:0.85rem;">${o.adresse || "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${items}</div>
         </div>
         <div>
@@ -482,6 +572,7 @@ function livraisonBlockHtml(o, livreurs) {
           <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString()} FCFA</div>
         </div>
       </div>
+      ${locationBlock}
       <div style="display:flex;gap:10px;">
         ${!o.livreurId ? `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-weight:700;">
           <option value="">Assigner un livreur…</option>
@@ -492,14 +583,15 @@ function livraisonBlockHtml(o, livreurs) {
 }
 
 async function initLivraisons() {
-  const [orders, livreurs] = await Promise.all([
+  const [orders, livreurs, clients] = await Promise.all([
     AdminService.listOrders(),
     AdminService.listLivreurs(),
+    AdminService.listClients(),
   ]);
   const active = orders.filter(o => o.statut === "en_preparation" || o.statut === "en_livraison");
   const wrap = document.getElementById("livraisons-list");
   wrap.innerHTML = active.length
-    ? active.map(o => livraisonBlockHtml(o, livreurs)).join("")
+    ? active.map(o => livraisonBlockHtml(o, livreurs, clients)).join("")
     : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:40px 0;">Aucune livraison en cours.</p>`;
 
   wrap.querySelectorAll(".assign-select").forEach(sel => {
@@ -521,26 +613,54 @@ async function initLivraisons() {
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
   });
+
+  // Positions en direct (client + livreur) pour chaque livraison active en cours.
+  wrap.querySelectorAll(".location-block").forEach(async (el) => {
+    try {
+      const loc = await AdminService.getLocation(el.dataset.order);
+      const parts = [];
+      if (loc.livreur) parts.push(`🛵 Livreur : <a href="https://www.google.com/maps?q=${loc.livreur.lat},${loc.livreur.lng}" target="_blank" style="color:#22c55e;font-weight:800;">voir →</a>`);
+      if (loc.client) parts.push(`📍 Client : <a href="https://www.google.com/maps?q=${loc.client.lat},${loc.client.lng}" target="_blank" style="color:#3b82f6;font-weight:800;">voir →</a>`);
+      el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : "📡 Aucune position partagée pour l'instant.";
+    } catch { el.innerHTML = ""; }
+  });
 }
 
 /* ── HISTORIQUE ── */
 async function initHistorique() {
-  const orders = await AdminService.listOrders();
+  const [orders, clients, livreurs] = await Promise.all([
+    AdminService.listOrders(), AdminService.listClients(), AdminService.listLivreurs(),
+  ]);
+  const clientById = new Map(clients.map(c => [c.id, c.nom]));
+  const livreurById = new Map(livreurs.map(l => [l.id, l.nom]));
   const done = orders.filter(o => o.statut === "livree" || o.statut === "annulee")
     .sort((a, b) => b.id - a.id);
   const body = document.getElementById("hist-body");
 
-  body.innerHTML = done.length
-    ? done.map(o => `
-      <tr data-status="${o.statut === "livree" ? "livre" : "annule"}">
-        <td>CMD-${o.id}</td><td>—</td><td>${o.adresse || "—"}</td><td>${o.livreurId || "—"}</td>
-        <td>${new Date(o.createdAt).toLocaleDateString("fr-FR")}<br><small style="color:#9ca3af;">${new Date(o.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small></td>
-        <td>${o.items.reduce((s, i) => s + i.qty, 0)}</td>
-        <td>${o.total.toLocaleString()} FCFA</td>
-        <td>${o.etaMinutes || "-"} min</td>
-        <td><span class="badge ${o.statut === "livree" ? "badge-livre" : "badge-annule"}">${o.statut === "livree" ? "✅ Livré" : "❌ Annulé"}</span></td>
-      </tr>`).join("")
-    : `<tr><td colspan="9" style="text-align:center;color:#9ca3af;font-weight:700;">Aucun historique pour l'instant.</td></tr>`;
+  // Stats réelles, calculées sur les VRAIES commandes en base.
+  const livrees = done.filter(o => o.statut === "livree");
+  const annulees = done.filter(o => o.statut === "annulee");
+  document.getElementById("stat-hist-total").textContent = done.length;
+  document.getElementById("stat-hist-livrees").textContent = livrees.length;
+  document.getElementById("stat-hist-annulees").textContent = annulees.length;
+  document.getElementById("stat-hist-revenus").textContent = livrees.reduce((s, o) => s + o.total, 0).toLocaleString() + " FC";
+
+  function renderRows(list) {
+    body.innerHTML = list.length
+      ? list.map(o => `
+        <tr data-status="${o.statut === "livree" ? "livre" : "annule"}" data-date="${new Date(o.createdAt).toISOString().slice(0, 10)}">
+          <td>LIV-${o.id}</td><td>CMD-${o.id}</td>
+          <td>${clientById.get(o.userId) || "—"}</td>
+          <td>${o.livreurId ? (livreurById.get(o.livreurId) || `#${o.livreurId}`) : "—"}</td>
+          <td>${new Date(o.createdAt).toLocaleDateString("fr-FR")}<br><small style="color:#9ca3af;">${new Date(o.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small></td>
+          <td>${o.items.reduce((s, i) => s + i.qty, 0)}</td>
+          <td>${o.total.toLocaleString()} FCFA</td>
+          <td>${o.etaMinutes || "-"} min</td>
+          <td><span class="badge ${o.statut === "livree" ? "badge-livre" : "badge-annule"}">${o.statut === "livree" ? "✅ Livré" : "❌ Annulé"}</span></td>
+        </tr>`).join("")
+      : `<tr><td colspan="9" style="text-align:center;color:#9ca3af;font-weight:700;">Aucun historique pour l'instant.</td></tr>`;
+  }
+  renderRows(done);
 
   const chips = document.querySelectorAll(".filter-chip");
   const rows = () => document.querySelectorAll("#hist-body tr");
@@ -555,6 +675,13 @@ async function initHistorique() {
   document.getElementById("search-input")?.addEventListener("input", (e) => {
     const q = e.target.value.toLowerCase();
     rows().forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none"; });
+  });
+
+  document.getElementById("filter-date-input")?.addEventListener("change", (e) => {
+    const label = document.getElementById("filter-date-label");
+    if (!e.target.value) { label.textContent = "Filtrer par Date"; renderRows(done); return; }
+    label.textContent = new Date(e.target.value).toLocaleDateString("fr-FR");
+    renderRows(done.filter(o => new Date(o.createdAt).toISOString().slice(0, 10) === e.target.value));
   });
 
   document.getElementById("btn-export-pdf")?.addEventListener("click", () => {

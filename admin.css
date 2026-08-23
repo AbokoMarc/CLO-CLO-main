@@ -215,6 +215,7 @@ body {
 .badge-annule      { background: #fee2e2; color: #dc2626; }
 .badge-en-livraison{ background: #dbeafe; color: #1d4ed8; }
 .badge-disponible  { background: #dcfce7; color: #16a34a; }
+.badge-hors-ligne  { background: #fef3c7; color: #d97706; }
 .badge-hors-service{ background: #f1f5f9; color: #64748b; }
 
 /* ============================================================

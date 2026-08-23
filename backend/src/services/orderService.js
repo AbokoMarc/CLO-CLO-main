@@ -81,6 +81,9 @@ export const OrderService = {
 
   async assignLivreur(orderId, livreurId) {
     const order = await Store.update("orders", orderId, { livreurId: Number(livreurId), statut: "en_livraison" });
+    // Le livreur passe "en livraison" tant qu'il a une course active — reflète l'état réel,
+    // ce n'était mis à jour nulle part auparavant.
+    await Store.update("livreurs", Number(livreurId), { statut: "en_livraison" });
     notifyOrderEvent("order:assigned", order);
     return order;
   },
@@ -92,6 +95,10 @@ export const OrderService = {
       throw e;
     }
     const order = await Store.update("orders", orderId, { statut });
+    // Une fois la commande livrée (ou annulée), le livreur redevient disponible.
+    if (order.livreurId && (statut === "livree" || statut === "annulee")) {
+      await Store.update("livreurs", Number(order.livreurId), { statut: "disponible" });
+    }
     notifyOrderEvent("order:updated", order);
     return order;
   },
@@ -137,5 +144,37 @@ export const OrderService = {
     await Store.update("users", userId, { points: user.points - reward.cost });
     await addPointsHistory(userId, `Récompense : ${reward.name}`, -reward.cost, "loss");
     return { reward, remainingPoints: user.points - reward.cost };
+  },
+
+  /* ── LOCALISATION EN TEMPS RÉEL (client + livreur, pendant une livraison) ──
+     Stockée en mémoire seulement (pas en base) : c'est une donnée "live",
+     pas un historique à conserver. Redémarrer le serveur la réinitialise,
+     ce qui est normal pour ce type de donnée. */
+  _liveLocations: new Map(), // orderId -> { client: {lat,lng,at}, livreur: {lat,lng,at} }
+
+  async updateLocation(orderId, role, userId, lat, lng) {
+    const order = await Store.findById("orders", Number(orderId));
+    if (!order) {
+      const e = new Error("Commande introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    const authorized =
+      (role === "client" && order.userId === Number(userId)) ||
+      (role === "livreur" && Number(order.livreurId) === Number(userId));
+    if (!authorized) {
+      const e = new Error("Non autorisé pour cette commande.");
+      e.status = 403;
+      throw e;
+    }
+    const current = this._liveLocations.get(order.id) || {};
+    current[role] = { lat, lng, at: new Date().toISOString() };
+    this._liveLocations.set(order.id, current);
+    notifyOrderEvent("order:location", { ...order, location: current });
+    return current;
+  },
+
+  async getLocation(orderId) {
+    return this._liveLocations.get(Number(orderId)) || {};
   },
 };
