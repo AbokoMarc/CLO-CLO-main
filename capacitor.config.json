@@ -1,0 +1,13 @@
+{
+  "appId": "com.cloclo.app",
+  "appName": "Clo-Clo",
+  "webDir": "www",
+  "server": {
+    "url": "https://clo-clo-main.vercel.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
