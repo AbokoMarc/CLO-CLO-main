@@ -45,24 +45,36 @@ function fillProfile(admin) {
 
 /* ── BARRE D'OUTILS ADMIN : voir le site, changer mon mot de passe, notifications ── */
 function injectAdminToolbar() {
-  const nav = document.querySelector(".nav-actions") || document.querySelector("header") || document.body;
-  if (!nav || document.querySelector(".admin-toolbar")) return;
+  const host = document.querySelector(".page-header") || document.querySelector(".sidebar-brand");
+  if (!host || document.querySelector(".admin-toolbar")) return;
 
   const bar = document.createElement("div");
   bar.className = "admin-toolbar";
-  Object.assign(bar.style, { display: "flex", alignItems: "center", gap: "10px" });
   bar.innerHTML = `
-    <button class="notif-bell" title="Notifications" style="position:relative;background:none;border:none;font-size:1.15rem;cursor:pointer;padding:4px 8px;">
-      🔔<span class="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border-radius:10px;min-width:16px;height:16px;font-size:0.65rem;font-weight:800;align-items:center;justify-content:center;padding:0 3px;"></span>
+    <button class="notif-bell" title="Notifications">
+      🔔<span class="notif-badge" style="display:none;"></span>
     </button>
-    <button class="btn-view-site" title="Voir le site (mode client)" style="background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">🌐 Voir le site</button>
-    <button class="btn-change-pwd" title="Changer mon mot de passe" style="background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">🔑 Mon mot de passe</button>`;
-  nav.insertBefore(bar, nav.firstChild);
+    <button class="btn-view-site" title="Voir le site (mode client)">🌐 Voir le site</button>
+    <button class="btn-change-pwd" title="Changer mon mot de passe">🔑 Mon mot de passe</button>`;
+  host.appendChild(bar);
   I18n.injectToggle(bar);
 
   bar.querySelector(".notif-bell").addEventListener("click", () => NotificationService.clearUnread());
   bar.querySelector(".btn-view-site").addEventListener("click", () => window.open("index.html", "_blank"));
   bar.querySelector(".btn-change-pwd").addEventListener("click", handleChangeOwnPassword);
+}
+
+/* ── SIDEBAR MOBILE : la sidebar n'a aucun bouton pour l'ouvrir sur petit écran, on en ajoute un ── */
+function injectSidebarToggle() {
+  if (document.querySelector(".sidebar-toggle")) return;
+  const btn = document.createElement("button");
+  btn.className = "sidebar-toggle";
+  btn.setAttribute("aria-label", "Ouvrir le menu");
+  btn.innerHTML = "☰";
+  document.body.appendChild(btn);
+  const sidebar = document.querySelector(".sidebar");
+  btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
+  document.querySelector(".main-content")?.addEventListener("click", () => sidebar?.classList.remove("sidebar-open"));
 }
 
 async function handleChangeOwnPassword() {
@@ -528,6 +540,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   fillProfile(admin);
   initLogout();
   initAdminNotifications();
+  injectSidebarToggle();
 
   if (page.includes("admin-dashboard")) await initDashboard();
   else if (page.includes("admin-produits")) await initProduits();

@@ -3,6 +3,9 @@
    Point unique de configuration d'environnement pour le
    frontend statique. Charger CE fichier en premier, avant tout
    autre script.
+
+   ⚠️ AVANT DE DÉPLOYER EN PRODUCTION : remplacez API_BASE_URL
+   par l'URL réelle de votre backend déployé (ex: Render, Railway).
    ============================================================ */
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 

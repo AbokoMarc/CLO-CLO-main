@@ -10,6 +10,8 @@ RUN npm install --omit=dev
 
 COPY . .
 
+# Les données vivent sur Turso (distant), plus besoin de volume local
+# pour la persistance.
 ENV NODE_ENV=production
 EXPOSE 4000
 

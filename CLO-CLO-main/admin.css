@@ -1,3 +1,4 @@
+html, body { max-width: 100%; overflow-x: hidden; }
 /* ============================================================
    CLO-CLO ADMIN | admin.css  (partagé toutes pages admin)
    ============================================================ */
@@ -315,6 +316,41 @@ tbody td { padding: 14px 16px; color: var(--text-dark); font-weight: 600; }
 }
 
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .main-content { margin-left: 0; padding: 20px 16px; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+  .sidebar.sidebar-open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 20px 16px; padding-top: 64px; }
+}
+
+/* ── Bouton pour ouvrir/fermer la sidebar sur mobile (absent à l'origine) ── */
+.sidebar-toggle {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; top: 14px; left: 14px; z-index: 210;
+    width: 40px; height: 40px; border-radius: 10px; border: none;
+    background: var(--sidebar-bg); color: white; font-size: 1.2rem; cursor: pointer;
+  }
+}
+
+/* ── Barre d'outils admin (notifications, voir le site, mot de passe, langue) ── */
+.admin-toolbar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+}
+.admin-toolbar button {
+  background: white; border: 1.5px solid #e5e7eb; border-radius: 8px;
+  padding: 7px 12px; font-family: 'Nunito', sans-serif; font-weight: 700;
+  font-size: 0.8rem; cursor: pointer; white-space: nowrap;
+}
+.admin-toolbar .notif-bell {
+  position: relative; padding: 6px 9px; font-size: 1.05rem;
+}
+.admin-toolbar .notif-badge {
+  position: absolute; top: -4px; right: -4px; background: #ef4444; color: white;
+  border-radius: 10px; min-width: 16px; height: 16px; font-size: 0.65rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+@media (max-width: 480px) {
+  .admin-toolbar button:not(.notif-bell):not(.lang-toggle) { flex: 1 1 auto; text-align: center; }
 }

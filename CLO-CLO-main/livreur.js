@@ -54,6 +54,19 @@ function initLogout() {
   });
 }
 
+/* ── SIDEBAR MOBILE : aucun bouton pour l'ouvrir sur petit écran, on en ajoute un ── */
+function injectSidebarToggle() {
+  if (document.querySelector(".sidebar-toggle")) return;
+  const btn = document.createElement("button");
+  btn.className = "sidebar-toggle";
+  btn.setAttribute("aria-label", "Ouvrir le menu");
+  btn.innerHTML = "☰";
+  document.body.appendChild(btn);
+  const sidebar = document.querySelector(".sidebar");
+  btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
+  document.querySelector(".main-content")?.addEventListener("click", () => sidebar?.classList.remove("sidebar-open"));
+}
+
 function initLivreurNotifications(livreur) {
   NotificationService.connect((event, order) => {
     if (!order) return;
@@ -211,6 +224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   fillProfile(livreur);
   initLogout();
   initLivreurNotifications(livreur);
+  injectSidebarToggle();
 
   if (page.includes("livreur-dashboard")) await initDashboard(livreur);
   else if (page.includes("livreur-livraison")) await initLivraison();
