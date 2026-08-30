@@ -17,6 +17,12 @@ export const config = {
   // sans compte Turso.
   tursoUrl: process.env.TURSO_DATABASE_URL || "file:./data/cloclo.sqlite",
   tursoAuthToken: process.env.TURSO_AUTH_TOKEN || undefined,
+  // Notifications push (arrivent même app/onglet fermé). Si absentes, le
+  // serveur génère une paire de clés temporaire au démarrage (voir push.js)
+  // — mais elle change à chaque redémarrage, invalidant les abonnements
+  // existants. Définissez-les une fois pour de bon en production.
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY || undefined,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY || undefined,
 };
 
 if (!config.jwtSecret) {

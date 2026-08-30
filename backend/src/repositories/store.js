@@ -96,6 +96,14 @@ async function migrate() {
       pts INTEGER,
       type TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      channel TEXT NOT NULL,
+      endpoint TEXT NOT NULL UNIQUE,
+      p256dh TEXT NOT NULL,
+      authKey TEXT NOT NULL
+    );
   `);
 
   // Colonnes ajoutées après la première mise en prod : ALTER TABLE
@@ -125,6 +133,7 @@ const SCHEMAS = {
   zones:         { table: "zones",           columns: ["ville","quartier"] },
   orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt"], json: ["items"] },
   pointsHistory: { table: "points_history",  columns: ["userId","label","date","pts","type"] },
+  pushSubs:      { table: "push_subscriptions", columns: ["channel","endpoint","p256dh","authKey"] },
 };
 
 function toRow(collection, record) {

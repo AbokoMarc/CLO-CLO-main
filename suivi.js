@@ -21,7 +21,8 @@ function activeOrderHtml(o) {
   const locationBlock = o.statut === "en_livraison"
     ? `<div class="detail-block" id="location-block" style="grid-column:1/-1;">
          <div class="detail-title">Localisation en direct</div>
-         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.88rem;">📡 En attente de la position du livreur…</div>
+         <div id="tracking-map" style="height:220px;border-radius:12px;overflow:hidden;margin-top:6px;background:#f4f4f5;"></div>
+         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-top:8px;">📡 En attente de la position du livreur…</div>
        </div>`
     : "";
   return `
@@ -140,13 +141,45 @@ function setupLocationSharing(orderId) {
     clientLocationIntervalId = setInterval(sendPosition, 15000);
   }
 
-  // 2) Affiche la dernière position connue du livreur, puis se met à jour en direct via SSE.
+  // 2) Affiche une vraie carte en direct avec les positions client/livreur, mise à jour via SSE.
+  let map = null, markerLivreur = null, markerClient = null;
   const statusEl = document.getElementById("location-livreur-status");
+
+  function ensureMap() {
+    const mapEl = document.getElementById("tracking-map");
+    if (!mapEl || map || !window.L) return;
+    map = L.map("tracking-map", { zoomControl: false }).setView([3.848, 11.502], 13); // Yaoundé par défaut
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap",
+      maxZoom: 19,
+    }).addTo(map);
+  }
+
+  function fitMapToMarkers() {
+    const pts = [markerLivreur, markerClient].filter(Boolean).map((m) => m.getLatLng());
+    if (pts.length === 1) map.setView(pts[0], 15);
+    else if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [30, 30] });
+  }
+
   const renderLivreurPosition = (loc) => {
-    if (!statusEl || !loc?.livreur) return;
-    const { lat, lng, at } = loc.livreur;
-    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-    statusEl.innerHTML = `🛵 Livreur en route — <a href="${mapsUrl}" target="_blank" style="color:#22c55e;font-weight:800;">voir sur la carte →</a> <span style="color:#9ca3af;font-size:0.8rem;">(màj ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })})</span>`;
+    if (!loc) return;
+    ensureMap();
+    if (!map) return;
+    const livreurIcon = L.divIcon({ html: "🛵", className: "", iconSize: [28, 28] });
+    const clientIcon = L.divIcon({ html: "📍", className: "", iconSize: [28, 28] });
+
+    if (loc.livreur) {
+      const { lat, lng, at } = loc.livreur;
+      if (!markerLivreur) markerLivreur = L.marker([lat, lng], { icon: livreurIcon }).addTo(map).bindPopup("Livreur");
+      else markerLivreur.setLatLng([lat, lng]);
+      if (statusEl) statusEl.textContent = `🛵 Position mise à jour à ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    if (loc.client) {
+      const { lat, lng } = loc.client;
+      if (!markerClient) markerClient = L.marker([lat, lng], { icon: clientIcon }).addTo(map).bindPopup("Vous");
+      else markerClient.setLatLng([lat, lng]);
+    }
+    fitMapToMarkers();
   };
 
   OrderService.getLocation(orderId).then(renderLivreurPosition).catch(() => {});

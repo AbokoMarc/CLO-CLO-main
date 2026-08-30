@@ -7,6 +7,7 @@ import { CatalogController } from "./controllers/catalogController.js";
 import { OrderController } from "./controllers/orderController.js";
 import { AdminController } from "./controllers/adminController.js";
 import { NotificationController } from "./controllers/notificationController.js";
+import { PushController } from "./controllers/pushController.js";
 
 export const router = new Router();
 
@@ -56,3 +57,8 @@ router.delete("/api/admin/livreurs/:id", AdminController.deleteLivreur);
 
 // Notifications temps réel (SSE)
 router.get("/api/notifications/stream", NotificationController.stream);
+
+// Notifications push (arrivent même app fermée)
+router.get("/api/push/vapid-public-key", PushController.vapidPublicKey);
+router.post("/api/push/subscribe", PushController.subscribe);
+router.post("/api/push/unsubscribe", PushController.unsubscribe);

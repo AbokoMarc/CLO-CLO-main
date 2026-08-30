@@ -6,6 +6,8 @@
 import { APP } from "./app-data.js";
 import { NotificationService } from "./services/notificationService.js";
 import { I18n } from "./i18n.js";
+import { PWA } from "./pwa.js";
+import { ApiClient } from "./services/apiClient.js";
 
 /* ─── TOAST ─── */
 window.showToast = function (msg, type = "success") {
@@ -213,9 +215,14 @@ function initScrollReveal() {
 function initLoader() {
   const loader = document.getElementById("page-loader");
   if (!loader) return;
-  window.addEventListener("load", () => {
-    setTimeout(() => { loader.style.opacity = "0"; loader.style.transition = "opacity .35s"; setTimeout(() => loader.remove(), 380); }, 250);
-  });
+  const hide = () => {
+    if (!loader.isConnected) return;
+    loader.style.opacity = "0";
+    loader.style.transition = "opacity .35s";
+    setTimeout(() => loader.remove(), 380);
+  };
+  window.addEventListener("load", () => setTimeout(hide, 250));
+  setTimeout(hide, 6000); // filet de sécurité : jamais de logo qui tourne indéfiniment
 }
 
 /* ─── NOTIFICATIONS TEMPS RÉEL ─── */
@@ -302,7 +309,7 @@ function initImgFallback() {
    chaque page (menu.js, profil.js, ...) puissent réagir. */
 document.addEventListener("DOMContentLoaded", async () => {
   initLoader();
-  await APP.init();
+  await initAppWithTimeout();
   window.updateNavbar();
   bindNavLinks();
   bindAddButtons();
@@ -312,6 +319,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   initClientNotifications();
   initAdminReturnBanner();
   I18n.injectToggle(document.querySelector(".nav-actions"));
+  PWA.injectInstallButton(document.querySelector(".nav-actions"));
+  if (APP.isLoggedIn()) PWA.subscribeToPush(() => ApiClient.getToken());
   document.dispatchEvent(new CustomEvent("cloclo:ready", { detail: { APP } }));
   initScrollReveal(); // après le rendu dynamique des pages spécifiques
 });
+
+/** Charge les données initiales avec un délai maximum de 6s : jamais de
+    logo qui tourne indéfiniment, même hors-ligne ou en cas de panne
+    réseau. Si le délai expire ou que ça échoue, on affiche un bandeau
+    "hors ligne" au lieu de bloquer l'interface. */
+async function initAppWithTimeout() {
+  const timeout = new Promise((resolve) => setTimeout(() => resolve("timeout"), 6000));
+  try {
+    const result = await Promise.race([APP.init().then(() => "ok"), timeout]);
+    if (result === "timeout" || !navigator.onLine) showOfflineBanner();
+  } catch {
+    showOfflineBanner();
+  }
+}
+
+function showOfflineBanner() {
+  if (document.querySelector(".offline-banner")) return;
+  const banner = document.createElement("div");
+  banner.className = "offline-banner";
+  banner.innerHTML = `📡 Connexion instable ou hors ligne — certaines données peuvent être indisponibles. <button id="btn-retry-online">Réessayer</button>`;
+  Object.assign(banner.style, {
+    position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
+    background: "#1a1a2e", color: "white", textAlign: "center",
+    padding: "10px 12px", fontFamily: "'Nunito', sans-serif", fontWeight: "700",
+    fontSize: "0.82rem",
+  });
+  document.body.appendChild(banner);
+  document.getElementById("btn-retry-online")?.addEventListener("click", () => window.location.reload());
+}
+
+window.addEventListener("online", () => document.querySelector(".offline-banner")?.remove());

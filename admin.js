@@ -9,6 +9,8 @@ import { AdminService } from "./services/adminService.js";
 import { ProductService } from "./services/productService.js";
 import { NotificationService } from "./services/notificationService.js";
 import { I18n } from "./i18n.js";
+import { PWA } from "./pwa.js";
+import { ApiClient } from "./services/apiClient.js";
 
 const page = window.location.pathname;
 
@@ -58,6 +60,7 @@ function injectAdminToolbar() {
     <button class="btn-change-pwd" title="Changer mon mot de passe">🔑 Mon mot de passe</button>`;
   host.appendChild(bar);
   I18n.injectToggle(bar);
+  PWA.injectInstallButton(bar);
 
   bar.querySelector(".notif-bell").addEventListener("click", () => NotificationService.clearUnread());
   bar.querySelector(".btn-view-site").addEventListener("click", () => window.location.href = "index.html");
@@ -732,6 +735,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLogout();
   initAdminNotifications();
   injectSidebarToggle();
+  PWA.subscribeToPush(() => ApiClient.getToken());
 
   if (page.includes("admin-dashboard")) await initDashboard();
   else if (page.includes("admin-produits")) await initProduits();

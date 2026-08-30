@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clo-Clo — Hors ligne</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#22c55e"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .wrap { max-width: 340px; }
+    .icon { font-size: 3.2rem; margin-bottom: 18px; }
+    h1 { font-size: 1.3rem; margin-bottom: 10px; }
+    p { color: #94a3b8; font-size: 0.92rem; line-height: 1.5; margin-bottom: 24px; }
+    button {
+      background: #22c55e; color: white; border: none; border-radius: 12px;
+      padding: 13px 28px; font-size: 0.95rem; font-weight: 800; cursor: pointer;
+      font-family: inherit;
+    }
+    button:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">📡</div>
+    <h1>Pas de connexion internet</h1>
+    <p>Cette page n'est pas encore disponible hors-ligne. Reconnectez-vous puis réessayez — vos pages déjà visitées, elles, restent accessibles.</p>
+    <button onclick="window.location.reload()">Réessayer</button>
+  </div>
+</body>
+</html>

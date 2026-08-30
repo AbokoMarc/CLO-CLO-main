@@ -7,6 +7,8 @@ import { AuthService } from "./services/authService.js";
 import { DeliveryService } from "./services/deliveryService.js";
 import { NotificationService } from "./services/notificationService.js";
 import { I18n } from "./i18n.js";
+import { PWA } from "./pwa.js";
+import { ApiClient } from "./services/apiClient.js";
 
 const page = window.location.pathname;
 
@@ -68,18 +70,50 @@ function injectSidebarToggle() {
   document.querySelector(".main-content")?.addEventListener("click", () => sidebar?.classList.remove("sidebar-open"));
 }
 
+const notifLog = []; // historique en mémoire pour cette session (affiché dans le panneau)
+
 function initLivreurNotifications(livreur) {
   NotificationService.connect((event, order) => {
     if (!order) return;
     if (event === "order:new") {
+      notifLog.unshift({ text: `🆕 Nouvelle demande de livraison — CMD-${order.id}`, at: new Date() });
       showToast(`🆕 Nouvelle demande de livraison — CMD-${order.id}`, "orange");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
     } else if (event === "order:cancelled" && Number(order.livreurId) === Number(livreur.id)) {
+      notifLog.unshift({ text: `❌ Commande CMD-${order.id} annulée par le client.`, at: new Date() });
       showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
       if (page.includes("livreur-livraison")) initLivraison();
     }
   });
+
+  document.getElementById("nav-notifs-link")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    NotificationService.clearUnread();
+    showNotifPanel();
+  });
+}
+
+function showNotifPanel() {
+  document.querySelector(".notif-panel")?.remove();
+  const panel = document.createElement("div");
+  panel.className = "notif-panel";
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <strong>Notifications</strong>
+      <button id="notif-panel-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
+    </div>
+    ${notifLog.length
+      ? notifLog.slice(0, 15).map(n => `<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;">${n.text}<div style="color:#9ca3af;font-size:0.72rem;margin-top:2px;">${n.at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div></div>`).join("")
+      : `<p style="color:#9ca3af;font-size:0.85rem;text-align:center;padding:20px 0;">Aucune notification pour l'instant.</p>`}`;
+  Object.assign(panel.style, {
+    position: "fixed", top: "70px", left: "50%", transform: "translateX(-50%)",
+    background: "white", borderRadius: "14px", boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+    padding: "16px 18px", width: "min(340px, 90vw)", maxHeight: "70vh", overflowY: "auto",
+    zIndex: "9999",
+  });
+  document.body.appendChild(panel);
+  panel.querySelector("#notif-panel-close").addEventListener("click", () => panel.remove());
 }
 
 /* ── DASHBOARD ── */
@@ -300,6 +334,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLogout();
   initLivreurNotifications(livreur);
   injectSidebarToggle();
+  PWA.subscribeToPush(() => ApiClient.getToken());
 
   if (page.includes("livreur-dashboard")) await initDashboard(livreur);
   else if (page.includes("livreur-livraison")) await initLivraison();

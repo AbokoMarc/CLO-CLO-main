@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#22c55e"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Clo-Clo"/>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Connexion – Clo-Clo</title>
@@ -83,11 +89,9 @@
       <!-- Créer compte -->
       <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un Compte</button>
 
-      <!-- Lien livreur uniquement — l'accès administrateur n'est pas affiché publiquement.
-           connexion-directeur.html reste accessible directement par son URL. -->
-      <div class="bottom-links">
-        <a href="connexion-livreur.html">Accès Livreur</a>
-      </div>
+      <!-- Ni l'accès administrateur ni l'accès livreur ne sont affichés publiquement.
+           connexion-directeur.html et connexion-livreur.html restent accessibles
+           directement par leur URL (communiquée séparément au personnel). -->
 
     </div>
   </div>
