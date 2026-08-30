@@ -73,14 +73,14 @@ export const APP = {
   },
 
   // ── Commande : créée côté backend, qui calcule le total et les points ──
-  async passCommande(adresse) {
+  async passCommande(adresse, extra = {}) {
     if (!this.isLoggedIn()) {
       const e = new Error("Connectez-vous pour passer une commande.");
       e.requiresAuth = true;
       throw e;
     }
     const items = this.cart.map((i) => ({ productId: i.id, qty: i.qty }));
-    const order = await OrderService.create({ items, adresse: adresse || this.user.adresse });
+    const order = await OrderService.create({ items, adresse: adresse || this.user.adresse, ...extra });
     this.clearCart();
     this.user = await AuthService.me();
     return order;

@@ -104,6 +104,22 @@ async function migrate() {
       p256dh TEXT NOT NULL,
       authKey TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS promo_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      type TEXT NOT NULL,
+      value INTEGER NOT NULL,
+      active INTEGER DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      orderId INTEGER NOT NULL REFERENCES orders(id),
+      sender TEXT NOT NULL,
+      text TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    );
   `);
 
   // Colonnes ajoutées après la première mise en prod : ALTER TABLE
@@ -112,6 +128,20 @@ async function migrate() {
   const patchColumns = [
     "ALTER TABLE livreurs ADD COLUMN paieType TEXT DEFAULT 'journalier'",
     "ALTER TABLE livreurs ADD COLUMN paieMontant INTEGER DEFAULT 0",
+    "ALTER TABLE livreurs ADD COLUMN photoUrl TEXT",
+    "ALTER TABLE users ADD COLUMN favoriteAddresses TEXT DEFAULT '[]'",
+    "ALTER TABLE orders ADD COLUMN rating INTEGER",
+    "ALTER TABLE orders ADD COLUMN ratingComment TEXT",
+    "ALTER TABLE orders ADD COLUMN tip INTEGER DEFAULT 0",
+    "ALTER TABLE orders ADD COLUMN scheduledFor TEXT",
+    "ALTER TABLE orders ADD COLUMN promoCode TEXT",
+    "ALTER TABLE orders ADD COLUMN discount INTEGER DEFAULT 0",
+    "ALTER TABLE orders ADD COLUMN fraisLivraison INTEGER DEFAULT 0",
+    "ALTER TABLE orders ADD COLUMN distanceKm REAL",
+    "ALTER TABLE orders ADD COLUMN confirmedLivreurAt TEXT",
+    "ALTER TABLE orders ADD COLUMN confirmedClientAt TEXT",
+    "ALTER TABLE orders ADD COLUMN confirmedAdminAt TEXT",
+    "ALTER TABLE livreurs ADD COLUMN actif INTEGER DEFAULT 1",
   ];
   for (const sql of patchColumns) {
     try { await db.execute(sql); } catch { /* colonne déjà présente */ }
@@ -125,15 +155,17 @@ export const schemaReady = () => ready;
 /* Config par collection : table SQL réelle + colonnes spéciales
    (JSON sérialisé, booléens stockés en 0/1) */
 const SCHEMAS = {
-  users:         { table: "users",          columns: ["nom","email","tel","quartier","adresse","points","commandes","niveau","passwordHash"] },
-  livreurs:      { table: "livreurs",        columns: ["matricule","nom","tel","vehicule","statut","passwordHash","paieType","paieMontant"] },
+  users:         { table: "users",          columns: ["nom","email","tel","quartier","adresse","points","commandes","niveau","passwordHash","favoriteAddresses"], json: ["favoriteAddresses"] },
+  livreurs:      { table: "livreurs",        columns: ["matricule","nom","tel","vehicule","statut","passwordHash","paieType","paieMontant","photoUrl","actif"], bool: ["actif"] },
   admins:        { table: "admins",          columns: ["username","passwordHash"] },
   products:      { table: "products",        columns: ["name","price","category","popular","desc","img"], bool: ["popular"] },
   rewards:       { table: "rewards",         columns: ["name","desc","cost","available"], bool: ["available"] },
   zones:         { table: "zones",           columns: ["ville","quartier"] },
-  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt"], json: ["items"] },
+  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt","rating","ratingComment","tip","scheduledFor","promoCode","discount","fraisLivraison","distanceKm","confirmedLivreurAt","confirmedClientAt","confirmedAdminAt"], json: ["items"] },
   pointsHistory: { table: "points_history",  columns: ["userId","label","date","pts","type"] },
   pushSubs:      { table: "push_subscriptions", columns: ["channel","endpoint","p256dh","authKey"] },
+  promoCodes:    { table: "promo_codes",     columns: ["code","type","value","active"], bool: ["active"] },
+  messages:      { table: "messages",        columns: ["orderId","sender","text","createdAt"] },
 };
 
 function toRow(collection, record) {

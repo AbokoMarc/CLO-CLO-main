@@ -51,7 +51,13 @@ function fillProfile(livreur) {
 }
 
 function initLogout() {
-  document.querySelector(".js-livreur-logout")?.addEventListener("click", () => {
+  document.querySelector(".js-livreur-logout")?.addEventListener("click", async () => {
+    // On demande explicitement si le livreur reste "actif" (en service) — l'admin
+    // doit savoir qui est vraiment disponible aujourd'hui, pas juste qui est connecté.
+    const resteActif = confirm(
+      "Avant de vous déconnecter :\n\nRestez-vous actif (en service) pour aujourd'hui ?\n\nOK = Oui, je reste actif\nAnnuler = Non, je me mets hors service"
+    );
+    try { await DeliveryService.setActif(resteActif); } catch { /* pas bloquant */ }
     AuthService.logout();
     window.location.href = "connexion-livreur.html";
   });
@@ -84,6 +90,9 @@ function initLivreurNotifications(livreur) {
       showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
       if (page.includes("livreur-livraison")) initLivraison();
+    } else if (event === "order:sos") {
+      notifLog.unshift({ text: `🆘 Alerte urgence — CMD-${order.id}`, at: new Date() });
+      showToast(`🆘 ALERTE URGENCE — CMD-${order.id}`, "red");
     }
   });
 
@@ -119,8 +128,8 @@ function showNotifPanel() {
 /* ── DASHBOARD ── */
 async function initDashboard(livreur) {
   const deliveries = await DeliveryService.myDeliveries();
-  const enCours = deliveries.filter(o => o.statut === "en_livraison");
-  const enAttente = deliveries.filter(o => o.statut === "en_preparation");
+  const enCours = deliveries.filter(o => o.statut === "acceptee" || o.statut === "en_livraison");
+  const enAttente = deliveries.filter(o => o.statut === "assignee");
 
   document.getElementById("stat-livraisons-jour").textContent = deliveries.filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString()).length;
   // Montant réellement encaissé en cash chez les clients aujourd'hui (pas une commission
@@ -160,8 +169,10 @@ async function initDashboard(livreur) {
   wrap.querySelectorAll(".btn-accept").forEach(btn => {
     btn.addEventListener("click", async () => {
       try {
-        await DeliveryService.updateStatus(btn.dataset.order, "en_livraison");
-        showToast("✅ Demande acceptée !");
+        // Étape 1/2 seulement : accepter n'active PAS encore le GPS, ça ouvre juste le chat.
+        // Le vrai démarrage (avec GPS) se fait depuis la page livreur-livraison.html.
+        await DeliveryService.accept(btn.dataset.order);
+        showToast("✅ Demande acceptée ! Le chat est ouvert.");
         setTimeout(() => window.location.href = "livreur-livraison.html", 900);
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
@@ -171,13 +182,34 @@ async function initDashboard(livreur) {
 /* ── LIVRAISON EN COURS (détail) ── */
 async function initLivraison() {
   const deliveries = await DeliveryService.myDeliveries();
-  const order = deliveries.find(o => o.statut === "en_livraison");
+  const order = deliveries.find(o => ["assignee", "acceptee", "en_livraison"].includes(o.statut));
   const wrap = document.getElementById("livraison-content");
 
   if (!order) {
     wrap.innerHTML = `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:40px 0;">Aucune livraison active. <a href="livreur-dashboard.html" style="color:#22c55e;">Retour au tableau de bord →</a></p>`;
     return;
   }
+
+  const alreadyConfirmed = !!order.confirmedLivreurAt;
+  const actionButton =
+    order.statut === "assignee"
+      ? `<button id="btn-accept" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✅ Accepter la livraison</button>`
+      : order.statut === "acceptee"
+      ? `<button id="btn-start" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🛵 Démarrer la livraison</button>`
+      : alreadyConfirmed
+      ? `<div style="flex:1;text-align:center;color:#22c55e;font-weight:800;padding:12px;">✅ Livraison confirmée — en attente du client et de l'admin</div>`
+      : `<button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✓ J'ai livré la commande</button>`;
+
+  const chatBlock = ["acceptee", "en_livraison"].includes(order.statut)
+    ? `<div style="margin-top:20px;border-top:1px solid #f3f4f6;padding-top:16px;">
+         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:8px;">💬 CHAT AVEC LE CLIENT</div>
+         <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:8px;font-size:0.85rem;"></div>
+         <div style="display:flex;gap:8px;">
+           <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
+           <button id="chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+         </div>
+       </div>`
+    : "";
 
   wrap.innerHTML = `
     <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
@@ -195,29 +227,107 @@ async function initLivraison() {
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🗺️ Itinéraire</button>
-        <button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✓ Marquer comme livrée</button>
+        ${actionButton}
       </div>
+      ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">🆘 SOS urgence</button>` : ""}
       <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
+      ${chatBlock}
     </div>`;
 
   document.querySelector(".btn-gmaps")?.addEventListener("click", () => {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.adresse)}`, "_blank");
   });
 
-  startLocationSharing(order.id);
+  // La géolocalisation ne démarre QUE si la livraison est vraiment en cours
+  // (statut "en_livraison") — pas dès l'acceptation.
+  if (order.statut === "en_livraison") startLocationSharing(order.id);
+
+  document.getElementById("btn-accept")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = "Envoi…";
+    try {
+      await DeliveryService.accept(order.id);
+      showToast("✅ Livraison acceptée — le chat est maintenant ouvert.");
+      initLivraison();
+    } catch (err) {
+      e.target.disabled = false;
+      showToast(err.message || "Erreur", "red");
+    }
+  });
+
+  document.getElementById("btn-start")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = "Envoi…";
+    try {
+      await DeliveryService.start(order.id);
+      showToast("🛵 Livraison démarrée — position partagée.");
+      initLivraison();
+    } catch (err) {
+      e.target.disabled = false;
+      showToast(err.message || "Erreur", "red");
+    }
+  });
 
   document.getElementById("btn-livre")?.addEventListener("click", async (e) => {
     e.target.disabled = true;
     e.target.textContent = "Envoi…";
     try {
-      await DeliveryService.updateStatus(order.id, "livree");
+      await DeliveryService.confirmDelivered(order.id);
       stopLocationSharing();
-      showToast("🎉 Livraison complétée !");
-      setTimeout(() => window.location.href = "livreur-historique.html", 1200);
+      showToast("✅ Confirmé ! En attente de la confirmation du client et de l'admin.");
+      initLivraison();
     } catch (err) {
       e.target.disabled = false;
       showToast(err.message || "Erreur", "red");
     }
+  });
+
+  document.getElementById("btn-sos")?.addEventListener("click", async () => {
+    if (!confirm("Déclencher une alerte SOS ? L'administrateur et le client seront immédiatement prévenus.")) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        await DeliveryService.sos(order.id, pos.coords.latitude, pos.coords.longitude).catch(() => {});
+        showToast("🆘 Alerte envoyée.", "red");
+      },
+      async () => {
+        await DeliveryService.sos(order.id).catch(() => {});
+        showToast("🆘 Alerte envoyée (sans position).", "red");
+      }
+    );
+  });
+
+  if (chatBlock) initChat(order.id);
+}
+
+/* ── CHAT (client ↔ livreur) ── */
+async function initChat(orderId) {
+  const box = document.getElementById("chat-messages");
+  async function renderMessages() {
+    const messages = await DeliveryService.listMessages(orderId).catch(() => []);
+    box.innerHTML = messages.length
+      ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "livreur" ? "right" : "left"};">
+          <span style="display:inline-block;background:${m.sender === "livreur" ? "#22c55e" : "#e5e7eb"};color:${m.sender === "livreur" ? "white" : "#1a1a2e"};padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+        </div>`).join("")
+      : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
+    box.scrollTop = box.scrollHeight;
+  }
+  await renderMessages();
+
+  const send = async () => {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    try {
+      await DeliveryService.sendMessage(orderId, text);
+      renderMessages();
+    } catch (err) { showToast(err.message || "Message non envoyé.", "red"); }
+  };
+  document.getElementById("chat-send")?.addEventListener("click", send);
+  document.getElementById("chat-input")?.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+
+  NotificationService.connect((event, data) => {
+    if (event === "order:message" && data?.id === orderId) renderMessages();
   });
 }
 

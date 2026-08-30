@@ -4,8 +4,8 @@
 import { ApiClient } from "./apiClient.js";
 
 export const OrderService = {
-  create({ items, adresse, quartier }) {
-    return ApiClient.post("/orders", { items, adresse, quartier }, { auth: true });
+  create({ items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor }) {
+    return ApiClient.post("/orders", { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor }, { auth: true });
   },
   myOrders() {
     return ApiClient.get("/orders/me", { auth: true });
@@ -32,5 +32,25 @@ export const OrderService = {
   },
   listRewards() {
     return ApiClient.get("/rewards");
+  },
+  /** Le client confirme avoir reçu sa commande (3ᵉ confirmation du flux de livraison). */
+  confirmReceived(orderId) {
+    return ApiClient.post(`/orders/${orderId}/confirm`, {}, { auth: true });
+  },
+  rate(orderId, rating, comment) {
+    return ApiClient.post(`/orders/${orderId}/rate`, { rating, comment }, { auth: true });
+  },
+  tip(orderId, tip) {
+    return ApiClient.post(`/orders/${orderId}/tip`, { tip }, { auth: true });
+  },
+  sos(orderId, lat, lng) {
+    return ApiClient.post(`/orders/${orderId}/sos`, { lat, lng }, { auth: true });
+  },
+  /** Chat client ↔ livreur (disponible dès que le livreur a accepté la course). */
+  sendMessage(orderId, text) {
+    return ApiClient.post(`/orders/${orderId}/messages`, { text }, { auth: true });
+  },
+  listMessages(orderId) {
+    return ApiClient.get(`/orders/${orderId}/messages`, { auth: true });
   },
 };

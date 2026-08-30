@@ -63,4 +63,48 @@ export const OrderController = {
     requireRole(requireAuth(req), "admin", "client", "livreur");
     sendJson(res, 200, await OrderService.getLocation(params.id));
   },
+
+  /** Étape 1/2 livreur : accepte la course (ouvre le chat, PAS encore le GPS). */
+  async accept({ req, res, params }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "livreur");
+    sendJson(res, 200, await OrderService.acceptDelivery(auth.sub, params.id));
+  },
+  /** Étape 2/2 livreur : démarre vraiment la livraison (active le GPS). */
+  async start({ req, res, params }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "livreur");
+    sendJson(res, 200, await OrderService.startDelivery(auth.sub, params.id));
+  },
+  /** Triple confirmation (livreur / client / admin) avant qu'une commande soit "livrée". */
+  async confirm({ req, res, params }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "admin", "client", "livreur");
+    sendJson(res, 200, await OrderService.confirmDelivery(auth.role, params.id));
+  },
+  async rate({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "client");
+    sendJson(res, 200, await OrderService.rateDelivery(auth.sub, params.id, body.rating, body.comment));
+  },
+  async tip({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "client");
+    sendJson(res, 200, await OrderService.tipDelivery(auth.sub, params.id, body.tip));
+  },
+  async sos({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "client", "livreur");
+    sendJson(res, 200, await OrderService.triggerSos(auth.role, auth.sub, params.id, body.lat, body.lng));
+  },
+  async sendMessage({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "client", "livreur");
+    sendJson(res, 201, await OrderService.sendMessage(params.id, auth.role, auth.sub, body.text));
+  },
+  async listMessages({ req, res, params }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "admin", "client", "livreur");
+    sendJson(res, 200, await OrderService.listMessages(params.id));
+  },
 };

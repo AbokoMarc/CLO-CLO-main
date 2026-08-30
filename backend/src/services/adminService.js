@@ -118,6 +118,38 @@ export const AdminService = {
     return { deleted: true };
   },
 
+  /** Le livreur indique s'il est "actif" (en service) ou non — typiquement à la
+      déconnexion, pour que l'admin sache vraiment qui est disponible aujourd'hui,
+      indépendamment du statut ponctuel (disponible/en livraison/hors service). */
+  async setLivreurActif(id, actif) {
+    const livreur = await Store.update("livreurs", id, { actif: !!actif });
+    if (!livreur) {
+      const e = new Error("Livreur introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    return stripPwd(livreur);
+  },
+
+  /* ── CODES PROMO ── */
+  listPromoCodes() {
+    return Store.all("promoCodes");
+  },
+  async createPromoCode({ code, type, value }) {
+    if (!code || !["percent", "fixed"].includes(type) || !Number.isFinite(Number(value))) {
+      const e = new Error("Code promo invalide (code, type 'percent'/'fixed', value requis).");
+      e.status = 400;
+      throw e;
+    }
+    return Store.insert("promoCodes", { code: code.trim().toUpperCase(), type, value: Number(value), active: true });
+  },
+  async togglePromoCode(id, active) {
+    return Store.update("promoCodes", id, { active: !!active });
+  },
+  deletePromoCode(id) {
+    return Store.remove("promoCodes", id);
+  },
+
   /** Statistiques calculées à partir des VRAIES commandes en base (aucune donnée inventée) */
   async dashboardStats() {
     const orders = await Store.all("orders");

@@ -41,6 +41,14 @@ router.patch("/api/orders/:id/status", OrderController.updateStatus);
 router.patch("/api/orders/:id/cancel", OrderController.cancel);
 router.post("/api/orders/:id/location", OrderController.updateLocation);
 router.get("/api/orders/:id/location", OrderController.getLocation);
+router.post("/api/orders/:id/accept", OrderController.accept);
+router.post("/api/orders/:id/start", OrderController.start);
+router.post("/api/orders/:id/confirm", OrderController.confirm);
+router.post("/api/orders/:id/rate", OrderController.rate);
+router.post("/api/orders/:id/tip", OrderController.tip);
+router.post("/api/orders/:id/sos", OrderController.sos);
+router.post("/api/orders/:id/messages", OrderController.sendMessage);
+router.get("/api/orders/:id/messages", OrderController.listMessages);
 router.get("/api/orders/:id", OrderController.getOne);
 
 // Admin
@@ -54,6 +62,13 @@ router.patch("/api/admin/livreurs/:id/statut", AdminController.updateLivreurStat
 router.patch("/api/admin/livreurs/:id/paie", AdminController.setLivreurPaie);
 router.post("/api/admin/livreurs/:id/reset-password", AdminController.resetLivreurPassword);
 router.delete("/api/admin/livreurs/:id", AdminController.deleteLivreur);
+router.patch("/api/livreurs/me/actif", AdminController.setMyActif);
+
+// Codes promo
+router.get("/api/admin/promo-codes", AdminController.listPromoCodes);
+router.post("/api/admin/promo-codes", AdminController.createPromoCode);
+router.patch("/api/admin/promo-codes/:id", AdminController.togglePromoCode);
+router.delete("/api/admin/promo-codes/:id", AdminController.deletePromoCode);
 
 // Notifications temps réel (SSE)
 router.get("/api/notifications/stream", NotificationController.stream);

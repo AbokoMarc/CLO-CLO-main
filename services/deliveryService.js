@@ -17,4 +17,29 @@ export const DeliveryService = {
   updateLocation(orderId, lat, lng) {
     return ApiClient.post(`/orders/${orderId}/location`, { lat, lng }, { auth: true });
   },
+  /** Étape 1/2 : accepte la course (ouvre le chat, PAS encore le GPS). */
+  accept(orderId) {
+    return ApiClient.post(`/orders/${orderId}/accept`, {}, { auth: true });
+  },
+  /** Étape 2/2 : démarre vraiment la livraison (active le GPS). */
+  start(orderId) {
+    return ApiClient.post(`/orders/${orderId}/start`, {}, { auth: true });
+  },
+  /** Le livreur confirme avoir livré (1ʳᵉ des 3 confirmations). */
+  confirmDelivered(orderId) {
+    return ApiClient.post(`/orders/${orderId}/confirm`, {}, { auth: true });
+  },
+  sendMessage(orderId, text) {
+    return ApiClient.post(`/orders/${orderId}/messages`, { text }, { auth: true });
+  },
+  listMessages(orderId) {
+    return ApiClient.get(`/orders/${orderId}/messages`, { auth: true });
+  },
+  sos(orderId, lat, lng) {
+    return ApiClient.post(`/orders/${orderId}/sos`, { lat, lng }, { auth: true });
+  },
+  /** Le livreur indique s'il reste actif (en service) — typiquement à la déconnexion. */
+  setActif(actif) {
+    return ApiClient.patch("/livreurs/me/actif", { actif }, { auth: true });
+  },
 };

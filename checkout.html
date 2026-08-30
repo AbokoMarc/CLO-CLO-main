@@ -53,6 +53,24 @@
       <input class="form-input" type="text" id="input-adresse" placeholder="Ex : Nkolfoulou, non loin du carrefour marché"/>
     </div>
 
+    <div id="delivery-fee-block" style="background:#f0fdf4;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;color:#166534;display:none;">
+      📍 Frais de livraison estimés : <span id="delivery-fee-amount">—</span>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Code promo (facultatif)</label>
+      <input class="form-input" type="text" id="input-promo" placeholder="Ex : BIENVENUE10" style="text-transform:uppercase;"/>
+    </div>
+
+    <div class="form-group" style="margin-bottom:24px;">
+      <label class="form-label">Quand livrer ?</label>
+      <select class="form-input" id="input-scheduled">
+        <option value="">Maintenant</option>
+        <option value="later">Plus tard aujourd'hui…</option>
+      </select>
+      <input class="form-input" type="time" id="input-scheduled-time" style="display:none;margin-top:8px;"/>
+    </div>
+
     <button id="btn-confirm" style="width:100%;background:#22c55e;color:white;border:none;border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;">
       Confirmer et payer à la livraison
     </button>

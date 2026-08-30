@@ -107,8 +107,32 @@ function initAdminNotifications() {
       showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("admin-livraisons")) initLivraisons();
       if (page.includes("admin-historique")) initHistorique();
+    } else if (["order:accepted", "order:started", "order:confirmation"].includes(event)) {
+      if (page.includes("admin-livraisons")) initLivraisons();
+      if (page.includes("admin-historique")) initHistorique();
+    } else if (event === "order:sos") {
+      showSosAlert(order);
     }
   });
+}
+
+/** Alerte SOS — s'affiche par-dessus tout, très visible, ne disparaît pas toute seule. */
+function showSosAlert(order) {
+  const banner = document.createElement("div");
+  banner.className = "sos-alert";
+  banner.innerHTML = `
+    <div>🆘 <strong>ALERTE URGENCE</strong> — ${order.sosBy === "client" ? "Client" : "Livreur"} sur CMD-${order.id}
+    ${order.location?.lat ? `<a href="https://www.google.com/maps?q=${order.location.lat},${order.location.lng}" target="_blank" style="color:white;text-decoration:underline;margin-left:8px;">Voir la position →</a>` : ""}
+    </div>
+    <button aria-label="Fermer" style="background:none;border:none;color:white;font-size:1.2rem;font-weight:900;cursor:pointer;">✕</button>`;
+  Object.assign(banner.style, {
+    position: "fixed", top: "0", left: "0", right: "0", zIndex: "99999",
+    background: "#dc2626", color: "white", display: "flex", alignItems: "center",
+    justifyContent: "space-between", padding: "14px 18px", fontFamily: "'Nunito', sans-serif",
+    fontWeight: "800", fontSize: "0.9rem", boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+  });
+  banner.querySelector("button").addEventListener("click", () => banner.remove());
+  document.body.prepend(banner);
 }
 
 /* ── DASHBOARD : stats + graphiques réels ── */
@@ -171,6 +195,8 @@ async function initDashboard() {
 
 const STATUT_BADGE = {
   en_preparation: { cls: "badge-preparation", label: "Préparation" },
+  assignee:       { cls: "badge-preparation", label: "Assignée" },
+  acceptee:       { cls: "badge-en-route",    label: "Acceptée" },
   en_livraison:   { cls: "badge-en-route",    label: "En Route" },
   livree:         { cls: "badge-livre",       label: "Livré" },
   annulee:        { cls: "badge-annule",      label: "Annulé" },
@@ -412,6 +438,60 @@ async function initProduits() {
     }
   }
 
+  await initPromoCodes();
+}
+
+/* ── CODES PROMO ── */
+async function initPromoCodes() {
+  const list = document.getElementById("promo-list");
+  if (!list) return;
+
+  async function render() {
+    const codes = await AdminService.listPromoCodes();
+    list.innerHTML = codes.length
+      ? codes.map(c => `
+        <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);${c.active ? "" : "opacity:0.5;"}">
+          <div style="font-weight:900;font-size:1rem;color:#1a1a2e;">${c.code}</div>
+          <div style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-bottom:10px;">${c.type === "percent" ? `-${c.value}%` : `-${c.value.toLocaleString()} FCFA`}</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-toggle-promo" data-id="${c.id}" data-active="${c.active}" style="flex:1;background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px;font-weight:700;font-size:0.78rem;cursor:pointer;">${c.active ? "Désactiver" : "Activer"}</button>
+            <button class="btn-delete-promo" data-id="${c.id}" style="flex:1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:8px;padding:7px;font-weight:700;font-size:0.78rem;cursor:pointer;">Supprimer</button>
+          </div>
+        </div>`).join("")
+      : `<p style="grid-column:1/-1;text-align:center;color:#9ca3af;font-weight:700;">Aucun code promo pour l'instant.</p>`;
+
+    list.querySelectorAll(".btn-toggle-promo").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        try {
+          await AdminService.togglePromoCode(btn.dataset.id, btn.dataset.active !== "true");
+          render();
+        } catch (err) { showToast(err.message || "Erreur", "red"); }
+      });
+    });
+    list.querySelectorAll(".btn-delete-promo").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Supprimer ce code promo ?")) return;
+        try { await AdminService.deletePromoCode(btn.dataset.id); render(); }
+        catch (err) { showToast(err.message || "Erreur", "red"); }
+      });
+    });
+  }
+  await render();
+
+  document.getElementById("btn-new-promo")?.addEventListener("click", async () => {
+    const code = prompt("Code promo (ex: BIENVENUE10) :");
+    if (!code) return;
+    const type = prompt('Type — tapez "percent" (%) ou "fixed" (montant fixe) :', "percent");
+    if (!["percent", "fixed"].includes(type)) { showToast('Tapez "percent" ou "fixed".', "red"); return; }
+    const value = parseInt(prompt(type === "percent" ? "Pourcentage de réduction (ex: 10) :" : "Montant de réduction en FCFA (ex: 500) :"));
+    if (!Number.isFinite(value) || value <= 0) { showToast("Valeur invalide.", "red"); return; }
+    try {
+      await AdminService.createPromoCode(code, type, value);
+      showToast("✅ Code promo créé !");
+      render();
+    } catch (err) { showToast(err.message || "Erreur", "red"); }
+  });
+}
   render();
 }
 
@@ -546,6 +626,11 @@ async function renderLivreurStats() {
 }
 
 /* ── LIVRAISONS EN COURS ── */
+const STATUT_LABEL_ADMIN = {
+  en_preparation: "en préparation", assignee: "en attente d'acceptation",
+  acceptee: "acceptée (chat ouvert)", en_livraison: "en livraison", livree: "livrée",
+};
+
 function livraisonBlockHtml(o, livreurs, clients) {
   const livreur = livreurs.find(l => l.id === o.livreurId);
   const client = clients?.find(c => c.id === o.userId);
@@ -553,6 +638,24 @@ function livraisonBlockHtml(o, livreurs, clients) {
   const locationBlock = o.statut === "en_livraison"
     ? `<div class="location-block" data-order="${o.id}" style="margin-bottom:14px;font-size:0.82rem;color:#6b7280;font-weight:700;">📡 Chargement des positions…</div>`
     : "";
+
+  let actionHtml;
+  if (!o.livreurId) {
+    actionHtml = `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-weight:700;">
+      <option value="">Assigner un livreur…</option>
+      ${livreurs.filter(l => l.actif !== false).map(l => `<option value="${l.id}">${l.nom}</option>`).join("")}
+    </select>`;
+  } else if (o.statut === "en_livraison" && o.confirmedLivreurAt && o.confirmedClientAt && !o.confirmedAdminAt) {
+    actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">✅ Confirmer la livraison</button>`;
+  } else if (o.statut === "en_livraison") {
+    const wait = [];
+    if (!o.confirmedLivreurAt) wait.push("livreur");
+    if (!o.confirmedClientAt) wait.push("client");
+    actionHtml = `<div style="flex:1;text-align:center;color:#9ca3af;font-weight:700;font-size:0.85rem;">En attente de confirmation : ${wait.join(" et ")}</div>`;
+  } else {
+    actionHtml = `<div style="flex:1;text-align:center;color:#9ca3af;font-weight:700;font-size:0.85rem;">En attente côté livreur…</div>`;
+  }
+
   return `
     <div class="livraison-block anim" style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
@@ -560,7 +663,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
           <div style="font-size:0.78rem;color:#9ca3af;font-weight:700;">Commande</div>
           <div style="font-weight:900;font-size:1.05rem;color:#1a1a2e;">CMD-${o.id}</div>
         </div>
-        <span class="badge badge-en-livraison">${o.statut.replace("_", " ")}</span>
+        <span class="badge badge-en-livraison">${STATUT_LABEL_ADMIN[o.statut] || o.statut}</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
         <div>
@@ -572,16 +675,11 @@ function livraisonBlockHtml(o, livreurs, clients) {
         <div>
           <div style="font-size:0.78rem;color:#22c55e;font-weight:800;margin-bottom:4px;">LIVREUR</div>
           <div style="font-weight:700;color:#1a1a2e;">${livreur ? livreur.nom : "Non assigné"}</div>
-          <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString()} FCFA</div>
+          <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString()} FCFA${o.fraisLivraison ? ` (dont ${o.fraisLivraison.toLocaleString()} FCFA livraison)` : ""}</div>
         </div>
       </div>
       ${locationBlock}
-      <div style="display:flex;gap:10px;">
-        ${!o.livreurId ? `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-weight:700;">
-          <option value="">Assigner un livreur…</option>
-          ${livreurs.map(l => `<option value="${l.id}">${l.nom}</option>`).join("")}
-        </select>` : `<button class="btn-status" data-order="${o.id}" data-statut="livree" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">Marquer livrée</button>`}
-      </div>
+      <div style="display:flex;gap:10px;">${actionHtml}</div>
     </div>`;
 }
 
@@ -591,7 +689,7 @@ async function initLivraisons() {
     AdminService.listLivreurs(),
     AdminService.listClients(),
   ]);
-  const active = orders.filter(o => o.statut === "en_preparation" || o.statut === "en_livraison");
+  const active = orders.filter(o => ["en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut));
   const wrap = document.getElementById("livraisons-list");
   wrap.innerHTML = active.length
     ? active.map(o => livraisonBlockHtml(o, livreurs, clients)).join("")
@@ -602,16 +700,16 @@ async function initLivraisons() {
       if (!sel.value) return;
       try {
         await AdminService.assignOrder(sel.dataset.order, parseInt(sel.value));
-        showToast("🚚 Livreur assigné !");
+        showToast("🚚 Livreur assigné ! En attente de son acceptation.");
         initLivraisons();
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
   });
-  wrap.querySelectorAll(".btn-status").forEach(btn => {
+  wrap.querySelectorAll(".btn-confirm-admin").forEach(btn => {
     btn.addEventListener("click", async () => {
       try {
-        await AdminService.updateOrderStatus(btn.dataset.order, btn.dataset.statut);
-        showToast("✅ Statut mis à jour !");
+        await AdminService.confirmDelivery(btn.dataset.order);
+        showToast("✅ Livraison confirmée et clôturée !");
         initLivraisons();
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });

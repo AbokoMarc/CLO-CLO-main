@@ -52,4 +52,22 @@ export const AdminService = {
   getLocation(orderId) {
     return ApiClient.get(`/orders/${orderId}/location`, { auth: true });
   },
+  /** L'admin confirme la livraison (3ᵉ et dernière des 3 confirmations). */
+  confirmDelivery(orderId) {
+    return ApiClient.post(`/orders/${orderId}/confirm`, {}, { auth: true });
+  },
+
+  /* ── CODES PROMO ── */
+  listPromoCodes() {
+    return ApiClient.get("/admin/promo-codes", { auth: true });
+  },
+  createPromoCode(code, type, value) {
+    return ApiClient.post("/admin/promo-codes", { code, type, value }, { auth: true });
+  },
+  togglePromoCode(id, active) {
+    return ApiClient.patch(`/admin/promo-codes/${id}`, { active }, { auth: true });
+  },
+  deletePromoCode(id) {
+    return ApiClient.delete(`/admin/promo-codes/${id}`, { auth: true });
+  },
 };

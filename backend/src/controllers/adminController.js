@@ -53,4 +53,28 @@ export const AdminController = {
     if (!ok) return sendJson(res, 401, { error: "Mot de passe incorrect." });
     sendJson(res, 200, { ok: true });
   },
+  /** Le livreur indique lui-même s'il reste "actif" (en service) en se déconnectant. */
+  async setMyActif({ req, res, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "livreur");
+    sendJson(res, 200, await AdminService.setLivreurActif(auth.sub, body.actif));
+  },
+
+  /* ── CODES PROMO ── */
+  async listPromoCodes({ req, res }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await AdminService.listPromoCodes());
+  },
+  async createPromoCode({ req, res, body }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 201, await AdminService.createPromoCode(body));
+  },
+  async togglePromoCode({ req, res, params, body }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await AdminService.togglePromoCode(params.id, body.active));
+  },
+  async deletePromoCode({ req, res, params }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, { deleted: await AdminService.deletePromoCode(params.id) });
+  },
 };
