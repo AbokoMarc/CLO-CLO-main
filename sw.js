@@ -15,7 +15,7 @@
    fraîches. Seule la coquille statique est mise en cache.
    ============================================================ */
 
-const CACHE_NAME = "cloclo-shell-v2";
+const CACHE_NAME = "cloclo-shell-v3";
 const OFFLINE_URL = "/offline.html";
 
 const SHELL_FILES = [

@@ -454,9 +454,28 @@ function exportHistoriqueLivreurToPdf(deliveries) {
   printWin.onload = () => { printWin.print(); };
 }
 
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Délai dépassé (${label || "chargement"}) — vérifiez votre connexion.`)), ms)),
+  ]);
+}
+
 /* ── INIT ── */
 document.addEventListener("DOMContentLoaded", async () => {
-  const livreur = await requireLivreur();
+  let livreur;
+  try {
+    livreur = await withTimeout(requireLivreur(), 12000, "authentification");
+  } catch (err) {
+    console.error("Erreur d'authentification livreur :", err);
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
+      <div>
+        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">⚠️ Impossible de contacter le serveur.</p>
+        <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
+      </div>
+    </div>`;
+    return;
+  }
   if (!livreur) return;
   fillProfile(livreur);
   initLogout();
@@ -464,7 +483,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   injectSidebarToggle();
   PWA.subscribeToPush(() => ApiClient.getToken());
 
-  if (page.includes("livreur-dashboard")) await initDashboard(livreur);
-  else if (page.includes("livreur-livraison")) await initLivraison();
-  else if (page.includes("livreur-historique")) await initHistorique();
+  try {
+    if (page.includes("livreur-dashboard")) await withTimeout(initDashboard(livreur), 10000, "tableau de bord");
+    else if (page.includes("livreur-livraison")) await withTimeout(initLivraison(), 10000, "livraison");
+    else if (page.includes("livreur-historique")) await withTimeout(initHistorique(), 10000, "historique");
+  } catch (err) {
+    console.error("Erreur de chargement de la page livreur :", err);
+    const target = document.getElementById("livreur-content") || document.getElementById("livraison-content") || document.getElementById("histo-list");
+    if (target) {
+      target.innerHTML = `<p style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">⚠️ Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button onclick="window.location.reload()" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button></p>`;
+    }
+  }
 });

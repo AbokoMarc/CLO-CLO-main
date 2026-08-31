@@ -826,8 +826,27 @@ function initLogout() {
 }
 
 /* ── INIT ── */
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Délai dépassé (${label || "chargement"}) — vérifiez votre connexion.`)), ms)),
+  ]);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  const admin = await requireAdmin();
+  let admin;
+  try {
+    admin = await withTimeout(requireAdmin(), 12000, "authentification");
+  } catch (err) {
+    console.error("Erreur d'authentification admin :", err);
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
+      <div>
+        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">⚠️ Impossible de contacter le serveur.</p>
+        <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
+      </div>
+    </div>`;
+    return;
+  }
   if (!admin) return;
   fillProfile(admin);
   initLogout();
@@ -835,10 +854,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   injectSidebarToggle();
   PWA.subscribeToPush(() => ApiClient.getToken());
 
-  if (page.includes("admin-dashboard")) await initDashboard();
-  else if (page.includes("admin-produits")) await initProduits();
-  else if (page.includes("admin-clients")) await initClients();
-  else if (page.includes("admin-livreurs")) await initLivreurs();
-  else if (page.includes("admin-livraisons")) await initLivraisons();
-  else if (page.includes("admin-historique")) await initHistorique();
+  try {
+    if (page.includes("admin-dashboard")) await withTimeout(initDashboard(), 10000, "tableau de bord");
+    else if (page.includes("admin-produits")) await withTimeout(initProduits(), 10000, "produits");
+    else if (page.includes("admin-clients")) await withTimeout(initClients(), 10000, "clients");
+    else if (page.includes("admin-livreurs")) await withTimeout(initLivreurs(), 10000, "livreurs");
+    else if (page.includes("admin-livraisons")) await withTimeout(initLivraisons(), 10000, "livraisons");
+    else if (page.includes("admin-historique")) await withTimeout(initHistorique(), 10000, "historique");
+  } catch (err) {
+    // Ne JAMAIS laisser la page bloquée sur "Chargement…" sans explication —
+    // ça ressemblait à un chargement infini alors que c'était une erreur silencieuse.
+    console.error("Erreur de chargement de la page admin :", err);
+    const target = document.querySelector(
+      "#top-products-list, #recent-orders-list, #products-grid-admin, #clients-grid, #livreurs-grid, #livraisons-list, #hist-body"
+    );
+    const message = `⚠️ Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
+    if (target) {
+      if (target.tagName === "TBODY") target.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</td></tr>`;
+      else target.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</p>`;
+    }
+    document.getElementById("btn-retry-admin")?.addEventListener("click", () => window.location.reload());
+  }
 });
