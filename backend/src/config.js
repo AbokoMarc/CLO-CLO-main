@@ -21,8 +21,8 @@ export const config = {
   // serveur génère une paire de clés temporaire au démarrage (voir push.js)
   // — mais elle change à chaque redémarrage, invalidant les abonnements
   // existants. Définissez-les une fois pour de bon en production.
-  vapidPublicKey: process.env.VAPID_PUBLIC_KEY || undefined,
-  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY || undefined,
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY?.trim() || undefined,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY?.trim() || undefined,
 };
 
 if (!config.jwtSecret) {

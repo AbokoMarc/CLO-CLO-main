@@ -48,16 +48,34 @@ function fillProfile(livreur) {
     : "Non définie par l'administrateur";
   document.querySelectorAll(".profile-paie").forEach(el => el.textContent = paieLabel);
   I18n.injectToggle(document.querySelector(".sidebar-bottom"));
+
+  // Toggle "Actif" — visible en permanence, pas seulement à la déconnexion.
+  const toggleBtn = document.getElementById("btn-toggle-actif");
+  if (toggleBtn) {
+    let actif = livreur.actif !== false;
+    function paintToggle() {
+      toggleBtn.textContent = actif ? "✅ Actif" : "⛔ Inactif";
+      toggleBtn.style.background = actif ? "#dcfce7" : "#fef3c7";
+      toggleBtn.style.color = actif ? "#16a34a" : "#d97706";
+      toggleBtn.style.borderColor = actif ? "#16a34a" : "#d97706";
+    }
+    paintToggle();
+    toggleBtn.addEventListener("click", async () => {
+      actif = !actif;
+      paintToggle();
+      try {
+        await DeliveryService.setActif(actif);
+        showToast(actif ? "✅ Vous êtes actif — visible par l'admin." : "⛔ Vous êtes marqué inactif.");
+      } catch (err) {
+        actif = !actif; paintToggle();
+        showToast(err.message || "Erreur", "red");
+      }
+    });
+  }
 }
 
 function initLogout() {
-  document.querySelector(".js-livreur-logout")?.addEventListener("click", async () => {
-    // On demande explicitement si le livreur reste "actif" (en service) — l'admin
-    // doit savoir qui est vraiment disponible aujourd'hui, pas juste qui est connecté.
-    const resteActif = confirm(
-      "Avant de vous déconnecter :\n\nRestez-vous actif (en service) pour aujourd'hui ?\n\nOK = Oui, je reste actif\nAnnuler = Non, je me mets hors service"
-    );
-    try { await DeliveryService.setActif(resteActif); } catch { /* pas bloquant */ }
+  document.querySelector(".js-livreur-logout")?.addEventListener("click", () => {
     AuthService.logout();
     window.location.href = "connexion-livreur.html";
   });
