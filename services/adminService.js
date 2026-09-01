@@ -52,6 +52,13 @@ export const AdminService = {
   getLocation(orderId) {
     return ApiClient.get(`/orders/${orderId}/location`, { auth: true });
   },
+  /** Chat (visible par client, livreur et admin) pendant une livraison. */
+  sendMessage(orderId, text) {
+    return ApiClient.post(`/orders/${orderId}/messages`, { text }, { auth: true });
+  },
+  listMessages(orderId) {
+    return ApiClient.get(`/orders/${orderId}/messages`, { auth: true });
+  },
   /** L'admin confirme la livraison (3ᵉ et dernière des 3 confirmations). */
   confirmDelivery(orderId) {
     return ApiClient.post(`/orders/${orderId}/confirm`, {}, { auth: true });

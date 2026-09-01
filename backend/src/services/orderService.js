@@ -333,6 +333,7 @@ export const OrderService = {
       throw e;
     }
     const authorized =
+      role === "admin" ||
       (role === "client" && order.userId === Number(userId)) ||
       (role === "livreur" && Number(order.livreurId) === Number(userId));
     if (!authorized) {
@@ -340,7 +341,7 @@ export const OrderService = {
       e.status = 403;
       throw e;
     }
-    if (!["acceptee", "en_livraison"].includes(order.statut)) {
+    if (role !== "admin" && !["acceptee", "en_livraison"].includes(order.statut)) {
       const e = new Error("Le chat n'est disponible qu'une fois la livraison acceptée par le livreur.");
       e.status = 400;
       throw e;

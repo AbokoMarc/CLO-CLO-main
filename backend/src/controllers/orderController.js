@@ -99,7 +99,7 @@ export const OrderController = {
   },
   async sendMessage({ req, res, params, body }) {
     const auth = requireAuth(req);
-    requireRole(auth, "client", "livreur");
+    requireRole(auth, "client", "livreur", "admin");
     sendJson(res, 201, await OrderService.sendMessage(params.id, auth.role, auth.sub, body.text));
   },
   async listMessages({ req, res, params }) {

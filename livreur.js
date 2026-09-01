@@ -323,9 +323,16 @@ async function initChat(orderId) {
   async function renderMessages() {
     const messages = await DeliveryService.listMessages(orderId).catch(() => []);
     box.innerHTML = messages.length
-      ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "livreur" ? "right" : "left"};">
-          <span style="display:inline-block;background:${m.sender === "livreur" ? "#22c55e" : "#e5e7eb"};color:${m.sender === "livreur" ? "white" : "#1a1a2e"};padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
-        </div>`).join("")
+      ? messages.map(m => {
+          const mine = m.sender === "livreur";
+          const isAdmin = m.sender === "admin";
+          const bg = mine ? "#22c55e" : isAdmin ? "#1a1a2e" : "#e5e7eb";
+          const color = mine || isAdmin ? "white" : "#1a1a2e";
+          return `<div style="margin-bottom:6px;text-align:${mine ? "right" : "left"};">
+          ${isAdmin ? `<div style="font-size:0.68rem;color:#9ca3af;font-weight:800;">ADMIN</div>` : ""}
+          <span style="display:inline-block;background:${bg};color:${color};padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+        </div>`;
+        }).join("")
       : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
     box.scrollTop = box.scrollHeight;
   }

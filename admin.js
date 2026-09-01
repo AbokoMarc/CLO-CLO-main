@@ -492,8 +492,6 @@ async function initPromoCodes() {
     } catch (err) { showToast(err.message || "Erreur", "red"); }
   });
 }
-  render();
-}
 
 /* ── LIVREURS ── */
 function livreurCardHtml(l) {
@@ -656,6 +654,17 @@ function livraisonBlockHtml(o, livreurs, clients) {
     actionHtml = `<div style="flex:1;text-align:center;color:#9ca3af;font-weight:700;font-size:0.85rem;">En attente côté livreur…</div>`;
   }
 
+  const chatBlock = o.livreurId && ["acceptee", "en_livraison"].includes(o.statut)
+    ? `<details style="margin-top:12px;">
+         <summary style="cursor:pointer;font-weight:800;font-size:0.82rem;color:#3b82f6;">💬 Chat (livreur / client)</summary>
+         <div id="chat-messages-${o.id}" data-order="${o.id}" style="max-height:150px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.82rem;">Chargement…</div>
+         <div style="display:flex;gap:8px;">
+           <input id="chat-input-${o.id}" type="text" placeholder="Écrire un message…" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-size:0.85rem;"/>
+           <button class="btn-chat-send" data-order="${o.id}" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:0.82rem;">Envoyer</button>
+         </div>
+       </details>`
+    : "";
+
   return `
     <div class="livraison-block anim" style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
@@ -680,6 +689,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
       </div>
       ${locationBlock}
       <div style="display:flex;gap:10px;">${actionHtml}</div>
+      ${chatBlock}
     </div>`;
 }
 
@@ -725,6 +735,41 @@ async function initLivraisons() {
       el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : "📡 Aucune position partagée pour l'instant.";
     } catch { el.innerHTML = ""; }
   });
+
+  // Chat (livreur / client / admin) — chargé seulement à l'ouverture du <details>
+  // pour ne pas multiplier les requêtes sur des blocs jamais dépliés.
+  wrap.querySelectorAll("details").forEach(details => {
+    details.addEventListener("toggle", async () => {
+      if (!details.open) return;
+      const box = details.querySelector("[id^='chat-messages-']");
+      const orderId = box.dataset.order;
+      await renderAdminChat(orderId, box);
+    }, { once: true });
+  });
+  wrap.querySelectorAll(".btn-chat-send").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const orderId = btn.dataset.order;
+      const input = document.getElementById(`chat-input-${orderId}`);
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      try {
+        await AdminService.sendMessage(orderId, text);
+        await renderAdminChat(orderId, document.getElementById(`chat-messages-${orderId}`));
+      } catch (err) { showToast(err.message || "Message non envoyé.", "red"); }
+    });
+  });
+}
+
+async function renderAdminChat(orderId, box) {
+  if (!box) return;
+  const messages = await AdminService.listMessages(orderId).catch(() => []);
+  const senderLabel = { admin: "Admin", livreur: "Livreur", client: "Client" };
+  const senderColor = { admin: "#1a1a2e", livreur: "#22c55e", client: "#3b82f6" };
+  box.innerHTML = messages.length
+    ? messages.map(m => `<div style="margin-bottom:6px;"><b style="color:${senderColor[m.sender] || "#6b7280"};">${senderLabel[m.sender] || m.sender} :</b> ${m.text}</div>`).join("")
+    : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
+  box.scrollTop = box.scrollHeight;
 }
 
 /* ── HISTORIQUE ── */

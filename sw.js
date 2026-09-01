@@ -76,8 +76,10 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(req, clone));
+          // Cloner IMMÉDIATEMENT, avant toute autre opération sur la réponse —
+          // un clone tardif ou concurrent provoque "Response body is already used".
+          const toCache = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(req, toCache)).catch(() => {});
           return res;
         })
         .catch(() => caches.match(req).then((r) => r || caches.match(OFFLINE_URL)))
@@ -91,7 +93,10 @@ self.addEventListener("fetch", (event) => {
     caches.match(req).then((cached) => {
       const network = fetch(req)
         .then((res) => {
-          if (res.ok) caches.open(CACHE_NAME).then((c) => c.put(req, res.clone()));
+          if (res.ok) {
+            const toCache = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(req, toCache)).catch(() => {});
+          }
           return res;
         })
         .catch(() => cached);
