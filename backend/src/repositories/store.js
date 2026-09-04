@@ -120,6 +120,14 @@ async function migrate() {
       text TEXT NOT NULL,
       createdAt TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS livreur_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      livreurId INTEGER NOT NULL REFERENCES livreurs(id),
+      sender TEXT NOT NULL,
+      text TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    );
   `);
 
   // Colonnes ajoutées après la première mise en prod : ALTER TABLE
@@ -142,6 +150,7 @@ async function migrate() {
     "ALTER TABLE orders ADD COLUMN confirmedClientAt TEXT",
     "ALTER TABLE orders ADD COLUMN confirmedAdminAt TEXT",
     "ALTER TABLE livreurs ADD COLUMN actif INTEGER DEFAULT 1",
+    "ALTER TABLE admins ADD COLUMN tel TEXT",
   ];
   for (const sql of patchColumns) {
     try { await db.execute(sql); } catch { /* colonne déjà présente */ }
@@ -157,7 +166,7 @@ export const schemaReady = () => ready;
 const SCHEMAS = {
   users:         { table: "users",          columns: ["nom","email","tel","quartier","adresse","points","commandes","niveau","passwordHash","favoriteAddresses"], json: ["favoriteAddresses"] },
   livreurs:      { table: "livreurs",        columns: ["matricule","nom","tel","vehicule","statut","passwordHash","paieType","paieMontant","photoUrl","actif"], bool: ["actif"] },
-  admins:        { table: "admins",          columns: ["username","passwordHash"] },
+  admins:        { table: "admins",          columns: ["username","passwordHash","tel"] },
   products:      { table: "products",        columns: ["name","price","category","popular","desc","img"], bool: ["popular"] },
   rewards:       { table: "rewards",         columns: ["name","desc","cost","available"], bool: ["available"] },
   zones:         { table: "zones",           columns: ["ville","quartier"] },
@@ -166,6 +175,7 @@ const SCHEMAS = {
   pushSubs:      { table: "push_subscriptions", columns: ["channel","endpoint","p256dh","authKey"] },
   promoCodes:    { table: "promo_codes",     columns: ["code","type","value","active"], bool: ["active"] },
   messages:      { table: "messages",        columns: ["orderId","sender","text","createdAt"] },
+  livreurMessages: { table: "livreur_messages", columns: ["livreurId","sender","text","createdAt"] },
 };
 
 function toRow(collection, record) {

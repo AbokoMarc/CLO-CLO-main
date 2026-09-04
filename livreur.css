@@ -120,7 +120,7 @@ body {
    ============================================================ */
 .main-content {
   margin-left: var(--sidebar-w);
-  flex: 1; padding: 36px 40px; min-height: 100vh;
+  flex: 1; min-width: 0; padding: 36px 40px; min-height: 100vh;
 }
 
 .page-header { margin-bottom: 28px; animation: fadeUp 0.45s ease both; }

@@ -9,6 +9,7 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || "*",
   adminUsername: process.env.ADMIN_USERNAME || "",
   adminPassword: process.env.ADMIN_PASSWORD || "",
+  adminPhone: process.env.ADMIN_PHONE || "",
   nodeEnv: process.env.NODE_ENV || "development",
   // Base de données Turso (libSQL) — persiste réellement les données,
   // contrairement au disque de Render qui peut être réinitialisé.

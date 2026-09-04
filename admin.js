@@ -97,8 +97,14 @@ async function handleChangeOwnPassword() {
 
 /* ── NOTIFICATIONS TEMPS RÉEL ── */
 function initAdminNotifications() {
-  NotificationService.connect((event, order) => {
-    if (!order) return;
+  NotificationService.connect((event, data) => {
+    if (!data) return;
+    if (event === "livreur:message") {
+      showToast("💬 Nouveau message d'un livreur");
+      if (document.querySelector(".livreur-chat-panel")) initLivreurs();
+      return;
+    }
+    const order = data;
     if (event === "order:new") {
       showToast(`🆕 Nouvelle commande CMD-${order.id} (${order.total.toLocaleString()} FCFA)`);
       if (page.includes("admin-dashboard")) initDashboard();
@@ -139,7 +145,13 @@ function showSosAlert(order) {
 async function initDashboard() {
   const stats = await AdminService.stats();
 
-  document.getElementById("stat-revenus").textContent = stats.totalVentes.toLocaleString() + " FCFA";
+  document.getElementById("stat-revenus").textContent = stats.revenuJour.toLocaleString() + " FCFA";
+  document.getElementById("stat-revenus-mois").textContent = stats.revenuMois.toLocaleString() + " FCFA";
+  document.getElementById("stat-revenus-annee").textContent = stats.revenuAnnee.toLocaleString() + " FCFA";
+  const moisLabelEl = document.getElementById("stat-mois-label");
+  if (moisLabelEl) moisLabelEl.textContent = `Revenus de ${stats.moisLabel}`;
+  const anneeLabelEl = document.getElementById("stat-annee-label");
+  if (anneeLabelEl) anneeLabelEl.textContent = `Revenus ${stats.anneeLabel}`;
   document.getElementById("stat-commandes").textContent = stats.totalCommandes;
   document.getElementById("stat-clients").textContent = stats.totalClients;
   document.getElementById("stat-livreurs").textContent = stats.livreursDisponibles + " / " + stats.totalLivreurs;
@@ -494,6 +506,53 @@ async function initPromoCodes() {
 }
 
 /* ── LIVREURS ── */
+/* ── CHAT PRIVÉ ADMIN ↔ LIVREUR (indépendant des livraisons) ── */
+function openLivreurChatPanel(livreurId, livreurNom) {
+  document.querySelector(".livreur-chat-panel")?.remove();
+  const panel = document.createElement("div");
+  panel.className = "livreur-chat-panel";
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <strong>💬 Chat avec ${livreurNom}</strong>
+      <button id="livreur-chat-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
+    </div>
+    <div id="livreur-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
+    <div style="display:flex;gap:8px;">
+      <input id="livreur-chat-input" type="text" placeholder="Écrire…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
+      <button id="livreur-chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+    </div>`;
+  Object.assign(panel.style, {
+    position: "fixed", bottom: "22px", right: "22px", zIndex: "9991",
+    background: "white", borderRadius: "16px", boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+    padding: "18px", width: "min(320px, 88vw)",
+  });
+  document.body.appendChild(panel);
+  panel.querySelector("#livreur-chat-close").addEventListener("click", () => panel.remove());
+
+  const box = panel.querySelector("#livreur-chat-messages");
+  async function render() {
+    const messages = await AdminService.listLivreurMessages(livreurId).catch(() => []);
+    box.innerHTML = messages.length
+      ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "admin" ? "right" : "left"};">
+          <span style="display:inline-block;background:${m.sender === "admin" ? "#1a1a2e" : "#22c55e"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+        </div>`).join("")
+      : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
+    box.scrollTop = box.scrollHeight;
+  }
+  render();
+
+  const send = async () => {
+    const input = panel.querySelector("#livreur-chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    try { await AdminService.sendLivreurMessage(livreurId, text); render(); }
+    catch (err) { showToast(err.message || "Message non envoyé.", "red"); }
+  };
+  panel.querySelector("#livreur-chat-send").addEventListener("click", send);
+  panel.querySelector("#livreur-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+}
+
 function livreurCardHtml(l) {
   const statutClass = l.statut === "disponible" ? "badge-disponible" : l.statut === "en_livraison" ? "badge-en-livraison" : "badge-hors-ligne";
   const paieLabel = l.paieMontant > 0
@@ -502,7 +561,7 @@ function livreurCardHtml(l) {
   return `
     <div class="livreur-card anim">
       <div class="livreur-header">
-        <div class="livreur-avatar"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <div class="livreur-avatar" style="${l.photoUrl ? `background:url(${l.photoUrl});background-size:cover;background-position:center;` : ""}">${l.photoUrl ? "" : `<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`}</div>
         <div style="flex:1;">
           <div class="livreur-name">${l.nom}</div>
           <div class="livreur-id">${l.matricule}</div>
@@ -518,9 +577,11 @@ function livreurCardHtml(l) {
         <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">💰 Définir la paie</button>
         <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#22c55e" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#22c55e" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? "✅ Remettre en service" : "⛔ Mettre hors service"}</button>
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🔑 Mot de passe</button>
-          <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🗑️ Supprimer</button>
+          <a class="btn-call-livreur" href="tel:${l.tel}" style="flex:1;text-align:center;background:white;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:none;display:block;">📞 Appeler</a>
+          <button class="btn-chat-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#1a1a2e;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">💬 Contacter</button>
         </div>
+        <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🔑 Mot de passe</button>
+        <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🗑️ Supprimer</button>
       </div>
     </div>`;
 }
@@ -563,6 +624,10 @@ async function initLivreurs() {
           showToast(err.message || "Impossible de changer le statut.", "red");
         }
       });
+    });
+
+    grid.querySelectorAll(".btn-chat-livreur").forEach(btn => {
+      btn.addEventListener("click", () => openLivreurChatPanel(btn.dataset.id, btn.dataset.nom));
     });
 
     grid.querySelectorAll(".btn-reset-livreur-pwd").forEach(btn => {
@@ -680,6 +745,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
           <div style="font-weight:700;color:#1a1a2e;">${client ? client.nom : "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${o.adresse || "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${items}</div>
+          ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#16a34a;font-weight:800;font-size:0.8rem;text-decoration:none;">📞 Appeler</a>` : ""}
         </div>
         <div>
           <div style="font-size:0.78rem;color:#22c55e;font-weight:800;margin-bottom:4px;">LIVREUR</div>

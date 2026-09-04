@@ -9,7 +9,19 @@
    avec repli sur localhost pour le développement. */
 const API_BASE_URL = window.CLOCLO_CONFIG?.API_BASE_URL || "http://localhost:4000/api";
 
-const TOKEN_KEY = "cloclo_token";
+/* Chaque section du site (client / livreur / admin) garde SA PROPRE session,
+   dans une clé localStorage distincte. Avant, une seule clé partagée faisait
+   que se connecter en admin déconnectait silencieusement la session client
+   (et vice versa) — très gênant pour un gérant qui bascule entre les deux.
+   Le rôle est déduit du chemin de la page, chaque page HTML n'appartenant
+   qu'à un seul rôle (admin-*.html, livreur-*.html, ou le reste = client). */
+function detectRole() {
+  const p = window.location.pathname;
+  if (p.includes("admin-") || p.includes("directeur")) return "admin";
+  if (p.includes("livreur")) return "livreur";
+  return "client";
+}
+const TOKEN_KEY = `cloclo_token_${detectRole()}`;
 
 export const ApiClient = {
   getToken() {

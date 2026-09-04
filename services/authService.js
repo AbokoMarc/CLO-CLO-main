@@ -31,6 +31,10 @@ export const AuthService = {
   async changePassword(currentPwd, newPwd) {
     return ApiClient.patch("/auth/me/password", { currentPwd, newPwd }, { auth: true });
   },
+  /** L'admin définit son propre numéro (bouton "Appeler l'admin" côté livreur). */
+  async setPhone(tel) {
+    return ApiClient.patch("/auth/me/phone", { tel }, { auth: true });
+  },
   async me() {
     if (!ApiClient.getToken()) return null;
     try {

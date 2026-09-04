@@ -88,14 +88,32 @@ export const OrderService = {
     return order;
   },
 
+  /** Ajoute le nom + téléphone du livreur assigné, pour le bouton "Appeler le
+      livreur" côté client — sans exposer d'autres infos sensibles du livreur. */
+  async _withLivreurContact(order) {
+    if (!order?.livreurId) return order;
+    const livreur = await Store.findById("livreurs", order.livreurId);
+    return livreur ? { ...order, livreurContact: { nom: livreur.nom, tel: livreur.tel, photoUrl: livreur.photoUrl || null } } : order;
+  },
+
+  /** Ajoute le nom + téléphone du client, pour le bouton "Appeler le client"
+      côté livreur. */
+  async _withClientContact(order) {
+    if (!order?.userId) return order;
+    const client = await Store.findById("users", order.userId);
+    return client ? { ...order, clientContact: { nom: client.nom, tel: client.tel } } : order;
+  },
+
   async listOrdersForUser(userId) {
     const orders = await Store.all("orders");
-    return orders.filter((o) => o.userId === userId).sort((a, b) => b.id - a.id);
+    const mine = orders.filter((o) => o.userId === userId).sort((a, b) => b.id - a.id);
+    return Promise.all(mine.map((o) => this._withLivreurContact(o)));
   },
 
   async getOrderForUser(userId, orderId) {
     const o = await Store.findById("orders", orderId);
-    return o && o.userId === userId ? o : null;
+    if (!o || o.userId !== userId) return null;
+    return this._withLivreurContact(o);
   },
 
   async listAllOrders({ statut } = {}) {
@@ -105,7 +123,8 @@ export const OrderService = {
 
   async listOrdersForLivreur(livreurId) {
     const orders = await Store.all("orders");
-    return orders.filter((o) => Number(o.livreurId) === Number(livreurId));
+    const mine = orders.filter((o) => Number(o.livreurId) === Number(livreurId));
+    return Promise.all(mine.map((o) => this._withClientContact(o)));
   },
 
   /** L'admin désigne un livreur — celui-ci doit encore ACCEPTER (voir acceptDelivery)

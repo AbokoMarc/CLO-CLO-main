@@ -59,6 +59,13 @@ export const AdminService = {
   listMessages(orderId) {
     return ApiClient.get(`/orders/${orderId}/messages`, { auth: true });
   },
+  /** Chat privé admin ↔ livreur, indépendant des livraisons. */
+  sendLivreurMessage(livreurId, text) {
+    return ApiClient.post(`/livreurs/${livreurId}/messages`, { text }, { auth: true });
+  },
+  listLivreurMessages(livreurId) {
+    return ApiClient.get(`/livreurs/${livreurId}/messages`, { auth: true });
+  },
   /** L'admin confirme la livraison (3ᵉ et dernière des 3 confirmations). */
   confirmDelivery(orderId) {
     return ApiClient.post(`/orders/${orderId}/confirm`, {}, { auth: true });

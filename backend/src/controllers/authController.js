@@ -33,4 +33,10 @@ export const AuthController = {
     const result = await AuthService.changeOwnPassword(payload.role, payload.sub, body.currentPwd, body.newPwd);
     sendJson(res, 200, result);
   },
+  /** L'admin définit son propre numéro (bouton "Appeler l'admin" côté livreur). */
+  async setMyPhone({ req, res, body }) {
+    const payload = requireAuth(req);
+    if (payload.role !== "admin") return sendJson(res, 403, { error: "Réservé à l'administrateur." });
+    sendJson(res, 200, await AuthService.setAdminPhone(payload.sub, body.tel));
+  },
 };

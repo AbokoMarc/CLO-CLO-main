@@ -12,7 +12,7 @@ const API_BASE_URL = window.CLOCLO_CONFIG?.API_BASE_URL || "http://localhost:400
 const ALL_EVENTS = [
   "order:new", "order:assigned", "order:accepted", "order:started",
   "order:updated", "order:confirmation", "order:cancelled",
-  "order:message", "order:sos",
+  "order:message", "order:sos", "livreur:message",
 ];
 
 export const NotificationService = {

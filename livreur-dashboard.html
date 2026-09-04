@@ -23,7 +23,10 @@
       <div><div class="sidebar-brand-name">Clo-Clo Livreur</div><div class="sidebar-brand-sub">Espace Livraison</div></div>
     </div>
     <div class="sidebar-profile">
-      <div class="profile-avatar"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <div class="profile-avatar" id="profile-avatar" style="cursor:pointer;position:relative;overflow:hidden;" title="Changer ma photo">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <input id="photo-input" type="file" accept="image/*" style="display:none;"/>
+      </div>
       <div>
         <div class="profile-name">Jean Mukendi</div>
         <div class="profile-id">ID: DRV-001</div>
@@ -65,6 +68,10 @@
       <div class="stat-card">
         <div class="stat-icon-box" style="background:#dcfce7;">📈</div>
         <div><div class="stat-label">Encaissé Aujourd'hui</div><div class="stat-value val-green" id="stat-gains-jour">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-box" style="background:#fef9c3;">💵</div>
+        <div><div class="stat-label">Pourboires du Jour</div><div class="stat-value val-yellow" id="stat-pourboires-jour">—</div></div>
       </div>
       <div class="stat-card">
         <div class="stat-icon-box" style="background:#f3e8ff;">🚚</div>

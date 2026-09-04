@@ -34,6 +34,13 @@ function activeOrderHtml(o) {
 
   const chatBlock = (o.statut === "acceptee" || o.statut === "en_livraison")
     ? `<div class="detail-block" style="grid-column:1/-1;">
+         ${o.livreurContact ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+           <div style="width:44px;height:44px;border-radius:50%;background:${o.livreurContact.photoUrl ? `url(${o.livreurContact.photoUrl})` : "#e5e7eb"};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;">${!o.livreurContact.photoUrl ? "🛵" : ""}</div>
+           <div>
+             <div style="font-weight:800;color:#1a1a2e;">${o.livreurContact.nom}</div>
+             ${o.livreurContact.tel ? `<a href="tel:${o.livreurContact.tel}" style="color:#16a34a;font-weight:700;font-size:0.82rem;text-decoration:none;">📞 Appeler</a>` : ""}
+           </div>
+         </div>` : ""}
          <div class="detail-title">💬 Chat avec le livreur</div>
          <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.85rem;"></div>
          <div style="display:flex;gap:8px;">

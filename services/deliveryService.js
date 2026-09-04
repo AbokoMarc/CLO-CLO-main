@@ -42,4 +42,19 @@ export const DeliveryService = {
   setActif(actif) {
     return ApiClient.patch("/livreurs/me/actif", { actif }, { auth: true });
   },
+  /** Chat privé avec l'admin, indépendant des livraisons. */
+  sendAdminMessage(livreurId, text) {
+    return ApiClient.post(`/livreurs/${livreurId}/messages`, { text }, { auth: true });
+  },
+  listAdminMessages(livreurId) {
+    return ApiClient.get(`/livreurs/${livreurId}/messages`, { auth: true });
+  },
+  /** Numéro de l'admin, pour le bouton "Appeler l'admin". */
+  getAdminContact() {
+    return ApiClient.get("/admin-contact", { auth: true });
+  },
+  /** Photo de profil (base64), vue par le client et l'admin. */
+  setPhoto(photoUrl) {
+    return ApiClient.patch("/livreurs/me/photo", { photoUrl }, { auth: true });
+  },
 };

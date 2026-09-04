@@ -23,7 +23,10 @@
       <div><div class="sidebar-brand-name">Clo-Clo Livreur</div><div class="sidebar-brand-sub">Espace Livraison</div></div>
     </div>
     <div class="sidebar-profile">
-      <div class="profile-avatar"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <div class="profile-avatar" id="profile-avatar" style="cursor:pointer;position:relative;overflow:hidden;" title="Changer ma photo">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <input id="photo-input" type="file" accept="image/*" style="display:none;"/>
+      </div>
       <div>
         <div class="profile-name">Jean Mukendi</div>
         <div class="profile-id">ID: DRV-001</div>

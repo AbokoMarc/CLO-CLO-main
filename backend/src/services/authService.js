@@ -97,6 +97,13 @@ export const AuthService = {
   },
 
   /** Changement de mot de passe par l'utilisateur lui-même (client, livreur OU admin). */
+  /** Permet à l'admin de définir/modifier son propre numéro (pour le bouton
+      "Appeler l'admin" côté livreur) — au-delà de la valeur ADMIN_PHONE initiale. */
+  async setAdminPhone(adminId, tel) {
+    const updated = await Store.update("admins", adminId, { tel });
+    return updated ? publicAdmin(updated) : null;
+  },
+
   async changeOwnPassword(role, id, currentPwd, newPwd) {
     const collection = COLLECTION_BY_ROLE[role];
     if (!collection) {

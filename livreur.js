@@ -43,6 +43,7 @@ function fillProfile(livreur) {
   document.querySelectorAll(".statut-badge").forEach(el => {
     el.innerHTML = `<span class="dot-${livreur.statut === "disponible" ? "green" : "orange"}"></span> ${livreur.statut === "disponible" ? "Disponible" : "En livraison"}`;
   });
+  initPhotoUpload(livreur);
   const paieLabel = livreur.paieMontant > 0
     ? `${livreur.paieMontant.toLocaleString()} FCFA / ${livreur.paieType === "mensuel" ? "mois" : "jour"}`
     : "Non définie par l'administrateur";
@@ -74,6 +75,55 @@ function fillProfile(livreur) {
   }
 }
 
+/** Affiche la photo existante (si déjà définie) et permet d'en choisir une
+    nouvelle — redimensionnée côté navigateur (canvas) avant envoi, pour
+    rester léger (pas de vrai stockage cloud, juste une image compacte
+    stockée en base64). Vue ensuite par le client et l'admin. */
+function initPhotoUpload(livreur) {
+  const avatar = document.getElementById("profile-avatar");
+  const input = document.getElementById("photo-input");
+  if (!avatar || !input) return;
+
+  function showPhoto(url) {
+    avatar.style.backgroundImage = `url(${url})`;
+    avatar.style.backgroundSize = "cover";
+    avatar.style.backgroundPosition = "center";
+    avatar.querySelector("svg").style.display = "none";
+  }
+  if (livreur.photoUrl) showPhoto(livreur.photoUrl);
+
+  avatar.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = async () => {
+        // Redimensionne à 200×200 max et compresse en JPEG — reste léger
+        // même sans vrai service de stockage d'images.
+        const canvas = document.createElement("canvas");
+        const size = 200;
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        const ratio = Math.max(size / img.width, size / img.height);
+        const w = img.width * ratio, h = img.height * ratio;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        try {
+          await DeliveryService.setPhoto(dataUrl);
+          showPhoto(dataUrl);
+          showToast("✅ Photo de profil mise à jour !");
+        } catch (err) {
+          showToast(err.message || "Impossible d'enregistrer la photo.", "red");
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function initLogout() {
   document.querySelector(".js-livreur-logout")?.addEventListener("click", () => {
     AuthService.logout();
@@ -92,6 +142,95 @@ function injectSidebarToggle() {
   const sidebar = document.querySelector(".sidebar");
   btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
   document.querySelector(".main-content")?.addEventListener("click", () => sidebar?.classList.remove("sidebar-open"));
+}
+
+/* ── CHAT PRIVÉ AVEC L'ADMIN (bouton flottant, disponible sur toutes les pages) ── */
+function injectAdminChatButton(livreurId) {
+  if (document.querySelector(".admin-chat-fab")) return;
+
+  // Bouton d'appel direct (au-dessus du chat), seulement si l'admin a renseigné un numéro.
+  DeliveryService.getAdminContact().then(({ tel }) => {
+    if (!tel) return;
+    const callBtn = document.createElement("a");
+    callBtn.href = `tel:${tel}`;
+    callBtn.className = "admin-call-fab";
+    callBtn.innerHTML = "📞";
+    callBtn.title = "Appeler l'administrateur";
+    Object.assign(callBtn.style, {
+      position: "fixed", bottom: "86px", right: "22px", zIndex: "9990",
+      width: "46px", height: "46px", borderRadius: "50%", border: "none",
+      background: "#16a34a", color: "white", fontSize: "1.2rem", cursor: "pointer",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.25)", display: "flex", alignItems: "center",
+      justifyContent: "center", textDecoration: "none",
+    });
+    document.body.appendChild(callBtn);
+  }).catch(() => {});
+
+  const fab = document.createElement("button");
+  fab.className = "admin-chat-fab";
+  fab.innerHTML = "💬";
+  fab.title = "Contacter l'administrateur";
+  Object.assign(fab.style, {
+    position: "fixed", bottom: "22px", right: "22px", zIndex: "9990",
+    width: "54px", height: "54px", borderRadius: "50%", border: "none",
+    background: "#1a1a2e", color: "white", fontSize: "1.4rem", cursor: "pointer",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
+  });
+  document.body.appendChild(fab);
+  fab.addEventListener("click", () => openAdminChatPanel(livreurId));
+
+  NotificationService.connect((event) => {
+    if (event === "livreur:message") {
+      showToast("💬 Nouveau message de l'admin");
+      if (document.querySelector(".admin-chat-panel")) openAdminChatPanel(livreurId);
+    }
+  });
+}
+
+function openAdminChatPanel(livreurId) {
+  document.querySelector(".admin-chat-panel")?.remove();
+  const panel = document.createElement("div");
+  panel.className = "admin-chat-panel";
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <strong>💬 Chat avec l'administrateur</strong>
+      <button id="admin-chat-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
+    </div>
+    <div id="admin-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
+    <div style="display:flex;gap:8px;">
+      <input id="admin-chat-input" type="text" placeholder="Écrire à l'admin…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
+      <button id="admin-chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+    </div>`;
+  Object.assign(panel.style, {
+    position: "fixed", bottom: "86px", right: "22px", zIndex: "9991",
+    background: "white", borderRadius: "16px", boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+    padding: "18px", width: "min(320px, 88vw)",
+  });
+  document.body.appendChild(panel);
+  panel.querySelector("#admin-chat-close").addEventListener("click", () => panel.remove());
+
+  const box = panel.querySelector("#admin-chat-messages");
+  async function render() {
+    const messages = await DeliveryService.listAdminMessages(livreurId).catch(() => []);
+    box.innerHTML = messages.length
+      ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "livreur" ? "right" : "left"};">
+          <span style="display:inline-block;background:${m.sender === "livreur" ? "#22c55e" : "#1a1a2e"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+        </div>`).join("")
+      : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
+    box.scrollTop = box.scrollHeight;
+  }
+  render();
+
+  const send = async () => {
+    const input = panel.querySelector("#admin-chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    try { await DeliveryService.sendAdminMessage(livreurId, text); render(); }
+    catch (err) { showToast(err.message || "Message non envoyé.", "red"); }
+  };
+  panel.querySelector("#admin-chat-send").addEventListener("click", send);
+  panel.querySelector("#admin-chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
 }
 
 const notifLog = []; // historique en mémoire pour cette session (affiché dans le panneau)
@@ -155,6 +294,11 @@ async function initDashboard(livreur) {
   document.getElementById("stat-gains-jour").textContent = deliveries
     .filter(o => o.statut === "livree" && new Date(o.createdAt).toDateString() === new Date().toDateString())
     .reduce((s, o) => s + o.total, 0).toLocaleString() + " FCFA";
+  // "Ce qu'il a vraiment touché" — les pourboires du jour, son revenu personnel réel
+  // par livraison (distinct de l'argent encaissé qui revient à l'entreprise).
+  document.getElementById("stat-pourboires-jour").textContent = deliveries
+    .filter(o => o.statut === "livree" && new Date(o.createdAt).toDateString() === new Date().toDateString())
+    .reduce((s, o) => s + (o.tip || 0), 0).toLocaleString() + " FCFA";
   document.getElementById("stat-livraisons-total").textContent = deliveries.length;
 
   const wrap = document.getElementById("livreur-content");
@@ -247,6 +391,7 @@ async function initLivraison() {
         <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🗺️ Itinéraire</button>
         ${actionButton}
       </div>
+      ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#dcfce7;color:#16a34a;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">📞 Appeler ${order.clientContact.nom}</a>` : ""}
       ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">🆘 SOS urgence</button>` : ""}
       <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
       ${chatBlock}
@@ -395,6 +540,22 @@ async function initHistorique() {
   const done = deliveries.filter(o => o.statut === "livree" || o.statut === "annulee").sort((a, b) => b.id - a.id);
   const wrap = document.getElementById("histo-list");
 
+  // Vraies statistiques, calculées à partir des VRAIES livraisons de ce livreur —
+  // "Pourboires Gagnés" = son vrai revenu personnel par livraison (distinct de
+  // l'argent encaissé chez le client, qui revient à l'entreprise, et distinct
+  // de sa paie fixe définie par l'admin, affichée ailleurs).
+  const livrees = done.filter(o => o.statut === "livree");
+  const annulees = done.filter(o => o.statut === "annulee");
+  const totalTips = livrees.reduce((s, o) => s + (o.tip || 0), 0);
+  const rated = livrees.filter(o => o.rating);
+  const avgRating = rated.length ? (rated.reduce((s, o) => s + o.rating, 0) / rated.length) : null;
+
+  document.getElementById("stat-h-total").textContent = done.length;
+  document.getElementById("stat-h-completees").textContent = livrees.length;
+  document.getElementById("stat-h-annulees").textContent = annulees.length;
+  document.getElementById("stat-h-gagne").textContent = totalTips.toLocaleString() + " FC";
+  document.getElementById("stat-h-note").textContent = avgRating ? `⭐ ${avgRating.toFixed(1)}` : "—";
+
   wrap.innerHTML = done.length
     ? done.map(o => `
       <div class="histo-item" data-status="${o.statut === "livree" ? "complete" : "annule"}" style="background:white;border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -402,6 +563,7 @@ async function initHistorique() {
           <div>
             <div style="font-weight:800;color:#1a1a2e;">CMD-${o.id}</div>
             <div style="color:#6b7280;font-size:0.85rem;">${o.adresse}</div>
+            ${o.statut === "livree" ? `<div style="color:#9ca3af;font-size:0.78rem;margin-top:2px;">Encaissé chez le client : ${o.total.toLocaleString()} FCFA${o.tip ? ` · Pourboire reçu : ${o.tip.toLocaleString()} FCFA` : ""}${o.rating ? ` · ${"⭐".repeat(o.rating)}` : ""}</div>` : ""}
           </div>
           <div style="text-align:right;">
             <div style="font-weight:800;color:${o.statut === "livree" ? "#22c55e" : "#ef4444"};">${o.statut === "livree" ? "✅ Livrée" : "❌ Annulée"}</div>
@@ -488,6 +650,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLogout();
   initLivreurNotifications(livreur);
   injectSidebarToggle();
+  injectAdminChatButton(livreur.id);
   PWA.subscribeToPush(() => ApiClient.getToken());
 
   try {

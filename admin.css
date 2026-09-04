@@ -122,6 +122,7 @@ body {
 .main-content {
   margin-left: var(--sidebar-w);
   flex: 1;
+  min-width: 0; /* essentiel en flexbox : empêche un contenu large (tableau, grille) de pousser toute la mise en page et de faire disparaître ce qui dépasse à droite */
   padding: 36px 40px;
   min-height: 100vh;
 }

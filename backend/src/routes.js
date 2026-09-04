@@ -19,6 +19,7 @@ router.post("/api/auth/login/admin", AuthController.loginAdmin);
 router.get("/api/auth/me", AuthController.me);
 router.patch("/api/auth/me", AuthController.updateMe);
 router.patch("/api/auth/me/password", AuthController.changeMyPassword);
+router.patch("/api/auth/me/phone", AuthController.setMyPhone);
 
 // Catalogue
 router.get("/api/products", CatalogController.listProducts);
@@ -63,6 +64,10 @@ router.patch("/api/admin/livreurs/:id/paie", AdminController.setLivreurPaie);
 router.post("/api/admin/livreurs/:id/reset-password", AdminController.resetLivreurPassword);
 router.delete("/api/admin/livreurs/:id", AdminController.deleteLivreur);
 router.patch("/api/livreurs/me/actif", AdminController.setMyActif);
+router.get("/api/admin-contact", AdminController.adminContact);
+router.patch("/api/livreurs/me/photo", AdminController.setMyPhoto);
+router.post("/api/livreurs/:id/messages", AdminController.sendLivreurMessage);
+router.get("/api/livreurs/:id/messages", AdminController.listLivreurMessages);
 
 // Codes promo
 router.get("/api/admin/promo-codes", AdminController.listPromoCodes);

@@ -76,7 +76,7 @@ export function notifySos(order, role, location) {
 /** Envoie une notification PUSH (arrive même app fermée) à tous les abonnements
     d'un canal donné. Best-effort : une erreur d'envoi n'interrompt jamais le flux
     principal (créer/mettre à jour une commande ne doit jamais échouer pour ça). */
-async function pushToChannel(channel, { title, body }) {
+export async function pushToChannel(channel, { title, body }) {
   try {
     const subs = await Store.all("pushSubs");
     const matching = subs.filter((s) => s.channel === channel);

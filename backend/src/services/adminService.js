@@ -4,6 +4,7 @@
 import { Store } from "../repositories/store.js";
 import { hashPassword } from "../auth.js";
 import crypto from "node:crypto";
+import { publish, pushToChannel } from "../notify.js";
 
 const PAIE_TYPES = ["journalier", "mensuel"];
 
@@ -131,6 +132,17 @@ export const AdminService = {
     return stripPwd(livreur);
   },
 
+  /** Photo de profil du livreur (vue par le client et l'admin pendant une livraison). */
+  async setLivreurPhoto(id, photoUrl) {
+    const livreur = await Store.update("livreurs", id, { photoUrl });
+    if (!livreur) {
+      const e = new Error("Livreur introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    return stripPwd(livreur);
+  },
+
   /* ── CODES PROMO ── */
   listPromoCodes() {
     return Store.all("promoCodes");
@@ -155,11 +167,30 @@ export const AdminService = {
     const orders = await Store.all("orders");
     const users = await Store.all("users");
     const livreurs = await Store.all("livreurs");
+    const now = new Date();
 
-    const totalVentes = orders.reduce((s, o) => s + o.total, 0);
+    // Seules les commandes réellement LIVRÉES comptent comme un revenu encaissé —
+    // une commande encore en préparation ou annulée n'est pas un revenu réel.
+    const livrees = orders.filter((o) => o.statut === "livree");
+
+    const revenuJour = livrees
+      .filter((o) => new Date(o.createdAt).toDateString() === now.toDateString())
+      .reduce((s, o) => s + o.total, 0);
+
+    const revenuMois = livrees
+      .filter((o) => {
+        const d = new Date(o.createdAt);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((s, o) => s + o.total, 0);
+
+    const revenuAnnee = livrees
+      .filter((o) => new Date(o.createdAt).getFullYear() === now.getFullYear())
+      .reduce((s, o) => s + o.total, 0);
+
+    const totalVentes = livrees.reduce((s, o) => s + o.total, 0);
     const commandesAujourdhui = orders.filter((o) => {
       const d = new Date(o.createdAt);
-      const now = new Date();
       return d.toDateString() === now.toDateString();
     });
 
@@ -169,7 +200,7 @@ export const AdminService = {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const label = d.toLocaleDateString("fr-FR", { weekday: "short" });
-      const total = orders
+      const total = livrees
         .filter((o) => new Date(o.createdAt).toDateString() === d.toDateString())
         .reduce((s, o) => s + o.total, 0);
       days.push({ label, total });
@@ -177,6 +208,11 @@ export const AdminService = {
 
     return {
       totalVentes,
+      revenuJour,
+      revenuMois,
+      revenuAnnee,
+      moisLabel: now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+      anneeLabel: String(now.getFullYear()),
       totalCommandes: orders.length,
       commandesAujourdhui: commandesAujourdhui.length,
       totalClients: users.length,
@@ -184,5 +220,40 @@ export const AdminService = {
       livreursDisponibles: livreurs.filter((l) => l.statut === "disponible").length,
       ventesParJour: days,
     };
+  },
+
+  /* ── CHAT PRIVÉ ADMIN ↔ LIVREUR (indépendant des livraisons) ── */
+  async sendLivreurMessage(livreurId, sender, text) {
+    const livreur = await Store.findById("livreurs", livreurId);
+    if (!livreur) {
+      const e = new Error("Livreur introuvable.");
+      e.status = 404;
+      throw e;
+    }
+    if (!text || !text.trim()) {
+      const e = new Error("Message vide.");
+      e.status = 400;
+      throw e;
+    }
+    const message = await Store.insert("livreurMessages", {
+      livreurId: Number(livreurId), sender, text: text.trim(), createdAt: new Date().toISOString(),
+    });
+    publish("admin", "livreur:message", { livreurId: Number(livreurId), message });
+    publish(`livreur:${livreurId}`, "livreur:message", { livreurId: Number(livreurId), message });
+    const pushMsg = { title: "💬 Message", body: sender === "admin" ? "Nouveau message de l'administrateur." : "Nouveau message du livreur." };
+    pushToChannel(sender === "admin" ? `livreur:${livreurId}` : "admin", pushMsg);
+    return message;
+  },
+
+  async listLivreurMessages(livreurId) {
+    const all = await Store.all("livreurMessages");
+    return all.filter((m) => m.livreurId === Number(livreurId)).sort((a, b) => a.id - b.id);
+  },
+
+  /** Numéro de l'administrateur, pour le bouton "Appeler l'admin" côté livreur. */
+  async getAdminContact() {
+    const admins = await Store.all("admins");
+    const admin = admins[0];
+    return admin ? { tel: admin.tel || null } : { tel: null };
   },
 };

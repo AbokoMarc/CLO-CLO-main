@@ -60,6 +60,25 @@ export const AdminController = {
     sendJson(res, 200, await AdminService.setLivreurActif(auth.sub, body.actif));
   },
 
+  /* ── CHAT PRIVÉ ADMIN ↔ LIVREUR ── */
+  async sendLivreurMessage({ req, res, params, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "admin", "livreur");
+    // Un livreur ne peut écrire que dans SON propre canal.
+    if (auth.role === "livreur" && Number(auth.sub) !== Number(params.id)) {
+      return sendJson(res, 403, { error: "Non autorisé." });
+    }
+    sendJson(res, 201, await AdminService.sendLivreurMessage(params.id, auth.role, body.text));
+  },
+  async listLivreurMessages({ req, res, params }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "admin", "livreur");
+    if (auth.role === "livreur" && Number(auth.sub) !== Number(params.id)) {
+      return sendJson(res, 403, { error: "Non autorisé." });
+    }
+    sendJson(res, 200, await AdminService.listLivreurMessages(params.id));
+  },
+
   /* ── CODES PROMO ── */
   async listPromoCodes({ req, res }) {
     requireRole(requireAuth(req), "admin");
@@ -76,5 +95,19 @@ export const AdminController = {
   async deletePromoCode({ req, res, params }) {
     requireRole(requireAuth(req), "admin");
     sendJson(res, 200, { deleted: await AdminService.deletePromoCode(params.id) });
+  },
+  /** Numéro de l'administrateur — accessible aux livreurs uniquement, pour le bouton d'appel. */
+  async adminContact({ req, res }) {
+    requireRole(requireAuth(req), "livreur");
+    sendJson(res, 200, await AdminService.getAdminContact());
+  },
+  /** Le livreur définit sa propre photo de profil (vue par le client et l'admin). */
+  async setMyPhoto({ req, res, body }) {
+    const auth = requireAuth(req);
+    requireRole(auth, "livreur");
+    if (typeof body.photoUrl !== "string" || body.photoUrl.length > 400000) {
+      return sendJson(res, 400, { error: "Photo invalide ou trop volumineuse (max ~300 Ko)." });
+    }
+    sendJson(res, 200, await AdminService.setLivreurPhoto(auth.sub, body.photoUrl));
   },
 };

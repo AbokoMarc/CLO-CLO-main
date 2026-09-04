@@ -41,8 +41,12 @@ async function bootstrapAdmin() {
   await Store.insert("admins", {
     username: config.adminUsername,
     passwordHash: hashPassword(config.adminPassword),
+    tel: config.adminPhone || null,
   });
   console.log(`✅ Compte administrateur "${config.adminUsername}" créé à partir de .env.`);
+  if (!config.adminPhone) {
+    console.warn('⚠️  ADMIN_PHONE non défini — le bouton "Appeler l\'admin" ne fonctionnera pas tant qu\'un numéro n\'est pas renseigné (variable d\'environnement ADMIN_PHONE, ou via un futur profil admin).');
+  }
 }
 
 export async function runBootstrap() {
