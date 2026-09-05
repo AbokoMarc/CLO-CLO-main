@@ -1,4 +1,4 @@
-# Clo-Clo – Bar à Fruits & Délices version MVP
+# Clo-Clo – Bar à Fruits & Délices version MVP 1
 
 Application de livraison de jus, smoothies, glaces et salades de fruits,
 opérant à **Nkolfoulou, Yaoundé, Cameroun**.
