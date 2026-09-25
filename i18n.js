@@ -60,6 +60,66 @@ const DICT = {
   "Livraison Active": "Active Delivery", "Historique": "History",
   "Ma paie": "My pay", "Non définie par l'administrateur": "Not set by the administrator",
   "jour": "day", "mois": "month",
+
+  // Espace Directeur (Manager Area)
+  "Manager Area": "Manager Area", "Connexion Administrateur": "Administrator Login",
+  "Accès Restreint": "Restricted Access", "Réservé au personnel autorisé uniquement": "Reserved for authorized staff only",
+  "Nom d'utilisateur": "Username", "Retour au site": "Back to site", "Espace Livreur": "Delivery Area",
+  "Demo : admin / admin123": "Demo: admin / admin123",
+
+  // Gestion des produits
+  "Gestion des Produits": "Product Management",
+  "Ajoutez, modifiez ou retirez des produits du menu": "Add, edit or remove menu items",
+  "Ajouter un produit": "Add a product", "Chargement…": "Loading…", "Chargement...": "Loading...",
+  "Codes Promo": "Promo Codes", "Réductions applicables au moment du paiement": "Discounts applied at checkout",
+  "Créer un code": "Create a code", "Aucun code promo pour l'instant.": "No promo codes yet.",
+  "Zones de Livraison": "Delivery Zones",
+  "Quartiers proposés au client au moment de la commande": "Neighborhoods offered to the customer when ordering",
+  "Ajouter": "Add",
+  "Nom": "Name", "Catégorie": "Category", "Prix (FCFA)": "Price (FCFA)",
+  "Courte description": "Short description", "URL de l'image": "Image URL",
+  "Ou téléverser depuis votre appareil": "Or upload from your device",
+  "Produit populaire (mis en avant sur l'accueil)": "Popular product (featured on the homepage)",
+  "Jus": "Juice", "Smoothies": "Smoothies", "Glaces": "Ice cream", "Salades": "Salads", "Plats": "Dishes",
+  "Marquer indisponible": "Mark unavailable", "Marquer disponible": "Mark available",
+  "Supprimer définitivement": "Delete permanently",
+  "Disponible": "Available", "Indisponible": "Unavailable",
+
+  // Historique des livraisons (admin)
+  "Historique des Livraisons": "Delivery History", "Toutes les livraisons passées": "All past deliveries",
+  "Total Livraisons": "Total Deliveries", "Livrées": "Delivered", "Annulées": "Cancelled",
+  "Revenus Total": "Total Revenue", "Tous": "All",
+  "Filtrer par Date": "Filter by Date", "Exporter en PDF": "Export as PDF",
+  "ID": "ID", "COMMANDE": "ORDER", "CLIENT": "CUSTOMER", "LIVREUR": "DRIVER", "DATE": "DATE",
+
+  // Pied de page
+  "Horaires": "Hours", "Contact": "Contact",
+  "Lundi - Samedi": "Monday - Saturday", "Dimanche": "Sunday",
+  "Clo-Clo Fruit Bar": "Clo-Clo Fruit Bar",
+  "Des fruits frais, des jus naturels et des délices glacés pour tous les goûts.":
+    "Fresh fruit, natural juices and icy treats for every taste.",
+  "Tous droits réservés.": "All rights reserved.",
+};
+
+// Traductions des placeholders de champs — le DOM walker ci-dessous ne
+// couvre que le texte visible, pas les attributs, d'où ce dictionnaire à part.
+const PLACEHOLDER_DICT = {
+  "Rechercher par commande, client ou livreur...": "Search by order, customer or driver...",
+  "Ex : Jus d'Ananas": "Ex: Pineapple Juice",
+  "Courte description": "Short description",
+  "https://...": "https://...",
+  "1500": "1500",
+  "Ville (ex: Yaoundé)": "City (e.g. Yaoundé)",
+  "Quartier (ex: Biyem-Assi)": "Neighborhood (e.g. Biyem-Assi)",
+  "Ex : 6XX XXX XXX": "Ex: 6XX XXX XXX",
+  "Ex : 30": "Ex: 30",
+  "Précisez vos envies : jus, salades de fruits, glaces, plats…":
+    "Tell us what you'd like: juices, fruit salads, ice cream, dishes…",
+  "Jean Dupont": "John Doe",
+  "jean@email.com": "john@email.com",
+  "+237 6 XX XXX XXX": "+237 6 XX XXX XXX",
+  "123 Avenue...": "123 Avenue...",
+  "Ex : CL12 (donné par un ami)": "Ex: CL12 (given by a friend)",
 };
 
 const STORAGE_KEY = "cloclo_lang";
@@ -83,6 +143,26 @@ function translateNode(node) {
   node.nodeValue = leading + (currentLang === "en" ? DICT[trimmed] : trimmed) + trailing;
 }
 
+const originalPlaceholder = new WeakMap();
+
+function translatePlaceholder(el) {
+  if (!originalPlaceholder.has(el)) {
+    const current = el.getAttribute("placeholder");
+    if (!current || !PLACEHOLDER_DICT[current]) return;
+    originalPlaceholder.set(el, current);
+  }
+  const original = originalPlaceholder.get(el);
+  el.setAttribute("placeholder", currentLang === "en" ? PLACEHOLDER_DICT[original] : original);
+}
+
+function walkPlaceholders(root) {
+  const els = root.querySelectorAll ? root.querySelectorAll("[placeholder]") : [];
+  els.forEach(translatePlaceholder);
+  if (root.nodeType === Node.ELEMENT_NODE && root.hasAttribute?.("placeholder")) {
+    translatePlaceholder(root);
+  }
+}
+
 function walk(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
@@ -95,6 +175,7 @@ function walk(root) {
   let n;
   while ((n = walker.nextNode())) nodes.push(n);
   nodes.forEach(translateNode);
+  walkPlaceholders(root);
 }
 
 function applyLang() {

@@ -410,6 +410,15 @@ async function initProduits() {
     document.getElementById("pf-desc").value = product?.desc || "";
     document.getElementById("pf-img").value = product?.img || "";
     document.getElementById("pf-popular").checked = !!product?.popular;
+    const fileInput = document.getElementById("pf-img-file");
+    const preview = document.getElementById("pf-img-preview");
+    const status = document.getElementById("pf-img-status");
+    if (fileInput) fileInput.value = "";
+    if (status) status.textContent = "";
+    if (preview) {
+      if (product?.img) { preview.src = product.img; preview.style.display = ""; }
+      else { preview.style.display = "none"; }
+    }
     modal.classList.add("open");
   }
   function closeModal() { modal.classList.remove("open"); }
@@ -417,6 +426,30 @@ async function initProduits() {
   document.getElementById("btn-new-product")?.addEventListener("click", () => openModal(null));
   document.getElementById("btn-cancel-product")?.addEventListener("click", closeModal);
   modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+  /* Upload d'image depuis l'appareil : redimensionnée et compressée côté
+     navigateur (canvas → JPEG), puis stockée comme data-URL directement
+     dans le champ "URL de l'image" — aucune modification backend requise. */
+  document.getElementById("pf-img-file")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const status = document.getElementById("pf-img-status");
+    const preview = document.getElementById("pf-img-preview");
+    if (!file.type.startsWith("image/")) {
+      status.textContent = "⚠️ Merci de choisir un fichier image.";
+      return;
+    }
+    status.textContent = "Traitement de l'image…";
+    try {
+      const dataUrl = await resizeImageToDataUrl(file, 800, 0.72);
+      document.getElementById("pf-img").value = dataUrl;
+      preview.src = dataUrl;
+      preview.style.display = "";
+      status.textContent = `✅ Image prête (${Math.round(dataUrl.length / 1024)} Ko environ).`;
+    } catch (err) {
+      status.textContent = "❌ Impossible de traiter cette image. Réessayez ou utilisez une URL.";
+    }
+  });
 
   document.getElementById("btn-save-product")?.addEventListener("click", async () => {
     const id = document.getElementById("pf-id").value;
@@ -1043,3 +1076,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("btn-retry-admin")?.addEventListener("click", () => window.location.reload());
   }
 });
+
+/* ── UTIL : redimensionne + compresse une image côté navigateur ── */
+function resizeImageToDataUrl(file, maxWidth, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Lecture du fichier impossible."));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Image invalide."));
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
