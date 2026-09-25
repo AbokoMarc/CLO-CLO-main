@@ -75,13 +75,18 @@ document.getElementById("btn-creer")?.addEventListener("click", async () => {
   btn.disabled = true;
 
   try {
+    const codeParrainage = document.getElementById("input-parrainage").value.trim();
     await AuthService.register({
       nom: document.getElementById("input-nom").value.trim(),
       email: document.getElementById("input-email").value.trim(),
       tel: document.getElementById("input-tel").value.trim(),
       mdp: document.getElementById("input-mdp").value,
+      adresse: document.getElementById("input-adresse").value.trim(),
+      codeParrainage: codeParrainage || undefined,
     });
-    showToast("🎉 Compte créé ! 50 points de bienvenue offerts !");
+    showToast(codeParrainage
+      ? "🎉 Compte créé ! 150 points offerts (bienvenue + parrainage) !"
+      : "🎉 Compte créé ! 50 points de bienvenue offerts !");
     setTimeout(() => { window.location.href = "profil.html"; }, 1500);
   } catch (err) {
     btn.textContent = origText;

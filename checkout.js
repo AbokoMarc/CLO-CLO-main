@@ -74,6 +74,7 @@ document.addEventListener("cloclo:ready", async () => {
   function requestClientLocation() {
     const feeBlock = document.getElementById("delivery-fee-block");
     const feeAmount = document.getElementById("delivery-fee-amount");
+    const timeAmount = document.getElementById("delivery-time-amount");
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -81,12 +82,13 @@ document.addEventListener("cloclo:ready", async () => {
         // Estimation affichée à titre indicatif — le montant définitif exact
         // (toujours entre 1000 et 2000 FCFA) est calculé et fixé côté serveur.
         feeBlock.style.display = "";
-        feeAmount.textContent = "calcul en cours…";
         feeAmount.textContent = "entre 1 000 et 2 000 FCFA selon la distance";
+        if (timeAmount) timeAmount.textContent = "environ 25 à 45 min selon la distance et le trafic";
       },
       () => {
         feeBlock.style.display = "";
         feeAmount.textContent = "1 000 FCFA (position non partagée — tarif minimum appliqué)";
+        if (timeAmount) timeAmount.textContent = "environ 30 à 50 min (estimation par défaut)";
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );

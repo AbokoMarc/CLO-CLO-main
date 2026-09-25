@@ -68,6 +68,19 @@ export const APP = {
 
   clearCart() { this.cart = []; this._saveCart(); },
 
+  /** "Recommander" : réinjecte les articles d'une commande passée dans le
+      panier actuel (fusionne les quantités avec ce qui y est déjà).
+      N'exige pas que le produit soit encore dans le catalogue affiché —
+      on réutilise nom/prix/image tels qu'ils étaient sur la commande. */
+  reorderItems(items) {
+    for (const it of items) {
+      const ex = this.cart.find((x) => x.id === it.id);
+      if (ex) ex.qty += it.qty;
+      else this.cart.push({ id: it.id, name: it.name, price: it.price, qty: it.qty, img: it.img });
+    }
+    this._saveCart();
+  },
+
   _saveCart() {
     try { localStorage.setItem(CART_KEY, JSON.stringify(this.cart)); } catch { /* stockage indisponible */ }
   },

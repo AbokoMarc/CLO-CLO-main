@@ -5,6 +5,7 @@ import { Store } from "../repositories/store.js";
 import { hashPassword, verifyPassword, signToken } from "../auth.js";
 
 const WELCOME_POINTS = 50;
+const PARRAINAGE_POINTS = 100; // bonus accordé au parrain ET au filleul
 
 function publicUser(u) {
   const { passwordHash, ...rest } = u;
@@ -22,7 +23,7 @@ function publicAdmin(a) {
 const COLLECTION_BY_ROLE = { client: "users", livreur: "livreurs", admin: "admins" };
 
 export const AuthService = {
-  async registerClient({ nom, email, tel, mdp, quartier, adresse }) {
+  async registerClient({ nom, email, tel, mdp, quartier, adresse, codeParrainage }) {
     if (!nom || !email || !tel || !mdp) {
       const e = new Error("Champs obligatoires manquants (nom, email, tel, mdp).");
       e.status = 400;
@@ -34,11 +35,24 @@ export const AuthService = {
       e.status = 409;
       throw e;
     }
+
+    // Parrainage : code au format "CL<id du parrain>", ex "CL12".
+    let parrain = null;
+    if (codeParrainage) {
+      const match = /^CL(\d+)$/i.exec(codeParrainage.trim());
+      if (match) parrain = existing.find((u) => u.id === Number(match[1]));
+      if (!parrain) {
+        const e = new Error("Code de parrainage invalide.");
+        e.status = 400;
+        throw e;
+      }
+    }
+
     const user = await Store.insert("users", {
       nom, email, tel,
       quartier: quartier || "Nkolfoulou",
       adresse: adresse || "Nkolfoulou, Yaoundé",
-      points: WELCOME_POINTS, commandes: 0, niveau: "Bronze",
+      points: WELCOME_POINTS + (parrain ? PARRAINAGE_POINTS : 0), commandes: 0, niveau: "Bronze",
       passwordHash: hashPassword(mdp),
     });
     await Store.insert("pointsHistory", {
@@ -48,6 +62,25 @@ export const AuthService = {
       pts: WELCOME_POINTS,
       type: "gain",
     });
+
+    if (parrain) {
+      await Store.insert("pointsHistory", {
+        userId: user.id,
+        label: `Bonus de parrainage (invité par ${parrain.nom})`,
+        date: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
+        pts: PARRAINAGE_POINTS,
+        type: "gain",
+      });
+      await Store.update("users", parrain.id, { points: (parrain.points || 0) + PARRAINAGE_POINTS });
+      await Store.insert("pointsHistory", {
+        userId: parrain.id,
+        label: `Bonus de parrainage (${nom} a rejoint Clo-Clo grâce à vous)`,
+        date: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
+        pts: PARRAINAGE_POINTS,
+        type: "gain",
+      });
+    }
+
     const token = signToken({ sub: user.id, role: "client" });
     return { token, user: publicUser(user) };
   },

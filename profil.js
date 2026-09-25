@@ -36,6 +36,15 @@ function renderProfile() {
   }
 
   renderNiveau(u.points);
+
+  const code = `CL${u.id}`;
+  const codeEl = document.getElementById("parrain-code");
+  if (codeEl) codeEl.textContent = code;
+  const shareEl = document.getElementById("parrain-share");
+  if (shareEl) {
+    const msg = `Salut ! Rejoins Clo-Clo 🍹 (jus, smoothies, glaces livrés à Yaoundé) avec mon code de parrainage ${code} lors de ton inscription, on gagne chacun 100 points 🎁`;
+    shareEl.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  }
 }
 
 // Paliers réels de fidélité — doivent rester alignés avec ceux affichés
@@ -150,12 +159,25 @@ async function loadOrders() {
   wrap.innerHTML = orders.length
     ? orders.slice(0, 5).map(o => {
         const names = o.items.map(i => i.name);
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;">
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap;">
           <div><div style="font-weight:800;font-size:0.9rem;color:#1a1a2e;">CMD-${o.id}</div><div style="font-size:0.8rem;color:#6b7280;">${names.slice(0, 2).join(", ")}${names.length > 2 ? " ..." : ""}</div></div>
-          <div style="text-align:right;"><div style="font-weight:800;color:#22c55e;font-size:0.9rem;">${o.total.toLocaleString()} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#16a34a;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">🔁 Recommander</button>
+            <div style="text-align:right;"><div style="font-weight:800;color:#22c55e;font-size:0.9rem;">${o.total.toLocaleString()} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div></div>
+          </div>
         </div>`;
       }).join("")
     : `<div style="text-align:center;padding:30px;color:#9ca3af;font-weight:600;">Aucune commande pour l'instant<br><a href="menu.html" style="color:#22c55e;font-weight:700;text-decoration:none;display:inline-block;margin-top:10px;">Commander maintenant →</a></div>`;
+
+  wrap.querySelectorAll(".btn-reorder").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const order = orders.find(o => String(o.id) === btn.dataset.id);
+      if (!order) return;
+      APP.reorderItems(order.items);
+      showToast("🔁 Articles ajoutés au panier !");
+      setTimeout(() => { window.location.href = "checkout.html"; }, 700);
+    });
+  });
 }
 
 function initTabs() {
