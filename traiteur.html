@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#22c55e"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Clo-Clo"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Service Traiteur – Clo-Clo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="profil.css"/>
+  <script src="config.js"></script>
+  <script src="widgets.js"></script>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M6 3h12l-1.2 4.8a5 5 0 0 1-4.9 3.9h0a5 5 0 0 1-4.9-3.9Z"/><path d="M12 11.7V21"/><path d="M8 21h8"/><path d="M9 6.2c1 .5 2 .5 3 0s2-.5 3 0"/></svg></div>
+      <div>
+        <div class="nav-brand-name">Clo-Clo</div>
+        <div class="nav-brand-sub">Bar à Fruits &amp; Délices</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="suivie.html">Suivi</a></li>
+      <li><a href="traiteur.html" style="font-weight:900;">Traiteur</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-profile" onclick="window.location.href='profil.html'"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="btn-profile-label">Profil</span></button>
+    </div>
+  </nav>
+
+  <section style="max-width:640px;margin:48px auto;padding:0 20px 80px;">
+    <h1 style="font-size:1.7rem;font-weight:900;color:#1a1a2e;margin-bottom:6px;">Service Traiteur</h1>
+    <p style="color:#6b7280;font-weight:600;margin-bottom:28px;">
+      Un événement, une réception, un anniversaire ? Décrivez votre besoin, notre équipe
+      vous recontacte pour discuter des quantités et du prix.
+    </p>
+
+    <div id="traiteur-success" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:14px;padding:18px;font-weight:700;margin-bottom:20px;">
+      ✅ Votre demande a bien été envoyée ! Notre équipe vous contactera bientôt pour discuter du prix et des détails.
+    </div>
+
+    <div id="traiteur-form-block">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Votre nom</label>
+        <input class="form-input" type="text" id="tr-nom" placeholder="Nom complet"/>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Téléphone</label>
+        <input class="form-input" type="tel" id="tr-tel" placeholder="Ex : 6XX XXX XXX"/>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Type d'événement</label>
+        <select class="form-input" id="tr-type">
+          <option value="Anniversaire">Anniversaire</option>
+          <option value="Mariage">Mariage</option>
+          <option value="Réunion / Séminaire">Réunion / Séminaire</option>
+          <option value="Deuil">Deuil</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Nombre de personnes (estimation)</label>
+        <input class="form-input" type="number" min="1" id="tr-nb" placeholder="Ex : 30"/>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Date souhaitée</label>
+        <input class="form-input" type="date" id="tr-date"/>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label">Détails (facultatif)</label>
+        <textarea class="form-input" id="tr-message" rows="4" placeholder="Précisez vos envies : jus, salades de fruits, glaces, plats…"></textarea>
+      </div>
+
+      <button id="btn-tr-submit" style="width:100%;background:#22c55e;color:white;border:none;border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;">
+        Envoyer ma demande
+      </button>
+      <p id="traiteur-error" style="color:#ef4444;font-weight:700;margin-top:12px;text-align:center;"></p>
+    </div>
+  </section>
+
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="traiteur.js"></script>
+</body>
+</html>

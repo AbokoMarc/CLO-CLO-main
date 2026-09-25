@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#22c55e"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Clo-Clo"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirmer la commande – Clo-Clo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="profil.css"/>
+  <script src="config.js"></script>
+  <script src="widgets.js"></script>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M6 3h12l-1.2 4.8a5 5 0 0 1-4.9 3.9h0a5 5 0 0 1-4.9-3.9Z"/><path d="M12 11.7V21"/><path d="M8 21h8"/><path d="M9 6.2c1 .5 2 .5 3 0s2-.5 3 0"/></svg></div>
+      <div>
+        <div class="nav-brand-name">Clo-Clo</div>
+        <div class="nav-brand-sub">Bar à Fruits &amp; Délices</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="suivie.html">Suivi</a></li>
+      <li>
+        <a href="traiteur.html">
+          <svg viewBox="0 0 24 24">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/>
+            <line x1="6" y1="1" x2="6" y2="4"/>
+            <line x1="10" y1="1" x2="10" y2="4"/>
+            <line x1="14" y1="1" x2="14" y2="4"/>
+          </svg>
+          Traiteur
+        </a>
+      </li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-points"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="points-label">0 pts</span></button>
+      <button class="cart-btn" aria-label="Panier"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="cart-badge" id="cart-badge">0</span></button>
+      <button class="btn-profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="btn-profile-label">Profil</span></button>
+    </div>
+  </nav>
+
+  <section style="max-width:640px;margin:48px auto;padding:0 20px 80px;">
+    <h1 style="font-size:1.7rem;font-weight:900;color:#1a1a2e;margin-bottom:6px;">Confirmer la commande</h1>
+    <p style="color:#6b7280;font-weight:600;margin-bottom:28px;">Zone de livraison : Nkolfoulou, Yaoundé</p>
+
+    <div id="checkout-summary" style="background:#f9fafb;border-radius:16px;padding:20px;margin-bottom:24px;"></div>
+
+    <div class="form-group" style="margin-bottom:16px;" id="saved-addresses-group">
+      <label class="form-label">Adresse enregistrée (optionnel)</label>
+      <select class="form-input" id="input-saved-address">
+        <option value="">— Saisir une nouvelle adresse —</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Quartier</label>
+      <select class="form-input" id="input-quartier"></select>
+    </div>
+
+    <div class="form-group" style="margin-bottom:24px;">
+      <label class="form-label">Adresse précise (repère, rue…)</label>
+      <input class="form-input" type="text" id="input-adresse" placeholder="Ex : Nkolfoulou, non loin du carrefour marché"/>
+    </div>
+
+    <div id="delivery-fee-block" style="background:#f0fdf4;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;color:#166534;display:none;">
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M12 21s7-6.4 7-12a7 7 0 0 0-14 0c0 5.6 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg> Frais de livraison estimés : <span id="delivery-fee-amount">—</span>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Code promo (facultatif)</label>
+      <input class="form-input" type="text" id="input-promo" placeholder="Ex : BIENVENUE10" style="text-transform:uppercase;"/>
+    </div>
+
+    <div class="form-group" style="margin-bottom:24px;">
+      <label class="form-label">Quand livrer ?</label>
+      <select class="form-input" id="input-scheduled">
+        <option value="">Maintenant</option>
+        <option value="later">Plus tard aujourd'hui…</option>
+      </select>
+      <input class="form-input" type="time" id="input-scheduled-time" style="display:none;margin-top:8px;"/>
+    </div>
+
+    <button id="btn-confirm" style="width:100%;background:#22c55e;color:white;border:none;border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;">
+      Confirmer et payer à la livraison
+    </button>
+    <p id="checkout-error" style="color:#ef4444;font-weight:700;margin-top:12px;text-align:center;"></p>
+  </section>
+
+  <script type="module" src="app-data.js"></script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="checkout.js"></script>
+</body>
+</html>

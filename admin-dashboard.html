@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#22c55e"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Clo-Clo"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tableau de Bord – Clo-Clo Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="admin.css"/>
+  <script src="config.js"></script>
+  <script src="widgets.js"></script>
+  <style>
+    /* Graphiques canvas */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    canvas { width: 100% !important; }
+
+    /* Produits populaires */
+    .product-rank { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+    .product-rank:last-child { border-bottom: none; }
+    .rank-num { width: 36px; height: 36px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
+    .rank-info { flex: 1; }
+    .rank-name { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; }
+    .rank-cmds { font-size: 0.8rem; color: var(--text-gray); font-weight: 500; }
+    .rank-rev  { font-weight: 800; color: var(--green); font-size: 0.95rem; }
+
+    /* Commandes récentes */
+    .cmd-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+    .cmd-item:last-child { border-bottom: none; }
+    .cmd-id   { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; }
+    .cmd-meta { font-size: 0.82rem; color: var(--text-gray); font-weight: 500; margin-top: 2px; }
+    .cmd-right { text-align: right; }
+    .cmd-price { font-weight: 800; color: var(--text-dark); font-size: 0.95rem; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M6 3h12l-1.2 4.8a5 5 0 0 1-4.9 3.9h0a5 5 0 0 1-4.9-3.9Z"/><path d="M12 11.7V21"/><path d="M8 21h8"/><path d="M9 6.2c1 .5 2 .5 3 0s2-.5 3 0"/></svg></div>
+      <div>
+        <div class="sidebar-brand-name">Clo-Clo Admin</div>
+        <div class="sidebar-brand-sub">Espace Directeur</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin-dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tableau de Bord
+      </a>
+            <a href="admin-produits.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12.41V2h10.41l8.18 8.18a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Produits</a>
+<a href="admin-livraisons.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Livraisons en Cours
+      </a>
+      <a href="admin-historique.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Historique
+      </a>
+      <a href="admin-clients.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </a>
+      <a href="admin-livreurs.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Livreurs
+      </a>
+      <a href="admin-traiteur.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        Traiteur
+      </a>
+    </nav>
+    <div class="sidebar-logout">
+      <button class="btn-logout js-admin-logout">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Déconnexion
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ CONTENU ═══ -->
+  <main class="main-content">
+
+    <div class="page-header anim">
+      <h1 class="page-title">Tableau de Bord</h1>
+      <p class="page-sub">Vue d'ensemble des opérations</p>
+    </div>
+
+    <!-- KPI -->
+    <div class="stats-grid stats-grid-4 anim">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#dcfce7;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></div>
+        </div>
+        <div class="stat-label">Revenus du Jour</div>
+        <div class="stat-value" id="stat-revenus">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#fef9c3;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div>
+        </div>
+        <div class="stat-label" id="stat-mois-label">Revenus du Mois</div>
+        <div class="stat-value" id="stat-revenus-mois">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#e0e7ff;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M4 20V10M11 20V4M18 20v-7"/></svg></div>
+        </div>
+        <div class="stat-label" id="stat-annee-label">Revenus de l'Année</div>
+        <div class="stat-value" id="stat-revenus-annee">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#dbeafe;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M6 8h12l1 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>️</div>
+          <span class="stat-badge badge-blue" id="stat-cmd-badge"></span>
+        </div>
+        <div class="stat-label">Commandes</div>
+        <div class="stat-value" id="stat-commandes">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#f3e8ff;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 8.3a2.8 2.8 0 1 1 0-5.6"/><path d="M15 14.6c2.4.5 4.5 2.2 4.5 5.4"/></svg></div>
+          <span class="stat-badge badge-purple" id="stat-clients-badge"></span>
+        </div>
+        <div class="stat-label">Clients Actifs</div>
+        <div class="stat-value" id="stat-clients">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-icon-box" style="background:#fff7ed;"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><rect x="2" y="7" width="11" height="9" rx="1"/><path d="M13 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></div>
+          <span class="stat-badge badge-red" id="stat-livraison-badge"></span>
+        </div>
+        <div class="stat-label">En Livraison</div>
+        <div class="stat-value" id="stat-livreurs">—</div>
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts-grid">
+      <div class="card">
+        <div class="card-title">Ventes de la Semaine</div>
+        <canvas id="chartVentes" height="220"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Commandes Aujourd'hui</div>
+        <canvas id="chartCommandes" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Produits + Commandes récentes -->
+    <div class="bottom-grid">
+      <div class="card">
+        <div class="card-title">Produits Populaires</div>
+        <div id="top-products-list">
+          <p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Chargement…</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Commandes Récentes</div>
+        <div id="recent-orders-list">
+          <p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Chargement…</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
