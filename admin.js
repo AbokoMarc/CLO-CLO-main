@@ -441,7 +441,7 @@ async function initProduits() {
     }
     status.textContent = "Traitement de l'image…";
     try {
-      const dataUrl = await resizeImageToDataUrl(file, 800, 0.72);
+      const dataUrl = await resizeImageToDataUrl(file, 480, 0.55);
       document.getElementById("pf-img").value = dataUrl;
       preview.src = dataUrl;
       preview.style.display = "";
