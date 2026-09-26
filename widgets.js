@@ -22,6 +22,16 @@
 (function () {
   const THEME_KEY = "cloclo_theme";
 
+  /* ---------- Image de secours locale (aucune dépendance réseau) ----------
+     Remplace via.placeholder.com, qui peut être injoignable selon le réseau
+     et fait planter le service worker (fetch échoué → pas de Response). */
+  const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">
+    <rect width="100%" height="100%" fill="#22c55e"/>
+    <text x="50%" y="50%" font-family="sans-serif" font-size="22" font-weight="bold"
+          fill="#ffffff" text-anchor="middle" dominant-baseline="middle">Clo-Clo</text>
+  </svg>`;
+  window.CLOCLO_IMG_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(fallbackSvg);
+
   /* ---------- Styles injectés (widgets + mode sombre) ---------- */
   const style = document.createElement("style");
   style.textContent = `

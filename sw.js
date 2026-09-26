@@ -15,7 +15,7 @@
    fraîches. Seule la coquille statique est mise en cache.
    ============================================================ */
 
-const CACHE_NAME = "cloclo-shell-v3";
+const CACHE_NAME = "cloclo-shell-v4";
 const OFFLINE_URL = "/offline.html";
 
 const SHELL_FILES = [
@@ -89,18 +89,25 @@ self.addEventListener("fetch", (event) => {
 
   // Fichiers statiques (CSS/JS/icônes) : cache d'abord pour un affichage
   // instantané, mise à jour du cache en arrière-plan si le réseau répond.
+  // IMPORTANT : respondWith() DOIT toujours recevoir une vraie Response —
+  // si le fichier n'est ni en cache ni joignable (ex: image externe morte),
+  // on renvoie une réponse d'échec explicite plutôt que "undefined", qui
+  // fait planter le service worker ("Failed to convert value to Response").
   event.respondWith(
     caches.match(req).then((cached) => {
-      const network = fetch(req)
-        .then((res) => {
-          if (res.ok) {
-            const toCache = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, toCache)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || network;
+      if (cached) {
+        // Réponse immédiate depuis le cache ; on rafraîchit en tâche de fond,
+        // sans jamais laisser une erreur réseau remonter jusqu'à respondWith.
+        fetch(req)
+          .then((res) => {
+            if (res.ok) caches.open(CACHE_NAME).then((c) => c.put(req, res.clone())).catch(() => {});
+          })
+          .catch(() => {});
+        return cached;
+      }
+      return fetch(req).catch(
+        () => new Response("", { status: 504, statusText: "Ressource injoignable" })
+      );
     })
   );
 });

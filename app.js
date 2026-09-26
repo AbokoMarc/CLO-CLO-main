@@ -68,7 +68,7 @@ function buildCartItems() {
 
   return APP.cart.map(i => `
     <div class="ci" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f3f4f6;">
-      <img src="${i.img || ''}" onerror="this.src='https://via.placeholder.com/48/22c55e/fff?text=🍹'"
+      <img src="${i.img || ''}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"
         style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;"/>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:0.9rem;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.name}</div>
@@ -298,7 +298,7 @@ function initHamburger() {
 /* ─── IMAGE FALLBACK ─── */
 function initImgFallback() {
   document.querySelectorAll("img:not([onerror])").forEach(img => {
-    img.onerror = function () { this.src = "https://via.placeholder.com/300x200/22c55e/ffffff?text=Clo-Clo"; };
+    img.onerror = function () { this.onerror = null; this.src = window.CLOCLO_IMG_FALLBACK; };
   });
 }
 

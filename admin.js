@@ -360,7 +360,7 @@ function productCardHtml(p) {
   const dispo = p.disponible !== false;
   return `
     <div class="pcard" data-id="${p.id}" style="${dispo ? "" : "opacity:0.55;"}">
-      <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300x160/22c55e/ffffff?text=Clo-Clo'"/>
+      <img src="${p.img}" alt="${p.name}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"/>
       <div class="pcard-body">
         <div class="pcard-name">${p.name}${p.popular ? " ⭐" : ""}</div>
         <div class="pcard-cat">${p.category} · <span style="color:${dispo ? "#22c55e" : "#ef4444"};font-weight:700;">${dispo ? "Disponible" : "Indisponible"}</span></div>
@@ -457,7 +457,7 @@ async function initProduits() {
     const category = document.getElementById("pf-category").value;
     const price = parseInt(document.getElementById("pf-price").value);
     const desc = document.getElementById("pf-desc").value.trim();
-    const img = document.getElementById("pf-img").value.trim() || "https://via.placeholder.com/300x160/22c55e/ffffff?text=Clo-Clo";
+    const img = document.getElementById("pf-img").value.trim() || window.CLOCLO_IMG_FALLBACK;
     const popular = document.getElementById("pf-popular").checked;
 
     if (!name || !price || price <= 0) { errorEl.textContent = "Nom et prix (> 0) sont requis."; return; }
