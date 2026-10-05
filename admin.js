@@ -12,12 +12,45 @@ import { I18n } from "./i18n.js";
 import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
 
+/* ── ICÔNES (remplacent les emojis utilisés précédemment) ──
+   Petites icônes trait, cohérentes avec le reste du site, insérées
+   inline dans les libellés/boutons/toasts via les constantes ci-dessous. */
+const ICON_SVG = (path, extra = "") => `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true">${path}</svg>${extra}`;
+
+const IC = {
+  bell: ICON_SVG(`<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`),
+  globe: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/>`),
+  key: ICON_SVG(`<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>`),
+  menu: ICON_SVG(`<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>`),
+  errorX: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`),
+  check: ICON_SVG(`<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>`),
+  message: ICON_SVG(`<path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 20l1-5.5a8.5 8.5 0 1 1 17-3z"/>`),
+  box: ICON_SVG(`<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>`),
+  alertTriangle: ICON_SVG(`<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`),
+  close: ICON_SVG(`<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`),
+  lock: ICON_SVG(`<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`),
+  unlock: ICON_SVG(`<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>`),
+  star: ICON_SVG(`<polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/>`),
+  edit: ICON_SVG(`<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>`),
+  slash: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/>`),
+  trash: ICON_SVG(`<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>`),
+  money: ICON_SVG(`<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>`),
+  stop: ICON_SVG(`<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>`),
+  phone: ICON_SVG(`<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.4 2.1L8 10.1a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2.1Z"/>`),
+  radar: ICON_SVG(`<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6l16 16"/><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07A10 10 0 0 0 17.01 20.66"/>`),
+  truck: ICON_SVG(`<rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>`),
+  pin: ICON_SVG(`<path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>`),
+};
+
 const page = window.location.pathname;
 
 function showToast(msg, color = "green") {
   document.querySelector(".toast")?.remove();
   const t = document.createElement("div");
-  t.textContent = msg;
+  t.style.display = "flex";
+  t.style.alignItems = "center";
+  t.style.gap = "8px";
+  t.innerHTML = `${color === "red" ? IC.errorX : IC.check}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
     background: color === "red" ? "#ef4444" : "#22c55e",
@@ -54,10 +87,10 @@ function injectAdminToolbar() {
   bar.className = "admin-toolbar";
   bar.innerHTML = `
     <button class="notif-bell" title="Notifications">
-      🔔<span class="notif-badge" style="display:none;"></span>
+      ${IC.bell}<span class="notif-badge" style="display:none;"></span>
     </button>
-    <button class="btn-view-site" title="Voir le site (mode client)">🌐 Voir le site</button>
-    <button class="btn-change-pwd" title="Changer mon mot de passe">🔑 Mon mot de passe</button>`;
+    <button class="btn-view-site" title="Voir le site (mode client)">${IC.globe} Voir le site</button>
+    <button class="btn-change-pwd" title="Changer mon mot de passe">${IC.key} Mon mot de passe</button>`;
   host.appendChild(bar);
   I18n.injectToggle(bar);
   PWA.injectInstallButton(bar);
@@ -73,7 +106,7 @@ function injectSidebarToggle() {
   const btn = document.createElement("button");
   btn.className = "sidebar-toggle";
   btn.setAttribute("aria-label", "Ouvrir le menu");
-  btn.innerHTML = "☰";
+  btn.innerHTML = IC.menu;
   document.body.appendChild(btn);
   const sidebar = document.querySelector(".sidebar");
   btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
@@ -86,10 +119,10 @@ async function handleChangeOwnPassword() {
   const newPwd = prompt("Nouveau mot de passe (8 caractères minimum) :");
   if (!newPwd) return;
   const confirmPwd = prompt("Confirmez le nouveau mot de passe :");
-  if (newPwd !== confirmPwd) { showToast("❌ Les deux mots de passe ne correspondent pas.", "red"); return; }
+  if (newPwd !== confirmPwd) { showToast("Les deux mots de passe ne correspondent pas.", "red"); return; }
   try {
     await AuthService.changePassword(currentPwd, newPwd);
-    showToast("✅ Mot de passe modifié !");
+    showToast("Mot de passe modifié !");
   } catch (err) {
     showToast(err.message || "Impossible de changer le mot de passe.", "red");
   }
@@ -100,17 +133,17 @@ function initAdminNotifications() {
   NotificationService.connect((event, data) => {
     if (!data) return;
     if (event === "livreur:message") {
-      showToast("💬 Nouveau message d'un livreur");
+      showToast("Nouveau message d'un livreur");
       if (document.querySelector(".livreur-chat-panel")) initLivreurs();
       return;
     }
     const order = data;
     if (event === "order:new") {
-      showToast(`🆕 Nouvelle commande CMD-${order.id} (${order.total.toLocaleString()} FCFA)`);
+      showToast(`Nouvelle commande CMD-${order.id} (${order.total.toLocaleString()} FCFA)`);
       if (page.includes("admin-dashboard")) initDashboard();
       if (page.includes("admin-livraisons")) initLivraisons();
     } else if (event === "order:cancelled") {
-      showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
+      showToast(`Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("admin-livraisons")) initLivraisons();
       if (page.includes("admin-historique")) initHistorique();
     } else if (["order:accepted", "order:started", "order:confirmation"].includes(event)) {
@@ -127,7 +160,7 @@ function showSosAlert(order) {
   const banner = document.createElement("div");
   banner.className = "sos-alert";
   banner.innerHTML = `
-    <div>🆘 <strong>ALERTE URGENCE</strong> — ${order.sosBy === "client" ? "Client" : "Livreur"} sur CMD-${order.id}
+    <div>${IC.alertTriangle} <strong>ALERTE URGENCE</strong> — ${order.sosBy === "client" ? "Client" : "Livreur"} sur CMD-${order.id}
     ${order.location?.lat ? `<a href="https://www.google.com/maps?q=${order.location.lat},${order.location.lng}" target="_blank" style="color:white;text-decoration:underline;margin-left:8px;">Voir la position →</a>` : ""}
     </div>
     <button aria-label="Fermer" style="background:none;border:none;color:white;font-size:1.2rem;font-weight:900;cursor:pointer;">✕</button>`;
@@ -268,7 +301,7 @@ function clientCardHtml(c, unlocked) {
     ? `<div class="client-info"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${c.email}</div>
        <div class="client-info"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/></svg>${c.tel}</div>
        <div class="client-info"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.adresse}</div>`
-    : `<div class="client-info" style="color:#9ca3af;">🔒 Coordonnées masquées — déverrouillez pour les voir</div>`;
+    : `<div class="client-info" style="color:#9ca3af;">${IC.lock} Coordonnées masquées — déverrouillez pour les voir</div>`;
   return `
     <div class="client-card anim">
       <div class="client-header">
@@ -284,7 +317,7 @@ function clientCardHtml(c, unlocked) {
       </div>
       <div class="client-body">${contactBlock}</div>
       ${unlocked ? `<div class="client-body" style="padding-top:0;">
-        <button class="btn-reset-pwd" data-id="${c.id}" data-nom="${c.nom}" style="width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">🔑 Réinitialiser le mot de passe</button>
+        <button class="btn-reset-pwd" data-id="${c.id}" data-nom="${c.nom}" style="width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.key} Réinitialiser le mot de passe</button>
       </div>` : ""}
     </div>`;
 }
@@ -299,10 +332,10 @@ function isClientsUnlocked() {
 
 function unlockBarHtml(unlocked) {
   if (unlocked) {
-    return `<div style="grid-column:1/-1;background:#dcfce7;color:#166534;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;">🔓 Coordonnées déverrouillées pour cette session</div>`;
+    return `<div style="grid-column:1/-1;background:#dcfce7;color:#166534;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;">${IC.unlock} Coordonnées déverrouillées pour cette session</div>`;
   }
   return `<div style="grid-column:1/-1;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-    <span style="font-weight:700;font-size:0.85rem;color:#6b7280;">🔒 Coordonnées clients masquées par confidentialité</span>
+    <span style="font-weight:700;font-size:0.85rem;color:#6b7280;">${IC.lock} Coordonnées clients masquées par confidentialité</span>
     <button id="btn-unlock-clients" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:9px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">Déverrouiller</button>
   </div>`;
 }
@@ -325,7 +358,7 @@ async function initClients() {
       try {
         await AdminService.verifyPassword(mdp);
         sessionStorage.setItem(CLIENT_UNLOCK_KEY, "1");
-        showToast("✅ Coordonnées déverrouillées.");
+        showToast("Coordonnées déverrouillées.");
         renderClients();
       } catch (err) {
         showToast(err.status === 401 ? "Mot de passe incorrect." : (err.message || "Erreur, réessayez."), "red");
@@ -337,7 +370,7 @@ async function initClients() {
         if (!confirm(`Réinitialiser le mot de passe de "${btn.dataset.nom}" ?\n\nVérifiez d'abord l'identité du client avant de continuer.`)) return;
         try {
           const { tempPassword } = await AdminService.resetClientPassword(btn.dataset.id);
-          alert(`✅ Mot de passe réinitialisé !\n\nNouveau mot de passe temporaire : ${tempPassword}\n\nCommuniquez-le au client — il ne sera plus jamais affiché.`);
+          alert(`Mot de passe réinitialisé !\n\nNouveau mot de passe temporaire : ${tempPassword}\n\nCommuniquez-le au client — il ne sera plus jamais affiché.`);
         } catch (err) {
           showToast(err.message || "Impossible de réinitialiser ce mot de passe.", "red");
         }
@@ -362,21 +395,29 @@ function productCardHtml(p) {
     <div class="pcard" data-id="${p.id}" style="${dispo ? "" : "opacity:0.55;"}">
       <img src="${p.img}" alt="${p.name}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"/>
       <div class="pcard-body">
-        <div class="pcard-name">${p.name}${p.popular ? " ⭐" : ""}</div>
+        <div class="pcard-name">${p.name}${p.popular ? " " + IC.star : ""}</div>
         <div class="pcard-cat">${p.category} · <span style="color:${dispo ? "#22c55e" : "#ef4444"};font-weight:700;">${dispo ? "Disponible" : "Indisponible"}</span></div>
         <div class="pcard-price">${p.price.toLocaleString()} FCFA</div>
         <div class="pcard-actions">
-          <button class="btn-edit" data-id="${p.id}">✏️ Modifier</button>
-          <button class="btn-toggle-dispo" data-id="${p.id}" data-dispo="${dispo}">${dispo ? "🚫 Marquer indisponible" : "✅ Marquer disponible"}</button>
-          <button class="btn-delete" data-id="${p.id}">🗑️ Supprimer définitivement</button>
+          <button class="btn-edit" data-id="${p.id}">${IC.edit} Modifier</button>
+          <button class="btn-toggle-dispo" data-id="${p.id}" data-dispo="${dispo}">${dispo ? IC.slash + " Marquer indisponible" : IC.check + " Marquer disponible"}</button>
+          <button class="btn-delete" data-id="${p.id}">${IC.trash} Supprimer définitivement</button>
         </div>
       </div>
     </div>`;
 }
 
 async function initProduits() {
-  let products = await ProductService.list();
   const grid = document.getElementById("products-grid-admin");
+  const wakeupNotice = setTimeout(() => {
+    if (grid) grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#9ca3af;font-weight:700;">Le serveur se réveille (peut prendre jusqu'à 45s la première fois)…</p>`;
+  }, 4000);
+  let products;
+  try {
+    products = await ProductService.list();
+  } finally {
+    clearTimeout(wakeupNotice);
+  }
   const modal = document.getElementById("product-modal");
   const errorEl = document.getElementById("pf-error");
 
@@ -394,7 +435,7 @@ async function initProduits() {
       const updated = await ProductService.update(id, { disponible: !currentlyDispo });
       products = products.map(p => p.id === id ? updated : p);
       render();
-      showToast(currentlyDispo ? "🚫 Produit marqué indisponible." : "✅ Produit marqué disponible.");
+      showToast(currentlyDispo ? "Produit marqué indisponible." : "Produit marqué disponible.");
     } catch (err) {
       showToast(err.message || "Impossible de changer la disponibilité.", "red");
     }
@@ -436,7 +477,7 @@ async function initProduits() {
     const status = document.getElementById("pf-img-status");
     const preview = document.getElementById("pf-img-preview");
     if (!file.type.startsWith("image/")) {
-      status.textContent = "⚠️ Merci de choisir un fichier image.";
+      status.textContent = "Merci de choisir un fichier image.";
       return;
     }
     status.textContent = "Traitement de l'image…";
@@ -445,9 +486,9 @@ async function initProduits() {
       document.getElementById("pf-img").value = dataUrl;
       preview.src = dataUrl;
       preview.style.display = "";
-      status.textContent = `✅ Image prête (${Math.round(dataUrl.length / 1024)} Ko environ).`;
+      status.textContent = `Image prête (${Math.round(dataUrl.length / 1024)} Ko environ).`;
     } catch (err) {
-      status.textContent = "❌ Impossible de traiter cette image. Réessayez ou utilisez une URL.";
+      status.textContent = "Impossible de traiter cette image. Réessayez ou utilisez une URL.";
     }
   });
 
@@ -469,11 +510,11 @@ async function initProduits() {
       if (id) {
         const updated = await ProductService.update(id, payload);
         products = products.map(p => p.id === updated.id ? updated : p);
-        showToast("✅ Produit modifié !");
+        showToast("Produit modifié !");
       } else {
         const created = await ProductService.create(payload);
         products.push(created);
-        showToast("✅ Produit ajouté !");
+        showToast("Produit ajouté !");
       }
       render();
       closeModal();
@@ -491,7 +532,7 @@ async function initProduits() {
       await ProductService.remove(id);
       products = products.filter(p => p.id !== id);
       render();
-      showToast("🗑️ Produit retiré.");
+      showToast("Produit retiré.");
     } catch (err) {
       showToast(err.message || "Impossible de retirer ce produit.", "red");
     }
@@ -529,12 +570,12 @@ async function initZones() {
   document.getElementById("btn-add-zone")?.addEventListener("click", async () => {
     const ville = document.getElementById("zone-ville").value.trim();
     const quartier = document.getElementById("zone-quartier").value.trim();
-    if (!ville || !quartier) { showToast("⚠️ Ville et quartier requis.", "red"); return; }
+    if (!ville || !quartier) { showToast("Ville et quartier requis.", "red"); return; }
     try {
       await ProductService.createZone({ ville, quartier });
       document.getElementById("zone-ville").value = "";
       document.getElementById("zone-quartier").value = "";
-      showToast("✅ Zone ajoutée !");
+      showToast("Zone ajoutée !");
       render();
     } catch (err) {
       showToast(err.message || "Impossible d'ajouter cette zone.", "red");
@@ -588,7 +629,7 @@ async function initPromoCodes() {
     if (!Number.isFinite(value) || value <= 0) { showToast("Valeur invalide.", "red"); return; }
     try {
       await AdminService.createPromoCode(code, type, value);
-      showToast("✅ Code promo créé !");
+      showToast("Code promo créé !");
       render();
     } catch (err) { showToast(err.message || "Erreur", "red"); }
   });
@@ -602,7 +643,7 @@ function openLivreurChatPanel(livreurId, livreurNom) {
   panel.className = "livreur-chat-panel";
   panel.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <strong>💬 Chat avec ${livreurNom}</strong>
+      <strong>${IC.message} Chat avec ${livreurNom}</strong>
       <button id="livreur-chat-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
     </div>
     <div id="livreur-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
@@ -663,14 +704,14 @@ function livreurCardHtml(l) {
           <div><div class="lm-label">Véhicule</div><div class="lm-val">${l.vehicule}</div></div>
           <div><div class="lm-label">Paie</div><div class="lm-val">${paieLabel}</div></div>
         </div>
-        <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">💰 Définir la paie</button>
-        <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#22c55e" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#22c55e" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? "✅ Remettre en service" : "⛔ Mettre hors service"}</button>
+        <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.money} Définir la paie</button>
+        <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#22c55e" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#22c55e" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? IC.check + " Remettre en service" : IC.stop + " Mettre hors service"}</button>
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <a class="btn-call-livreur" href="tel:${l.tel}" style="flex:1;text-align:center;background:white;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:none;display:block;">📞 Appeler</a>
-          <button class="btn-chat-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#1a1a2e;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">💬 Contacter</button>
+          <a class="btn-call-livreur" href="tel:${l.tel}" style="flex:1;text-align:center;background:white;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:none;display:block;">${IC.phone} Appeler</a>
+          <button class="btn-chat-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#1a1a2e;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.message} Contacter</button>
         </div>
-        <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🔑 Mot de passe</button>
-        <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">🗑️ Supprimer</button>
+        <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.key} Mot de passe</button>
+        <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.trash} Supprimer</button>
       </div>
     </div>`;
 }
@@ -687,13 +728,13 @@ async function initLivreurs() {
     grid.querySelectorAll(".btn-set-paie").forEach(btn => {
       btn.addEventListener("click", async () => {
         const type = prompt(`Type de paie pour ${btn.dataset.nom} — tapez "journalier" ou "mensuel" :`, "journalier");
-        if (!type || !["journalier", "mensuel"].includes(type.trim())) { showToast("⚠️ Saisissez \"journalier\" ou \"mensuel\".", "red"); return; }
+        if (!type || !["journalier", "mensuel"].includes(type.trim())) { showToast("Saisissez \"journalier\" ou \"mensuel\".", "red"); return; }
         const montantStr = prompt(`Montant de la paie ${type} (FCFA) :`);
         const montant = parseInt(montantStr);
-        if (!montantStr || isNaN(montant) || montant < 0) { showToast("⚠️ Montant invalide.", "red"); return; }
+        if (!montantStr || isNaN(montant) || montant < 0) { showToast("Montant invalide.", "red"); return; }
         try {
           await AdminService.setLivreurPaie(btn.dataset.id, type.trim(), montant);
-          showToast("✅ Paie mise à jour !");
+          showToast("Paie mise à jour !");
           renderLivreurs();
         } catch (err) {
           showToast(err.message || "Impossible de mettre à jour la paie.", "red");
@@ -706,7 +747,7 @@ async function initLivreurs() {
         const nouveauStatut = btn.dataset.statut === "hors_service" ? "disponible" : "hors_service";
         try {
           await AdminService.updateLivreurStatut(btn.dataset.id, nouveauStatut);
-          showToast(nouveauStatut === "hors_service" ? "⛔ Livreur mis hors service." : "✅ Livreur remis en service.");
+          showToast(nouveauStatut === "hors_service" ? "Livreur mis hors service." : "Livreur remis en service.");
           renderLivreurs();
           renderLivreurStats();
         } catch (err) {
@@ -724,7 +765,7 @@ async function initLivreurs() {
         if (!confirm(`Réinitialiser le mot de passe de "${btn.dataset.nom}" ?`)) return;
         try {
           const { matricule, tempPassword } = await AdminService.resetLivreurPassword(btn.dataset.id);
-          alert(`✅ Mot de passe réinitialisé !\n\nMatricule : ${matricule}\nNouveau mot de passe temporaire : ${tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
+          alert(`Mot de passe réinitialisé !\n\nMatricule : ${matricule}\nNouveau mot de passe temporaire : ${tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
         } catch (err) {
           showToast(err.message || "Impossible de réinitialiser ce mot de passe.", "red");
         }
@@ -736,7 +777,7 @@ async function initLivreurs() {
         if (!confirm(`Supprimer définitivement le livreur "${btn.dataset.nom}" ?\n\nCette action est irréversible.`)) return;
         try {
           await AdminService.deleteLivreur(btn.dataset.id);
-          showToast("🗑️ Livreur supprimé.");
+          showToast("Livreur supprimé.");
           renderLivreurs();
           renderLivreurStats();
         } catch (err) {
@@ -757,7 +798,7 @@ async function initLivreurs() {
     const vehicule = prompt("Véhicule (Moto / Voiture) :", "Moto");
     try {
       const created = await AdminService.createLivreur({ nom, tel, vehicule });
-      alert(`✅ Livreur créé !\n\nMatricule : ${created.matricule}\nMot de passe temporaire : ${created.tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
+      alert(`Livreur créé !\n\nMatricule : ${created.matricule}\nMot de passe temporaire : ${created.tempPassword}\n\nCommuniquez ces identifiants au livreur — ce mot de passe ne sera plus jamais affiché.`);
       renderLivreurs();
       renderLivreurStats();
     } catch (err) {
@@ -788,7 +829,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
   const client = clients?.find(c => c.id === o.userId);
   const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
   const locationBlock = o.statut === "en_livraison"
-    ? `<div class="location-block" data-order="${o.id}" style="margin-bottom:14px;font-size:0.82rem;color:#6b7280;font-weight:700;">📡 Chargement des positions…</div>`
+    ? `<div class="location-block" data-order="${o.id}" style="margin-bottom:14px;font-size:0.82rem;color:#6b7280;font-weight:700;">${IC.radar} Chargement des positions…</div>`
     : "";
 
   let actionHtml;
@@ -798,7 +839,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
       ${livreurs.filter(l => l.actif !== false).map(l => `<option value="${l.id}">${l.nom}</option>`).join("")}
     </select>`;
   } else if (o.statut === "en_livraison" && o.confirmedLivreurAt && o.confirmedClientAt && !o.confirmedAdminAt) {
-    actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">✅ Confirmer la livraison</button>`;
+    actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.check} Confirmer la livraison</button>`;
   } else if (o.statut === "en_livraison") {
     const wait = [];
     if (!o.confirmedLivreurAt) wait.push("livreur");
@@ -810,7 +851,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
 
   const chatBlock = o.livreurId && ["acceptee", "en_livraison"].includes(o.statut)
     ? `<details style="margin-top:12px;">
-         <summary style="cursor:pointer;font-weight:800;font-size:0.82rem;color:#3b82f6;">💬 Chat (livreur / client)</summary>
+         <summary style="cursor:pointer;font-weight:800;font-size:0.82rem;color:#3b82f6;">${IC.message} Chat (livreur / client)</summary>
          <div id="chat-messages-${o.id}" data-order="${o.id}" style="max-height:150px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.82rem;">Chargement…</div>
          <div style="display:flex;gap:8px;">
            <input id="chat-input-${o.id}" type="text" placeholder="Écrire un message…" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-size:0.85rem;"/>
@@ -834,7 +875,7 @@ function livraisonBlockHtml(o, livreurs, clients) {
           <div style="font-weight:700;color:#1a1a2e;">${client ? client.nom : "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${o.adresse || "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${items}</div>
-          ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#16a34a;font-weight:800;font-size:0.8rem;text-decoration:none;">📞 Appeler</a>` : ""}
+          ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#16a34a;font-weight:800;font-size:0.8rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
         </div>
         <div>
           <div style="font-size:0.78rem;color:#22c55e;font-weight:800;margin-bottom:4px;">LIVREUR</div>
@@ -865,7 +906,7 @@ async function initLivraisons() {
       if (!sel.value) return;
       try {
         await AdminService.assignOrder(sel.dataset.order, parseInt(sel.value));
-        showToast("🚚 Livreur assigné ! En attente de son acceptation.");
+        showToast("Livreur assigné ! En attente de son acceptation.");
         initLivraisons();
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
@@ -874,7 +915,7 @@ async function initLivraisons() {
     btn.addEventListener("click", async () => {
       try {
         await AdminService.confirmDelivery(btn.dataset.order);
-        showToast("✅ Livraison confirmée et clôturée !");
+        showToast("Livraison confirmée et clôturée !");
         initLivraisons();
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
@@ -885,9 +926,9 @@ async function initLivraisons() {
     try {
       const loc = await AdminService.getLocation(el.dataset.order);
       const parts = [];
-      if (loc.livreur) parts.push(`🛵 Livreur : <a href="https://www.google.com/maps?q=${loc.livreur.lat},${loc.livreur.lng}" target="_blank" style="color:#22c55e;font-weight:800;">voir →</a>`);
-      if (loc.client) parts.push(`📍 Client : <a href="https://www.google.com/maps?q=${loc.client.lat},${loc.client.lng}" target="_blank" style="color:#3b82f6;font-weight:800;">voir →</a>`);
-      el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : "📡 Aucune position partagée pour l'instant.";
+      if (loc.livreur) parts.push(`${IC.truck} Livreur : <a href="https://www.google.com/maps?q=${loc.livreur.lat},${loc.livreur.lng}" target="_blank" style="color:#22c55e;font-weight:800;">voir →</a>`);
+      if (loc.client) parts.push(`${IC.pin} Client : <a href="https://www.google.com/maps?q=${loc.client.lat},${loc.client.lng}" target="_blank" style="color:#3b82f6;font-weight:800;">voir →</a>`);
+      el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : IC.radar + " Aucune position partagée pour l'instant.";
     } catch { el.innerHTML = ""; }
   });
 
@@ -957,7 +998,7 @@ async function initHistorique() {
           <td>${o.items.reduce((s, i) => s + i.qty, 0)}</td>
           <td>${o.total.toLocaleString()} FCFA</td>
           <td>${o.etaMinutes || "-"} min</td>
-          <td><span class="badge ${o.statut === "livree" ? "badge-livre" : "badge-annule"}">${o.statut === "livree" ? "✅ Livré" : "❌ Annulé"}</span></td>
+          <td><span class="badge ${o.statut === "livree" ? "badge-livre" : "badge-annule"}">${o.statut === "livree" ? IC.check + " Livré" : IC.errorX + " Annulé"}</span></td>
         </tr>`).join("")
       : `<tr><td colspan="9" style="text-align:center;color:#9ca3af;font-weight:700;">Aucun historique pour l'instant.</td></tr>`;
   }
@@ -1036,12 +1077,12 @@ function withTimeout(promise, ms, label) {
 document.addEventListener("DOMContentLoaded", async () => {
   let admin;
   try {
-    admin = await withTimeout(requireAdmin(), 12000, "authentification");
+    admin = await withTimeout(requireAdmin(), 45000, "authentification");
   } catch (err) {
     console.error("Erreur d'authentification admin :", err);
     document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
       <div>
-        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">⚠️ Impossible de contacter le serveur.</p>
+        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">${IC.alertTriangle} Impossible de contacter le serveur.</p>
         <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
       </div>
     </div>`;
@@ -1055,12 +1096,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   PWA.subscribeToPush(() => ApiClient.getToken());
 
   try {
-    if (page.includes("admin-dashboard")) await withTimeout(initDashboard(), 10000, "tableau de bord");
-    else if (page.includes("admin-produits")) await withTimeout(initProduits(), 10000, "produits");
-    else if (page.includes("admin-clients")) await withTimeout(initClients(), 10000, "clients");
-    else if (page.includes("admin-livreurs")) await withTimeout(initLivreurs(), 10000, "livreurs");
-    else if (page.includes("admin-livraisons")) await withTimeout(initLivraisons(), 10000, "livraisons");
-    else if (page.includes("admin-historique")) await withTimeout(initHistorique(), 10000, "historique");
+    if (page.includes("admin-dashboard")) await withTimeout(initDashboard(), 45000, "tableau de bord");
+    else if (page.includes("admin-produits")) await withTimeout(initProduits(), 45000, "produits");
+    else if (page.includes("admin-clients")) await withTimeout(initClients(), 45000, "clients");
+    else if (page.includes("admin-livreurs")) await withTimeout(initLivreurs(), 45000, "livreurs");
+    else if (page.includes("admin-livraisons")) await withTimeout(initLivraisons(), 45000, "livraisons");
+    else if (page.includes("admin-historique")) await withTimeout(initHistorique(), 45000, "historique");
   } catch (err) {
     // Ne JAMAIS laisser la page bloquée sur "Chargement…" sans explication —
     // ça ressemblait à un chargement infini alors que c'était une erreur silencieuse.
@@ -1068,7 +1109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const target = document.querySelector(
       "#top-products-list, #recent-orders-list, #products-grid-admin, #clients-grid, #livreurs-grid, #livraisons-list, #hist-body"
     );
-    const message = `⚠️ Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
+    const message = `${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
     if (target) {
       if (target.tagName === "TBODY") target.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</td></tr>`;
       else target.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</p>`;

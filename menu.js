@@ -12,7 +12,7 @@ function cardHtml(p) {
     <div class="product-card" data-category="${p.category}">
       <div class="product-img-wrap">
         <img src="${p.img}" alt="${p.name}"/>
-        ${p.popular ? '<span class="badge-popular">⭐ Populaire</span>' : ""}
+        ${p.popular ? '<span class="badge-popular">Populaire</span>' : ""}
         <span class="product-price">${p.price.toLocaleString()} FCFA</span>
       </div>
       <div class="product-info">

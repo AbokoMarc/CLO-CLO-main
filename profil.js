@@ -38,11 +38,25 @@ function renderProfile() {
   renderNiveau(u.points);
 
   const code = `CL${u.id}`;
+  const link = `${window.location.origin}/inscription.html?ref=${code}`;
   const codeEl = document.getElementById("parrain-code");
   if (codeEl) codeEl.textContent = code;
+  const linkEl = document.getElementById("parrain-link");
+  if (linkEl) linkEl.textContent = link;
+  const copyBtn = document.getElementById("parrain-copy");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(link);
+        showToast("Lien copié.");
+      } catch {
+        showToast("Impossible de copier le lien.", "red");
+      }
+    });
+  }
   const shareEl = document.getElementById("parrain-share");
   if (shareEl) {
-    const msg = `Salut ! Rejoins Clo-Clo 🍹 (jus, smoothies, glaces livrés à Yaoundé) avec mon code de parrainage ${code} lors de ton inscription, on gagne chacun 100 points 🎁`;
+    const msg = `Rejoins Clo-Clo (jus, smoothies, glaces livrés à Yaoundé) via mon lien de parrainage, on gagne chacun 100 points : ${link}`;
     shareEl.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   }
 }

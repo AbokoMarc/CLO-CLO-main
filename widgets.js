@@ -75,8 +75,72 @@
       #cc-whatsapp-float { bottom: 16px; right: 14px; width: 50px; height: 50px; }
       #cc-theme-toggle { bottom: 16px; right: 74px; width: 50px; height: 50px; }
     }
+
+    .cc-bottom-nav {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .cc-bottom-nav {
+        display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 9998;
+        background: #ffffff; border-top: 1px solid #e5e7eb;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+      }
+      html[data-theme="dark"] .cc-bottom-nav { background: #111827; border-top-color: #1f2937; }
+      .cc-bottom-nav-item {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        gap: 2px; padding: 8px 4px 6px; text-decoration: none; color: #9ca3af;
+        font-size: 0.68rem; font-weight: 700;
+      }
+      .cc-bottom-nav-item svg {
+        width: 22px; height: 22px; fill: none; stroke: currentColor;
+        stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      }
+      .cc-bottom-nav-item.cc-active { color: #22c55e; }
+      /* Laisse de la place en bas de page pour que la barre fixe ne
+         recouvre jamais le dernier bloc de contenu (footer, boutons…). */
+      body.cc-has-bottom-nav {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+      }
+      /* Les boutons flottants (WhatsApp / thème) remontent au-dessus de
+         la nouvelle barre plutôt que de passer dessous. */
+      body.cc-has-bottom-nav #cc-whatsapp-float,
+      body.cc-has-bottom-nav #cc-theme-toggle {
+        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+      }
+    }
   `;
   document.head.appendChild(style);
+
+  /* ---------- Barre de navigation mobile (bas d'écran, façon app) ----------
+     Le CSS du site masque .nav-links sous 768px sans jamais proposer
+     d'alternative : sur mobile, Accueil/Menu/Suivi/Traiteur étaient
+     tout simplement inaccessibles. On reprend ces mêmes liens (icône +
+     libellé) pour construire une barre fixe en bas de l'écran, sans
+     toucher aux fichiers HTML qui dupliquent la navbar. */
+  function initMobileNav() {
+    const nav = document.querySelector("nav");
+    const links = nav?.querySelectorAll(".nav-links > li > a");
+    if (!nav || !links || !links.length || document.querySelector(".cc-bottom-nav")) return;
+
+    const path = window.location.pathname.split("/").pop() || "index.html";
+    const bar = document.createElement("div");
+    bar.className = "cc-bottom-nav";
+    links.forEach((a) => {
+      const href = a.getAttribute("href") || "#";
+      const hrefFile = href.split("/").pop();
+      const isActive = hrefFile === path || (hrefFile === "index.html" && (path === "" || path === "index.html"));
+      const icon = a.querySelector("svg")?.outerHTML || "";
+      const label = a.textContent.trim();
+      const item = document.createElement("a");
+      item.href = href;
+      item.className = "cc-bottom-nav-item" + (isActive ? " cc-active" : "");
+      item.innerHTML = `${icon}<span>${label}</span>`;
+      bar.appendChild(item);
+    });
+    document.body.appendChild(bar);
+    document.body.classList.add("cc-has-bottom-nav");
+  }
 
   /* ---------- Mode sombre : appliqué dès que possible (évite le flash blanc) ---------- */
   function applyTheme(theme) {
@@ -127,6 +191,7 @@
   }
 
   function init() {
+    initMobileNav();
     initThemeToggle();
     initWhatsapp();
   }

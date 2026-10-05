@@ -6,6 +6,14 @@ import { AuthService } from "./services/authService.js";
 import { I18n } from "./i18n.js";
 I18n.injectToggle(document.querySelector(".nav-actions"));
 
+// Pré-remplit le code de parrainage si la personne arrive via un lien
+// de type inscription.html?ref=CL12 (partagé depuis le profil d'un ami).
+const refCode = new URLSearchParams(window.location.search).get("ref");
+if (refCode) {
+  const field = document.getElementById("input-parrainage");
+  if (field) { field.value = refCode; field.readOnly = true; }
+}
+
 document.querySelectorAll(".toggle-pwd").forEach(btn => {
   btn.addEventListener("click", () => {
     const input = document.getElementById(btn.dataset.target);

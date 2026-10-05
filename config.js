@@ -13,5 +13,5 @@ window.CLOCLO_CONFIG = {
   API_BASE_URL: isLocal ? "http://localhost:4000/api" : "https://clo-clo-main.onrender.com/api",
   // Numéro WhatsApp affiché par le bouton flottant, au format international
   // SANS le "+" (ex: Cameroun → "237699000000"). Laisser vide pour masquer le bouton.
-  WHATSAPP_NUMBER: "",
+  WHATSAPP_NUMBER: "237699876628",
 };
