@@ -93,8 +93,8 @@ document.getElementById("btn-creer")?.addEventListener("click", async () => {
       codeParrainage: codeParrainage || undefined,
     });
     showToast(codeParrainage
-      ? "🎉 Compte créé ! 150 points offerts (bienvenue + parrainage) !"
-      : "🎉 Compte créé ! 50 points de bienvenue offerts !");
+      ? "Compte créé ! 150 points offerts (bienvenue + parrainage) !"
+      : "Compte créé ! 50 points de bienvenue offerts !");
     setTimeout(() => { window.location.href = "profil.html"; }, 1500);
   } catch (err) {
     btn.textContent = origText;

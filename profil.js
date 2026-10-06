@@ -7,6 +7,8 @@ import { APP } from "./app-data.js";
 import { AuthService } from "./services/authService.js";
 import { ProductService } from "./services/productService.js";
 
+const IC_TRUCK = `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
+
 function sel(s, v) { const el = document.querySelector(s); if (el) el.textContent = v; }
 function val(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
 
@@ -134,7 +136,7 @@ function renderRewards() {
       const rewardId = parseInt(this.dataset.id);
       const cost = parseInt(this.dataset.cost);
       const name = this.dataset.reward;
-      if (APP.user.points < cost) { showToast(`❌ Points insuffisants (${APP.user.points} / ${cost})`, "red"); return; }
+      if (APP.user.points < cost) { showToast(`Points insuffisants (${APP.user.points} / ${cost})`, "red"); return; }
       this.disabled = true;
       try {
         await APP.useReward(rewardId);
@@ -142,7 +144,7 @@ function renderRewards() {
         await loadHistory();
         this.textContent = "✓ Utilisé !";
         this.style.background = "#16a34a";
-        showToast(`🎉 "${name}" appliqué !`, "green");
+        showToast(`"${name}" appliqué !`, "green");
         setTimeout(() => { this.textContent = this.dataset.origText; this.style.background = ""; this.disabled = false; }, 2000);
       } catch (err) {
         this.disabled = false;
@@ -176,7 +178,7 @@ async function loadOrders() {
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap;">
           <div><div style="font-weight:800;font-size:0.9rem;color:#1a1a2e;">CMD-${o.id}</div><div style="font-size:0.8rem;color:#6b7280;">${names.slice(0, 2).join(", ")}${names.length > 2 ? " ..." : ""}</div></div>
           <div style="display:flex;align-items:center;gap:12px;">
-            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#16a34a;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">🔁 Recommander</button>
+            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#16a34a;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC_TRUCK} Recommander</button>
             <div style="text-align:right;"><div style="font-weight:800;color:#22c55e;font-size:0.9rem;">${o.total.toLocaleString()} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div></div>
           </div>
         </div>`;
@@ -188,7 +190,7 @@ async function loadOrders() {
       const order = orders.find(o => String(o.id) === btn.dataset.id);
       if (!order) return;
       APP.reorderItems(order.items);
-      showToast("🔁 Articles ajoutés au panier !");
+      showToast("Articles ajoutés au panier !");
       setTimeout(() => { window.location.href = "checkout.html"; }, 700);
     });
   });
@@ -211,11 +213,11 @@ function initParamsForm() {
     const email = document.getElementById("input-email")?.value.trim();
     const tel = document.getElementById("input-tel")?.value.trim();
     const adresse = document.getElementById("input-adresse")?.value.trim();
-    if (!nom || !email) { showToast("⚠️ Nom et email sont requis.", "red"); return; }
+    if (!nom || !email) { showToast("Nom et email sont requis.", "red"); return; }
     try {
       APP.user = await AuthService.updateProfile({ nom, email, tel, adresse });
       renderProfile();
-      showToast("✅ Modifications enregistrées !");
+      showToast("Modifications enregistrées !");
     } catch (err) {
       showToast(err.message || "Impossible d'enregistrer.", "red");
     }
@@ -225,7 +227,7 @@ function initParamsForm() {
 function initLogout() {
   document.getElementById("btn-logout")?.addEventListener("click", () => {
     if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
-      showToast("👋 À bientôt !");
+      showToast("À bientôt !");
       setTimeout(() => APP.logout(), 900);
     }
   });
@@ -262,7 +264,7 @@ async function initAddresses() {
         try {
           APP.user = await AuthService.removeFavoriteAddress(btn.dataset.id);
           render();
-          showToast("🗑️ Adresse retirée.");
+          showToast("Adresse retirée.");
         } catch (err) {
           showToast(err.message || "Impossible de retirer cette adresse.", "red");
         }
@@ -275,13 +277,13 @@ async function initAddresses() {
     const label = document.getElementById("addr-label").value.trim();
     const quartier = quartierSelect.value;
     const adresse = document.getElementById("addr-adresse").value.trim();
-    if (!adresse || !quartier) { showToast("⚠️ Quartier et adresse précise sont requis.", "red"); return; }
+    if (!adresse || !quartier) { showToast("Quartier et adresse précise sont requis.", "red"); return; }
     try {
       APP.user = await AuthService.addFavoriteAddress({ label, quartier, adresse });
       document.getElementById("addr-label").value = "";
       document.getElementById("addr-adresse").value = "";
       render();
-      showToast("✅ Adresse ajoutée !");
+      showToast("Adresse ajoutée !");
     } catch (err) {
       showToast(err.message || "Impossible d'ajouter cette adresse.", "red");
     }
@@ -303,6 +305,6 @@ document.addEventListener("cloclo:ready", async () => {
 
   if (!sessionStorage.getItem("cloclo_welcomed")) {
     sessionStorage.setItem("cloclo_welcomed", "1");
-    setTimeout(() => showToast(`👋 Bienvenue, ${APP.user.nom.split(" ")[0]} ! Vous avez ${APP.user.points} pts`), 600);
+    setTimeout(() => showToast(`Bienvenue, ${APP.user.nom.split(" ")[0]} ! Vous avez ${APP.user.points} pts`), 600);
   }
 });

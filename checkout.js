@@ -120,7 +120,7 @@ document.addEventListener("cloclo:ready", async () => {
         clientLat: clientCoords?.lat, clientLng: clientCoords?.lng,
         promoCode, scheduledFor,
       });
-      showToast("🎉 Commande confirmée !");
+      showToast("Commande confirmée !");
       setTimeout(() => window.location.href = `suivie.html?order=${order.id}`, 1000);
     } catch (err) {
       btn.disabled = false;

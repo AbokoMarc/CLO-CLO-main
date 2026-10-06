@@ -4,10 +4,22 @@
 import { AuthService } from "./services/authService.js";
 import { ProductService } from "./services/productService.js";
 
+const ICON_SVG = (path) => `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true">${path}</svg>`;
+const IC = {
+  check: ICON_SVG(`<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>`),
+  errorX: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`),
+  box: ICON_SVG(`<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>`),
+  message: ICON_SVG(`<path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 20l1-5.5a8.5 8.5 0 1 1 17-3z"/>`),
+  phone: ICON_SVG(`<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.4 2.1L8 10.1a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2.1Z"/>`),
+};
+
 function showToast(msg, color = "green") {
   document.querySelector(".toast")?.remove();
   const t = document.createElement("div");
-  t.textContent = msg;
+  t.style.display = "flex";
+  t.style.alignItems = "center";
+  t.style.gap = "8px";
+  t.innerHTML = `${color === "red" ? IC.errorX : IC.check}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
     background: color === "red" ? "#ef4444" : "#22c55e",
@@ -28,15 +40,19 @@ async function requireAdmin() {
   return me;
 }
 
+// label : texte brut utilisé dans les <option> (le HTML n'y est jamais
+// interprété par le navigateur, même avec innerHTML) ; icon : utilisée
+// uniquement pour l'affichage riche (span) ailleurs dans la carte.
 const STATUTS = [
-  { value: "nouvelle", label: "🆕 Nouvelle" },
-  { value: "en_negociation", label: "💬 En négociation" },
-  { value: "confirmee", label: "✅ Confirmée" },
-  { value: "refusee", label: "❌ Refusée" },
+  { value: "nouvelle", label: "Nouvelle", icon: IC.box },
+  { value: "en_negociation", label: "En négociation", icon: IC.message },
+  { value: "confirmee", label: "Confirmée", icon: IC.check },
+  { value: "refusee", label: "Refusée", icon: IC.errorX },
 ];
 
 function requestCardHtml(r) {
-  const statutLabel = STATUTS.find(s => s.value === r.statut)?.label || r.statut;
+  const statutDef = STATUTS.find(s => s.value === r.statut);
+  const statutLabel = statutDef ? `${statutDef.icon} ${statutDef.label}` : r.statut;
   return `
     <div class="pcard" data-id="${r.id}" style="padding:18px;">
       <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap;">
@@ -53,7 +69,7 @@ function requestCardHtml(r) {
         </select>
         <input type="number" min="0" class="form-input tr-prix" data-id="${r.id}" placeholder="Prix proposé (FCFA)" value="${r.prixPropose || ""}" style="max-width:200px;"/>
         <button class="btn-submit tr-save" data-id="${r.id}" style="border:none;border-radius:10px;padding:10px 16px;font-weight:800;cursor:pointer;">Enregistrer</button>
-        <a href="https://wa.me/${(r.tel || "").replace(/[^0-9]/g, "")}" target="_blank" rel="noopener" style="color:#25D366;font-weight:800;text-decoration:none;">📞 WhatsApp</a>
+        <a href="https://wa.me/${(r.tel || "").replace(/[^0-9]/g, "")}" target="_blank" rel="noopener" style="color:#25D366;font-weight:800;text-decoration:none;">${IC.phone} WhatsApp</a>
       </div>
     </div>`;
 }

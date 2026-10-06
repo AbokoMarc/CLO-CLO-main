@@ -46,7 +46,7 @@ const DICT = {
   // Comptes / auth
   "Email": "Email", "Mot de passe": "Password", "Téléphone": "Phone",
   "Nom complet": "Full name", "Confirmer le mot de passe": "Confirm password",
-  "🔑 Mon mot de passe": "🔑 My password", "🌐 Voir le site": "🌐 View site",
+  "Mon mot de passe": "My password", "Voir le site": "View site",
 
   // Fidélité
   "Programme de Fidélité": "Loyalty Program", "Points": "Points",
@@ -182,7 +182,7 @@ function applyLang() {
   document.documentElement.lang = currentLang;
   walk(document.body);
   document.querySelectorAll(".lang-toggle").forEach((btn) => {
-    btn.textContent = currentLang === "fr" ? "🇬🇧 EN" : "🇫🇷 FR";
+    btn.textContent = currentLang === "fr" ? "EN" : "FR";
   });
 }
 
@@ -222,7 +222,7 @@ export const I18n = {
       padding: "6px 10px", fontFamily: "'Nunito', sans-serif", fontWeight: "800",
       fontSize: "0.8rem", cursor: "pointer",
     });
-    btn.textContent = currentLang === "fr" ? "🇬🇧 EN" : "🇫🇷 FR";
+    btn.textContent = currentLang === "fr" ? "EN" : "FR";
     btn.addEventListener("click", () => this.toggle());
     container.insertBefore(btn, container.firstChild);
   },

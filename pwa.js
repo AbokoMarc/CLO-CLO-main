@@ -61,16 +61,17 @@ export const PWA = {
     return outcome === "accepted";
   },
 
-  /** Injecte un bouton "📲 Installer l'app" quand c'est possible (Chrome/Edge/
+  /** Injecte un bouton "Installer l'app" quand c'est possible (Chrome/Edge/
       Android/PC), ou une bannière d'instructions manuelles sur iOS Safari. */
   injectInstallButton(container) {
     if (!container || this.isStandalone()) return;
+    const icDownload = `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
 
     if (this.isIos()) {
       if (container.querySelector(".pwa-ios-hint") || localStorage.getItem("cloclo_ios_hint_dismissed")) return;
       const hint = document.createElement("div");
       hint.className = "pwa-ios-hint";
-      hint.innerHTML = `📲 Installez Clo-Clo : appuyez sur <b>Partager</b> puis <b>"Sur l'écran d'accueil"</b> <button aria-label="Fermer" style="background:none;border:none;color:inherit;font-weight:900;cursor:pointer;margin-left:8px;">✕</button>`;
+      hint.innerHTML = `${icDownload} Installez Clo-Clo : appuyez sur <b>Partager</b> puis <b>"Sur l'écran d'accueil"</b> <button aria-label="Fermer" style="background:none;border:none;color:inherit;font-weight:900;cursor:pointer;margin-left:8px;">✕</button>`;
       Object.assign(hint.style, {
         position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9997",
         background: "#1a1a2e", color: "white", textAlign: "center",
@@ -87,7 +88,7 @@ export const PWA = {
 
     const btn = document.createElement("button");
     btn.className = "pwa-install-btn";
-    btn.textContent = "📲 Installer l'app";
+    btn.innerHTML = `${icDownload} Installer l'app`;
     btn.style.display = "none";
     Object.assign(btn.style, {
       background: "white", border: "1.5px solid #e5e7eb", borderRadius: "8px",

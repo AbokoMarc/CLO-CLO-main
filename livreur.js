@@ -12,10 +12,31 @@ import { ApiClient } from "./services/apiClient.js";
 
 const page = window.location.pathname;
 
+/* ── ICÔNES (remplacent les emojis utilisés précédemment) ── */
+const ICON_SVG = (path) => `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true">${path}</svg>`;
+
+const IC = {
+  check: ICON_SVG(`<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>`),
+  errorX: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`),
+  alertTriangle: ICON_SVG(`<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`),
+  stop: ICON_SVG(`<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>`),
+  menu: ICON_SVG(`<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>`),
+  phone: ICON_SVG(`<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.4 2.1L8 10.1a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2.1Z"/>`),
+  message: ICON_SVG(`<path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 20l1-5.5a8.5 8.5 0 1 1 17-3z"/>`),
+  box: ICON_SVG(`<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>`),
+  pin: ICON_SVG(`<path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>`),
+  truck: ICON_SVG(`<rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>`),
+  map: ICON_SVG(`<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>`),
+};
+
 function showToast(msg, color = "green") {
   document.querySelector(".toast")?.remove();
   const t = document.createElement("div");
-  t.textContent = msg;
+  t.style.display = "flex";
+  t.style.alignItems = "center";
+  t.style.gap = "8px";
+  const icon = color === "red" ? IC.errorX : color === "orange" ? IC.alertTriangle : IC.check;
+  t.innerHTML = `${icon}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
     background: color === "red" ? "#ef4444" : color === "orange" ? "#f97316" : "#22c55e",
@@ -55,7 +76,7 @@ function fillProfile(livreur) {
   if (toggleBtn) {
     let actif = livreur.actif !== false;
     function paintToggle() {
-      toggleBtn.textContent = actif ? "✅ Actif" : "⛔ Inactif";
+      toggleBtn.innerHTML = actif ? `${IC.check} Actif` : `${IC.stop} Inactif`;
       toggleBtn.style.background = actif ? "#dcfce7" : "#fef3c7";
       toggleBtn.style.color = actif ? "#16a34a" : "#d97706";
       toggleBtn.style.borderColor = actif ? "#16a34a" : "#d97706";
@@ -66,7 +87,7 @@ function fillProfile(livreur) {
       paintToggle();
       try {
         await DeliveryService.setActif(actif);
-        showToast(actif ? "✅ Vous êtes actif — visible par l'admin." : "⛔ Vous êtes marqué inactif.");
+        showToast(actif ? "Vous êtes actif — visible par l'admin." : "Vous êtes marqué inactif.");
       } catch (err) {
         actif = !actif; paintToggle();
         showToast(err.message || "Erreur", "red");
@@ -113,7 +134,7 @@ function initPhotoUpload(livreur) {
         try {
           await DeliveryService.setPhoto(dataUrl);
           showPhoto(dataUrl);
-          showToast("✅ Photo de profil mise à jour !");
+          showToast("Photo de profil mise à jour !");
         } catch (err) {
           showToast(err.message || "Impossible d'enregistrer la photo.", "red");
         }
@@ -137,7 +158,7 @@ function injectSidebarToggle() {
   const btn = document.createElement("button");
   btn.className = "sidebar-toggle";
   btn.setAttribute("aria-label", "Ouvrir le menu");
-  btn.innerHTML = "☰";
+  btn.innerHTML = IC.menu;
   document.body.appendChild(btn);
   const sidebar = document.querySelector(".sidebar");
   btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
@@ -154,7 +175,7 @@ function injectAdminChatButton(livreurId) {
     const callBtn = document.createElement("a");
     callBtn.href = `tel:${tel}`;
     callBtn.className = "admin-call-fab";
-    callBtn.innerHTML = "📞";
+    callBtn.innerHTML = IC.phone;
     callBtn.title = "Appeler l'administrateur";
     Object.assign(callBtn.style, {
       position: "fixed", bottom: "86px", right: "22px", zIndex: "9990",
@@ -168,7 +189,7 @@ function injectAdminChatButton(livreurId) {
 
   const fab = document.createElement("button");
   fab.className = "admin-chat-fab";
-  fab.innerHTML = "💬";
+  fab.innerHTML = IC.message;
   fab.title = "Contacter l'administrateur";
   Object.assign(fab.style, {
     position: "fixed", bottom: "22px", right: "22px", zIndex: "9990",
@@ -181,7 +202,7 @@ function injectAdminChatButton(livreurId) {
 
   NotificationService.connect((event) => {
     if (event === "livreur:message") {
-      showToast("💬 Nouveau message de l'admin");
+      showToast("Nouveau message de l'admin");
       if (document.querySelector(".admin-chat-panel")) openAdminChatPanel(livreurId);
     }
   });
@@ -193,7 +214,7 @@ function openAdminChatPanel(livreurId) {
   panel.className = "admin-chat-panel";
   panel.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <strong>💬 Chat avec l'administrateur</strong>
+      <strong>${IC.message} Chat avec l'administrateur</strong>
       <button id="admin-chat-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
     </div>
     <div id="admin-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
@@ -239,17 +260,17 @@ function initLivreurNotifications(livreur) {
   NotificationService.connect((event, order) => {
     if (!order) return;
     if (event === "order:new") {
-      notifLog.unshift({ text: `🆕 Nouvelle demande de livraison — CMD-${order.id}`, at: new Date() });
-      showToast(`🆕 Nouvelle demande de livraison — CMD-${order.id}`, "orange");
+      notifLog.unshift({ text: `${IC.box} Nouvelle demande de livraison — CMD-${order.id}`, at: new Date() });
+      showToast(`Nouvelle demande de livraison — CMD-${order.id}`, "orange");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
     } else if (event === "order:cancelled" && Number(order.livreurId) === Number(livreur.id)) {
-      notifLog.unshift({ text: `❌ Commande CMD-${order.id} annulée par le client.`, at: new Date() });
-      showToast(`❌ Commande CMD-${order.id} annulée par le client.`, "red");
+      notifLog.unshift({ text: `${IC.errorX} Commande CMD-${order.id} annulée par le client.`, at: new Date() });
+      showToast(`Commande CMD-${order.id} annulée par le client.`, "red");
       if (page.includes("livreur-dashboard")) initDashboard(livreur);
       if (page.includes("livreur-livraison")) initLivraison();
     } else if (event === "order:sos") {
-      notifLog.unshift({ text: `🆘 Alerte urgence — CMD-${order.id}`, at: new Date() });
-      showToast(`🆘 ALERTE URGENCE — CMD-${order.id}`, "red");
+      notifLog.unshift({ text: `${IC.alertTriangle} Alerte urgence — CMD-${order.id}`, at: new Date() });
+      showToast(`ALERTE URGENCE — CMD-${order.id}`, "red");
     }
   });
 
@@ -309,7 +330,7 @@ async function initDashboard(livreur) {
       <div class="delivery-current" style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
         <div style="font-weight:900;font-size:1.1rem;color:#1a1a2e;margin-bottom:6px;">Livraison en cours — CMD-${o.id}</div>
         <div style="color:#6b7280;font-weight:600;margin-bottom:10px;">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</div>
-        <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">📍 ${o.adresse}</div>
+        <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">${IC.pin} ${o.adresse}</div>
         <a href="livreur-livraison.html" style="display:inline-block;background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 20px;font-weight:800;text-decoration:none;">Voir le détail →</a>
       </div>`).join("");
   }
@@ -319,7 +340,7 @@ async function initDashboard(livreur) {
       <div class="demande-card" style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
         <div style="font-weight:900;font-size:1.05rem;color:#1a1a2e;margin-bottom:6px;">Nouvelle demande — CMD-${o.id}</div>
         <div style="color:#6b7280;font-weight:600;margin-bottom:10px;">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</div>
-        <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">📍 ${o.adresse}</div>
+        <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">${IC.pin} ${o.adresse}</div>
         <div style="display:flex;gap:10px;">
           <button class="btn-accept" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Accepter</button>
         </div>
@@ -334,7 +355,7 @@ async function initDashboard(livreur) {
         // Étape 1/2 seulement : accepter n'active PAS encore le GPS, ça ouvre juste le chat.
         // Le vrai démarrage (avec GPS) se fait depuis la page livreur-livraison.html.
         await DeliveryService.accept(btn.dataset.order);
-        showToast("✅ Demande acceptée ! Le chat est ouvert.");
+        showToast("Demande acceptée ! Le chat est ouvert.");
         setTimeout(() => window.location.href = "livreur-livraison.html", 900);
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
@@ -355,16 +376,16 @@ async function initLivraison() {
   const alreadyConfirmed = !!order.confirmedLivreurAt;
   const actionButton =
     order.statut === "assignee"
-      ? `<button id="btn-accept" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✅ Accepter la livraison</button>`
+      ? `<button id="btn-accept" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} Accepter la livraison</button>`
       : order.statut === "acceptee"
-      ? `<button id="btn-start" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🛵 Démarrer la livraison</button>`
+      ? `<button id="btn-start" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.truck} Démarrer la livraison</button>`
       : alreadyConfirmed
-      ? `<div style="flex:1;text-align:center;color:#22c55e;font-weight:800;padding:12px;">✅ Livraison confirmée — en attente du client et de l'admin</div>`
-      : `<button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">✓ J'ai livré la commande</button>`;
+      ? `<div style="flex:1;text-align:center;color:#22c55e;font-weight:800;padding:12px;">${IC.check} Livraison confirmée — en attente du client et de l'admin</div>`
+      : `<button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} J'ai livré la commande</button>`;
 
   const chatBlock = ["acceptee", "en_livraison"].includes(order.statut)
     ? `<div style="margin-top:20px;border-top:1px solid #f3f4f6;padding-top:16px;">
-         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:8px;">💬 CHAT AVEC LE CLIENT</div>
+         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:8px;">${IC.message} CHAT AVEC LE CLIENT</div>
          <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:8px;font-size:0.85rem;"></div>
          <div style="display:flex;gap:8px;">
            <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
@@ -379,7 +400,7 @@ async function initLivraison() {
       <div style="color:#6b7280;font-weight:600;margin-bottom:18px;">Total : ${order.total.toLocaleString()} FCFA</div>
       <div style="margin-bottom:16px;">
         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:4px;">ADRESSE DE LIVRAISON</div>
-        <div style="font-weight:700;color:#1a1a2e;">📍 ${order.adresse}</div>
+        <div style="font-weight:700;color:#1a1a2e;">${IC.pin} ${order.adresse}</div>
       </div>
       <div style="margin-bottom:22px;">
         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:6px;">ARTICLES</div>
@@ -388,11 +409,11 @@ async function initLivraison() {
         </ul>
       </div>
       <div style="display:flex;gap:10px;">
-        <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">🗺️ Itinéraire</button>
+        <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.map}️ Itinéraire</button>
         ${actionButton}
       </div>
-      ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#dcfce7;color:#16a34a;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">📞 Appeler ${order.clientContact.nom}</a>` : ""}
-      ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">🆘 SOS urgence</button>` : ""}
+      ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#dcfce7;color:#16a34a;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">${IC.phone} Appeler ${order.clientContact.nom}</a>` : ""}
+      ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.alertTriangle} SOS urgence</button>` : ""}
       <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
       ${chatBlock}
     </div>`;
@@ -410,7 +431,7 @@ async function initLivraison() {
     e.target.textContent = "Envoi…";
     try {
       await DeliveryService.accept(order.id);
-      showToast("✅ Livraison acceptée — le chat est maintenant ouvert.");
+      showToast("Livraison acceptée — le chat est maintenant ouvert.");
       initLivraison();
     } catch (err) {
       e.target.disabled = false;
@@ -423,7 +444,7 @@ async function initLivraison() {
     e.target.textContent = "Envoi…";
     try {
       await DeliveryService.start(order.id);
-      showToast("🛵 Livraison démarrée — position partagée.");
+      showToast("Livraison démarrée — position partagée.");
       initLivraison();
     } catch (err) {
       e.target.disabled = false;
@@ -437,7 +458,7 @@ async function initLivraison() {
     try {
       await DeliveryService.confirmDelivered(order.id);
       stopLocationSharing();
-      showToast("✅ Confirmé ! En attente de la confirmation du client et de l'admin.");
+      showToast("Confirmé ! En attente de la confirmation du client et de l'admin.");
       initLivraison();
     } catch (err) {
       e.target.disabled = false;
@@ -450,11 +471,11 @@ async function initLivraison() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await DeliveryService.sos(order.id, pos.coords.latitude, pos.coords.longitude).catch(() => {});
-        showToast("🆘 Alerte envoyée.", "red");
+        showToast("Alerte envoyée.", "red");
       },
       async () => {
         await DeliveryService.sos(order.id).catch(() => {});
-        showToast("🆘 Alerte envoyée (sans position).", "red");
+        showToast("Alerte envoyée (sans position).", "red");
       }
     );
   });
@@ -510,7 +531,7 @@ let locationIntervalId = null;
 function startLocationSharing(orderId) {
   const statusEl = document.getElementById("location-share-status");
   if (!navigator.geolocation) {
-    if (statusEl) statusEl.textContent = "⚠️ Géolocalisation non disponible sur cet appareil.";
+    if (statusEl) statusEl.textContent = "Géolocalisation non disponible sur cet appareil.";
     return;
   }
   const sendPosition = () => {
@@ -518,10 +539,10 @@ function startLocationSharing(orderId) {
       async (pos) => {
         try {
           await DeliveryService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude);
-          if (statusEl) statusEl.textContent = "📍 Position partagée avec le client et l'admin";
+          if (statusEl) statusEl.textContent = "Position partagée avec le client et l'admin";
         } catch { /* silencieux — pas grave si un envoi échoue, le suivant réessaiera */ }
       },
-      () => { if (statusEl) statusEl.textContent = "⚠️ Partage de position refusé — activez la localisation pour que le client vous suive."; },
+      () => { if (statusEl) statusEl.textContent = "Partage de position refusé — activez la localisation pour que le client vous suive."; },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   };
@@ -566,7 +587,7 @@ async function initHistorique() {
             ${o.statut === "livree" ? `<div style="color:#9ca3af;font-size:0.78rem;margin-top:2px;">Encaissé chez le client : ${o.total.toLocaleString()} FCFA${o.tip ? ` · Pourboire reçu : ${o.tip.toLocaleString()} FCFA` : ""}${o.rating ? ` · ${"⭐".repeat(o.rating)}` : ""}</div>` : ""}
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:800;color:${o.statut === "livree" ? "#22c55e" : "#ef4444"};">${o.statut === "livree" ? "✅ Livrée" : "❌ Annulée"}</div>
+            <div style="font-weight:800;color:${o.statut === "livree" ? "#22c55e" : "#ef4444"};">${o.statut === "livree" ? IC.check + " Livrée" : IC.errorX + " Annulée"}</div>
             <div style="color:#9ca3af;font-size:0.8rem;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div>
           </div>
         </div>
@@ -639,7 +660,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erreur d'authentification livreur :", err);
     document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
       <div>
-        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">⚠️ Impossible de contacter le serveur.</p>
+        <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">${IC.alertTriangle} Impossible de contacter le serveur.</p>
         <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
       </div>
     </div>`;
@@ -661,7 +682,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erreur de chargement de la page livreur :", err);
     const target = document.getElementById("livreur-content") || document.getElementById("livraison-content") || document.getElementById("histo-list");
     if (target) {
-      target.innerHTML = `<p style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">⚠️ Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button onclick="window.location.reload()" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button></p>`;
+      target.innerHTML = `<p style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button onclick="window.location.reload()" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button></p>`;
     }
   }
 });

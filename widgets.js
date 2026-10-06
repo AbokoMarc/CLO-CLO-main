@@ -182,7 +182,7 @@
 
     const link = document.createElement("a");
     link.id = "cc-whatsapp-float";
-    link.href = `https://wa.me/${number}?text=${encodeURIComponent("Bonjour Clo-Clo, j'ai une question 🍹")}`;
+    link.href = `https://wa.me/${number}?text=${encodeURIComponent("Bonjour Clo-Clo, j'ai une question")}`;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     link.setAttribute("aria-label", "Nous contacter sur WhatsApp");

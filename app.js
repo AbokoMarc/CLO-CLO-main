@@ -10,15 +10,42 @@ import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
 
 /* ─── TOAST ─── */
+function ICON_SVG(path) {
+  return `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true">${path}</svg>`;
+}
+const IC = {
+  cart: ICON_SVG(`<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>`),
+  bell: ICON_SVG(`<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`),
+  box: ICON_SVG(`<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>`),
+  eye: ICON_SVG(`<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>`),
+  back: ICON_SVG(`<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>`),
+  menu: ICON_SVG(`<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>`),
+  radar: ICON_SVG(`<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6l16 16"/><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07A10 10 0 0 0 17.01 20.66"/>`),
+};
+
+const TOAST_ICON = {
+  success: ICON_SVG(`<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>`),
+  error: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`),
+  warning: ICON_SVG(`<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`),
+  info: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`),
+};
 window.showToast = function (msg, type = "success") {
   document.querySelector(".toast-g")?.remove();
+  // "red"/"green" sont acceptés en alias — plusieurs pages du site les
+  // utilisent directement au lieu de "error"/"success" ; avant ce correctif,
+  // un toast appelé avec "red" tombait sur aucune clé connue et s'affichait
+  // donc en vert par défaut (bug silencieux sur les alertes SOS notamment).
+  const normalizedType = type === "red" ? "error" : type === "green" ? "success" : type;
   const colors = { success: "#22c55e", error: "#ef4444", warning: "#f97316", info: "#3b82f6" };
   const t = document.createElement("div");
   t.className = "toast-g";
-  t.textContent = msg;
+  t.style.display = "flex";
+  t.style.alignItems = "center";
+  t.style.gap = "8px";
+  t.innerHTML = `${TOAST_ICON[normalizedType] || TOAST_ICON.success}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "28px", right: "28px",
-    background: colors[type] || "#22c55e",
+    background: colors[normalizedType] || "#22c55e",
     color: "white", padding: "13px 22px", borderRadius: "14px",
     fontFamily: "'Nunito',sans-serif", fontWeight: "700", fontSize: "0.93rem",
     boxShadow: "0 8px 28px rgba(0,0,0,0.18)", zIndex: "99999",
@@ -64,7 +91,7 @@ window.updateNavbar = function () {
 /* ─── MINI-PANIER ─── */
 function buildCartItems() {
   if (APP.cart.length === 0)
-    return `<div style="text-align:center;padding:48px 0;color:#9ca3af;font-size:0.92rem;font-weight:600;">🛒 Votre panier est vide</div>`;
+    return `<div style="text-align:center;padding:48px 0;color:#9ca3af;font-size:0.92rem;font-weight:600;">${IC.cart} Votre panier est vide</div>`;
 
   return APP.cart.map(i => `
     <div class="ci" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f3f4f6;">
@@ -102,7 +129,7 @@ function refreshMiniCart() {
   const wrap = document.getElementById("mc-items");
   const title = document.getElementById("mc-title");
   if (wrap) wrap.innerHTML = buildCartItems();
-  if (title) title.textContent = `🛒 Panier (${APP.getCartCount()})`;
+  if (title) title.innerHTML = `${IC.cart} Panier (${APP.getCartCount()})`;
   window.updateNavbar();
 }
 
@@ -146,7 +173,7 @@ window.openMiniCart = function () {
   panel.innerHTML = `
     <div style="padding:22px 22px 100px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <h2 id="mc-title" style="font-size:1.1rem;font-weight:900;color:#1a1a2e;">🛒 Panier (${APP.getCartCount()})</h2>
+        <h2 id="mc-title" style="font-size:1.1rem;font-weight:900;color:#1a1a2e;">${IC.cart} Panier (${APP.getCartCount()})</h2>
         <button onclick="closeMiniCart()" style="background:#f3f4f6;border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:1rem;">✕</button>
       </div>
       <div id="mc-items">${buildCartItems()}</div>
@@ -229,7 +256,7 @@ function initLoader() {
 const STATUT_LABEL_CLIENT = {
   en_preparation: "en préparation",
   en_livraison: "en route",
-  livree: "livrée 🎉",
+  livree: "livrée",
   annulee: "annulée",
 };
 
@@ -239,7 +266,7 @@ function initNotifBell() {
   const bell = document.createElement("button");
   bell.className = "notif-bell";
   bell.title = "Notifications";
-  bell.innerHTML = `🔔<span class="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border-radius:10px;min-width:16px;height:16px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px;"></span>`;
+  bell.innerHTML = `${IC.bell}<span class="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border-radius:10px;min-width:16px;height:16px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px;"></span>`;
   Object.assign(bell.style, {
     position: "relative", background: "none", border: "none",
     fontSize: "1.15rem", cursor: "pointer", padding: "4px 8px",
@@ -257,7 +284,7 @@ function initClientNotifications() {
       showToast(`❌ Commande CMD-${order.id} annulée.`, "warning");
     } else {
       const label = STATUT_LABEL_CLIENT[order.statut] || order.statut;
-      showToast(`📦 Commande CMD-${order.id} : ${label}`, "info");
+      showToast(`${IC.box} Commande CMD-${order.id} : ${label}`, "info");
     }
   });
 }
@@ -267,7 +294,7 @@ function initAdminReturnBanner() {
   if (APP.user?.role !== "admin" || document.querySelector(".admin-return-banner")) return;
   const banner = document.createElement("div");
   banner.className = "admin-return-banner";
-  banner.innerHTML = `👁️ Vous consultez le site en tant qu'administrateur — <a href="admin-dashboard.html">🔙 Retour au tableau de bord</a>`;
+  banner.innerHTML = `${IC.eye} Vous consultez le site en tant qu'administrateur — <a href="admin-dashboard.html">${IC.back} Retour au tableau de bord</a>`;
   Object.assign(banner.style, {
     position: "fixed", top: "0", left: "0", right: "0", zIndex: "9998",
     background: "#1a1a2e", color: "white", textAlign: "center",
@@ -284,7 +311,7 @@ function initHamburger() {
   const nav = document.querySelector("nav"); if (!nav) return;
   if (document.querySelector(".hamburger")) return;
   const btn = document.createElement("button"); btn.className = "hamburger";
-  btn.innerHTML = "☰";
+  btn.innerHTML = IC.menu;
   Object.assign(btn.style, { display: "none", background: "none", border: "none", color: "white", fontSize: "1.5rem", cursor: "pointer", padding: "4px 8px" });
   if (!document.getElementById("hbg-style")) {
     const s = document.createElement("style"); s.id = "hbg-style";
@@ -343,7 +370,7 @@ function showOfflineBanner() {
   if (document.querySelector(".offline-banner")) return;
   const banner = document.createElement("div");
   banner.className = "offline-banner";
-  banner.innerHTML = `📡 Connexion instable ou hors ligne — certaines données peuvent être indisponibles. <button id="btn-retry-online">Réessayer</button>`;
+  banner.innerHTML = `${IC.radar} Connexion instable ou hors ligne — certaines données peuvent être indisponibles. <button id="btn-retry-online">Réessayer</button>`;
   Object.assign(banner.style, {
     position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
     background: "#1a1a2e", color: "white", textAlign: "center",

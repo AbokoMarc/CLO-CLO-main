@@ -8,6 +8,20 @@ import { APP } from "./app-data.js";
 import { OrderService } from "./services/orderService.js";
 import { NotificationService } from "./services/notificationService.js";
 
+/* ── ICÔNES (remplacent les emojis utilisés précédemment) ── */
+const ICON_SVG = (path) => `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true">${path}</svg>`;
+const IC = {
+  check: ICON_SVG(`<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/>`),
+  errorX: ICON_SVG(`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`),
+  close: ICON_SVG(`<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`),
+  alertTriangle: ICON_SVG(`<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`),
+  phone: ICON_SVG(`<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 3a2 2 0 0 1-.4 2.1L8 10.1a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2-.5c1 .3 2 .5 3 .7a2 2 0 0 1 1.7 2.1Z"/>`),
+  message: ICON_SVG(`<path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-4-1L3 20l1-5.5a8.5 8.5 0 1 1 17-3z"/>`),
+  pin: ICON_SVG(`<path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>`),
+  truck: ICON_SVG(`<rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>`),
+  radar: ICON_SVG(`<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6l16 16"/><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07A10 10 0 0 0 17.01 20.66"/>`),
+};
+
 const STEP_LABELS = ["Préparation", "Acceptée", "En Route", "Livré"];
 const STATUS_PROGRESS = { en_preparation: 1, assignee: 1, acceptee: 2, en_livraison: 3, livree: 4, annulee: 0 };
 const STATUT_LABEL = {
@@ -20,14 +34,14 @@ function activeOrderHtml(o) {
   const step = STATUS_PROGRESS[o.statut] ?? 1;
   const pct = Math.round((step / 4) * 100);
   const cancelBtn = o.statut === "en_preparation"
-    ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">✕ Annuler ma commande</button>`
+    ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">${IC.close} Annuler ma commande</button>`
     : "";
 
   const locationBlock = o.statut === "en_livraison"
     ? `<div class="detail-block" id="location-block" style="grid-column:1/-1;">
          <div class="detail-title">Localisation en direct</div>
          <div id="tracking-map" style="height:220px;border-radius:12px;overflow:hidden;margin-top:6px;background:#f4f4f5;"></div>
-         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-top:8px;">📡 En attente de la position du livreur…</div>
+         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-top:8px;">${IC.radar} En attente de la position du livreur…</div>
          <div id="eta-live" style="color:#22c55e;font-weight:800;font-size:0.95rem;margin-top:6px;"></div>
        </div>`
     : "";
@@ -35,13 +49,13 @@ function activeOrderHtml(o) {
   const chatBlock = (o.statut === "acceptee" || o.statut === "en_livraison")
     ? `<div class="detail-block" style="grid-column:1/-1;">
          ${o.livreurContact ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-           <div style="width:44px;height:44px;border-radius:50%;background:${o.livreurContact.photoUrl ? `url(${o.livreurContact.photoUrl})` : "#e5e7eb"};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;">${!o.livreurContact.photoUrl ? "🛵" : ""}</div>
+           <div style="width:44px;height:44px;border-radius:50%;background:${o.livreurContact.photoUrl ? `url(${o.livreurContact.photoUrl})` : "#e5e7eb"};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;">${!o.livreurContact.photoUrl ? IC.truck : ""}</div>
            <div>
              <div style="font-weight:800;color:#1a1a2e;">${o.livreurContact.nom}</div>
-             ${o.livreurContact.tel ? `<a href="tel:${o.livreurContact.tel}" style="color:#16a34a;font-weight:700;font-size:0.82rem;text-decoration:none;">📞 Appeler</a>` : ""}
+             ${o.livreurContact.tel ? `<a href="tel:${o.livreurContact.tel}" style="color:#16a34a;font-weight:700;font-size:0.82rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
            </div>
          </div>` : ""}
-         <div class="detail-title">💬 Chat avec le livreur</div>
+         <div class="detail-title">${IC.message} Chat avec le livreur</div>
          <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.85rem;"></div>
          <div style="display:flex;gap:8px;">
            <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
@@ -53,12 +67,12 @@ function activeOrderHtml(o) {
   const confirmBlock = (o.statut === "en_livraison" && o.confirmedLivreurAt && !o.confirmedClientAt)
     ? `<div style="grid-column:1/-1;background:#fef9c3;border-radius:12px;padding:16px;text-align:center;">
          <div style="font-weight:800;color:#92400e;margin-bottom:10px;">Le livreur indique avoir livré votre commande.</div>
-         <button id="btn-confirm-received" data-id="${o.id}" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 24px;font-weight:800;cursor:pointer;">✅ J'ai bien reçu ma commande</button>
+         <button id="btn-confirm-received" data-id="${o.id}" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 24px;font-weight:800;cursor:pointer;">${IC.check} J'ai bien reçu ma commande</button>
        </div>`
     : "";
 
   const sosBlock = o.statut === "en_livraison"
-    ? `<button id="btn-sos" data-id="${o.id}" style="grid-column:1/-1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">🆘 SOS urgence</button>`
+    ? `<button id="btn-sos" data-id="${o.id}" style="grid-column:1/-1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">${IC.alertTriangle} SOS urgence</button>`
     : "";
 
   const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
@@ -94,7 +108,7 @@ function activeOrderHtml(o) {
         </div>
         <div class="detail-block">
           <div class="detail-title">Adresse de Livraison</div>
-          <div class="address-row">📍 ${o.adresse || "—"}</div>
+          <div class="address-row">${IC.pin} ${o.adresse || "—"}</div>
         </div>
         ${locationBlock}
         ${confirmBlock}
@@ -116,10 +130,10 @@ function recentOrderHtml(o) {
         ${o.rating ? `<div style="color:#f59e0b;font-size:0.8rem;">${"★".repeat(o.rating)}${"☆".repeat(5 - o.rating)}</div>` : ""}
       </div>
       <div class="recent-right">
-        <div class="badge-livre">${o.statut === "livree" ? "✅ Livré" : o.statut === "annulee" ? "❌ Annulé" : "🚚 " + (STATUT_LABEL[o.statut] || o.statut)}</div>
+        <div class="badge-livre">${o.statut === "livree" ? IC.check + " Livré" : o.statut === "annulee" ? IC.errorX + " Annulé" : IC.truck + " " + (STATUT_LABEL[o.statut] || o.statut)}</div>
         <div class="recent-price">${o.total.toLocaleString()} FCFA</div>
         ${needsRating ? `<button class="btn-rate" data-id="${o.id}" style="margin-top:6px;background:#f59e0b;color:white;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">⭐ Noter</button>` : ""}
-        ${o.statut === "livree" ? `<button class="btn-reorder" data-id="${o.id}" style="margin-top:6px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">🔁 Recommander</button>` : ""}
+        ${o.statut === "livree" ? `<button class="btn-reorder" data-id="${o.id}" style="margin-top:6px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC.truck} Recommander</button>` : ""}
       </div>
     </div>`;
 }
@@ -162,7 +176,7 @@ async function loadSuivi() {
     } catch (err) {
       alert(err.message || "Impossible d'annuler cette commande.");
       btn.disabled = false;
-      btn.textContent = "✕ Annuler ma commande";
+      btn.innerHTML = `${IC.close} Annuler ma commande`;
     }
   });
 
@@ -172,7 +186,7 @@ async function loadSuivi() {
     btn.textContent = "Confirmation…";
     try {
       await OrderService.confirmReceived(btn.dataset.id);
-      showToast("✅ Merci ! En attente de la confirmation finale de l'administrateur.");
+      showToast("Merci ! En attente de la confirmation finale de l'administrateur.");
       await loadSuivi();
     } catch (err) {
       alert(err.message || "Erreur.");
@@ -186,11 +200,11 @@ async function loadSuivi() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await OrderService.sos(orderIdSos, pos.coords.latitude, pos.coords.longitude).catch(() => {});
-        showToast("🆘 Alerte envoyée.", "red");
+        showToast("Alerte envoyée.", "red");
       },
       async () => {
         await OrderService.sos(orderIdSos).catch(() => {});
-        showToast("🆘 Alerte envoyée (sans position).", "red");
+        showToast("Alerte envoyée (sans position).", "red");
       }
     );
   });
@@ -209,10 +223,10 @@ async function loadSuivi() {
         }
       }
       if (added === 0) {
-        showToast("⚠️ Ces produits ne sont plus disponibles au menu.", "red");
+        showToast("Ces produits ne sont plus disponibles au menu.", "red");
         return;
       }
-      showToast("🔁 Articles ajoutés au panier !");
+      showToast("Articles ajoutés au panier !");
       setTimeout(() => window.location.href = "checkout.html", 800);
     });
   });
@@ -271,7 +285,7 @@ function openRatingModal(orderId) {
     try {
       await OrderService.rate(orderId, rating, comment);
       if (tip > 0) await OrderService.tip(orderId, tip);
-      showToast("🙏 Merci pour votre retour !");
+      showToast("Merci pour votre retour !");
       modal.remove();
       loadSuivi();
     } catch (err) {
@@ -384,14 +398,14 @@ function setupLocationSharing(orderId) {
     if (!loc) return;
     ensureMap();
     if (!map) return;
-    const livreurIcon = L.divIcon({ html: "🛵", className: "", iconSize: [28, 28] });
-    const clientIcon = L.divIcon({ html: "📍", className: "", iconSize: [28, 28] });
+    const livreurIcon = L.divIcon({ html: IC.truck, className: "", iconSize: [28, 28] });
+    const clientIcon = L.divIcon({ html: IC.pin, className: "", iconSize: [28, 28] });
 
     if (loc.livreur) {
       const { lat, lng, at } = loc.livreur;
       if (!markerLivreur) markerLivreur = L.marker([lat, lng], { icon: livreurIcon }).addTo(map).bindPopup("Livreur");
       else markerLivreur.setLatLng([lat, lng]);
-      if (statusEl) statusEl.textContent = `🛵 Position mise à jour à ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      if (statusEl) statusEl.innerHTML = `${IC.truck} Position mise à jour à ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
       updateEta(lat, lng);
     }
     if (loc.client) {

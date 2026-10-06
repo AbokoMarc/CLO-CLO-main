@@ -28,7 +28,7 @@ function initSubmit() {
     const message = document.getElementById("tr-message").value.trim();
 
     if (!nom || !tel) {
-      showError("⚠️ Nom et téléphone sont requis.");
+      showError("Nom et téléphone sont requis.");
       return;
     }
 
