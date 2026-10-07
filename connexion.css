@@ -67,7 +67,7 @@ nav {
   padding: 50px 20px 60px;
 }
 /* Variantes de fond */
-.bg-client    { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+.bg-client    { background: linear-gradient(135deg, #EAF3EA 0%, #bbf7d0 100%); }
 .bg-livreur   { background: linear-gradient(135deg, #0F6B4D 0%, #0B5039 100%); }
 .bg-directeur { background: #16211A; min-height: 100vh; }
 

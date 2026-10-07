@@ -20,11 +20,14 @@ function renderPopularProducts() {
     <div class="product-card">
       <div class="product-img-wrap">
         <img src="${p.img}" alt="${p.name}"/>
-        <span class="product-price">${p.price.toLocaleString()} FCFA</span>
+        <span class="product-price">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
       </div>
       <div class="product-info">
         <div class="product-name">${p.name}</div>
-        <button class="product-order btn-add" data-id="${p.id}">Commander →</button>
+        <div class="product-bottom">
+          <span class="product-price-inline">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
+          <button class="product-order btn-add btn-round" data-id="${p.id}" aria-label="Ajouter au panier">+</button>
+        </div>
       </div>
     </div>`).join("");
 }

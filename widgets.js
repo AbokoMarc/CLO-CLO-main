@@ -21,12 +21,19 @@
    ============================================================ */
 (function () {
   const THEME_KEY = "cloclo_theme";
+  /* Langue courante (même clé que i18n.js) — widgets.js est un script classique,
+     il lit donc la préférence directement et se met à jour sur « cloclo:langchange ». */
+  const WTXT = {
+    fr: { waAria: "Nous contacter sur WhatsApp", waMsg: "Bonjour Clo-Clo, j'ai une question", themeAria: "Changer de thème (clair/sombre)", themeTitle: "Mode clair / sombre" },
+    en: { waAria: "Contact us on WhatsApp", waMsg: "Hello Clo-Clo, I have a question", themeAria: "Switch theme (light/dark)", themeTitle: "Light / dark mode" },
+  };
+  const wl = () => (localStorage.getItem("cloclo_lang") === "en" ? "en" : "fr");
 
   /* ---------- Image de secours locale (aucune dépendance réseau) ----------
      Remplace via.placeholder.com, qui peut être injoignable selon le réseau
      et fait planter le service worker (fetch échoué → pas de Response). */
   const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="160">
-    <rect width="100%" height="100%" fill="#22c55e"/>
+    <rect width="100%" height="100%" fill="#0F5B2C"/>
     <text x="50%" y="50%" font-family="sans-serif" font-size="22" font-weight="bold"
           fill="#ffffff" text-anchor="middle" dominant-baseline="middle">Clo-Clo</text>
   </svg>`;
@@ -54,7 +61,8 @@
       transition: transform 0.15s ease;
     }
     #cc-whatsapp-float:hover { transform: scale(1.07); }
-    #cc-whatsapp-float svg { width: 30px; height: 30px; fill: #fff; }
+    #cc-whatsapp-float svg { width: 28px; height: 28px; fill: #fff; flex-shrink: 0; }
+    #cc-whatsapp-float .cc-wa-ico { display: flex; }
 
     #cc-theme-toggle {
       position: fixed; bottom: 22px; right: 86px; z-index: 9999;
@@ -96,7 +104,7 @@
         width: 22px; height: 22px; fill: none; stroke: currentColor;
         stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
       }
-      .cc-bottom-nav-item.cc-active { color: #22c55e; }
+      .cc-bottom-nav-item.cc-active { color: #0F5B2C; }
       /* Laisse de la place en bas de page pour que la barre fixe ne
          recouvre jamais le dernier bloc de contenu (footer, boutons…). */
       body.cc-has-bottom-nav {
@@ -152,8 +160,8 @@
   function initThemeToggle() {
     const btn = document.createElement("button");
     btn.id = "cc-theme-toggle";
-    btn.setAttribute("aria-label", "Changer de thème (clair/sombre)");
-    btn.setAttribute("title", "Mode clair / sombre");
+    btn.setAttribute("aria-label", WTXT[wl()].themeAria);
+    btn.setAttribute("title", WTXT[wl()].themeTitle);
 
     const sunIcon = `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
     const moonIcon = `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
@@ -182,11 +190,21 @@
 
     const link = document.createElement("a");
     link.id = "cc-whatsapp-float";
-    link.href = `https://wa.me/${number}?text=${encodeURIComponent("Bonjour Clo-Clo, j'ai une question")}`;
+    const display = window.CLOCLO_CONFIG?.CONTACT_PHONE_DISPLAY || "+" + number;
+    const refresh = () => {
+      link.href = `https://wa.me/${number}?text=${encodeURIComponent(WTXT[wl()].waMsg)}`;
+      link.setAttribute("aria-label", `${WTXT[wl()].waAria} (${display})`);
+      link.title = `WhatsApp ${display}`;
+    };
+    document.addEventListener("cloclo:langchange", () => {
+      refresh();
+      const tb = document.getElementById("cc-theme-toggle");
+      if (tb) { tb.setAttribute("aria-label", WTXT[wl()].themeAria); tb.setAttribute("title", WTXT[wl()].themeTitle); }
+    });
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.setAttribute("aria-label", "Nous contacter sur WhatsApp");
-    link.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.14 1.6 5.95L0 24l6.32-1.66a11.86 11.86 0 0 0 5.73 1.46h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.44-8.42zM12.06 21.6h-.01a9.7 9.7 0 0 1-4.95-1.36l-.35-.21-3.75.98 1-3.66-.23-.38a9.7 9.7 0 0 1-1.49-5.17c0-5.37 4.37-9.74 9.79-9.74a9.73 9.73 0 0 1 6.9 2.86 9.65 9.65 0 0 1 2.86 6.88c0 5.37-4.37 9.74-9.77 9.74zm5.36-7.3c-.29-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.66.15-.2.29-.76.96-.93 1.16-.17.2-.34.22-.63.07-.29-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.51-.07-.15-.66-1.6-.91-2.19-.24-.58-.48-.5-.66-.51h-.56c-.2 0-.51.07-.78.37-.27.29-1.02 1-1.02 2.44 0 1.44 1.05 2.83 1.2 3.02.15.2 2.06 3.14 4.99 4.4.7.3 1.24.48 1.67.61.7.22 1.34.19 1.84.12.56-.08 1.74-.71 1.98-1.4.24-.68.24-1.27.17-1.4-.07-.12-.26-.2-.55-.34z"/></svg>`;
+    refresh();
+    link.innerHTML = `<span class="cc-wa-ico"><svg viewBox="0 0 24 24"><path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.14 1.6 5.95L0 24l6.32-1.66a11.86 11.86 0 0 0 5.73 1.46h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.44-8.42zM12.06 21.6h-.01a9.7 9.7 0 0 1-4.95-1.36l-.35-.21-3.75.98 1-3.66-.23-.38a9.7 9.7 0 0 1-1.49-5.17c0-5.37 4.37-9.74 9.79-9.74a9.73 9.73 0 0 1 6.9 2.86 9.65 9.65 0 0 1 2.86 6.88c0 5.37-4.37 9.74-9.77 9.74zm5.36-7.3c-.29-.15-1.74-.86-2.01-.96-.27-.1-.47-.15-.66.15-.2.29-.76.96-.93 1.16-.17.2-.34.22-.63.07-.29-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.51-.07-.15-.66-1.6-.91-2.19-.24-.58-.48-.5-.66-.51h-.56c-.2 0-.51.07-.78.37-.27.29-1.02 1-1.02 2.44 0 1.44 1.05 2.83 1.2 3.02.15.2 2.06 3.14 4.99 4.4.7.3 1.24.48 1.67.61.7.22 1.34.19 1.84.12.56-.08 1.74-.71 1.98-1.4.24-.68.24-1.27.17-1.4-.07-.12-.26-.2-.55-.34z"/></svg></span><span class="cc-wa-num">${display}</span>`;
     document.body.appendChild(link);
   }
 

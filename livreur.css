@@ -363,7 +363,7 @@ body {
   animation: fadeUp 0.4s ease both;
 }
 .histo-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-bottom: 1px solid #f3f4f6; }
-.histo-icon-done   { width: 42px; height: 42px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.histo-icon-done   { width: 42px; height: 42px; background: #EAF3EA; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .histo-icon-done svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .histo-icon-annule { width: 42px; height: 42px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .histo-icon-annule svg { width: 20px; height: 20px; stroke: #ef4444; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }

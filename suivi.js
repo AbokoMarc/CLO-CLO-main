@@ -34,7 +34,7 @@ function activeOrderHtml(o) {
   const step = STATUS_PROGRESS[o.statut] ?? 1;
   const pct = Math.round((step / 4) * 100);
   const cancelBtn = o.statut === "en_preparation"
-    ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">${IC.close} Annuler ma commande</button>`
+    ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-weight:800;cursor:pointer;">${IC.close} Annuler ma commande</button>`
     : "";
 
   const locationBlock = o.statut === "en_livraison"
@@ -42,7 +42,7 @@ function activeOrderHtml(o) {
          <div class="detail-title">Localisation en direct</div>
          <div id="tracking-map" style="height:220px;border-radius:12px;overflow:hidden;margin-top:6px;background:#f4f4f5;"></div>
          <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-top:8px;">${IC.radar} En attente de la position du livreur…</div>
-         <div id="eta-live" style="color:#22c55e;font-weight:800;font-size:0.95rem;margin-top:6px;"></div>
+         <div id="eta-live" style="color:#0F5B2C;font-weight:800;font-size:0.95rem;margin-top:6px;"></div>
        </div>`
     : "";
 
@@ -52,14 +52,14 @@ function activeOrderHtml(o) {
            <div style="width:44px;height:44px;border-radius:50%;background:${o.livreurContact.photoUrl ? `url(${o.livreurContact.photoUrl})` : "#e5e7eb"};background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b7280;">${!o.livreurContact.photoUrl ? IC.truck : ""}</div>
            <div>
              <div style="font-weight:800;color:#1a1a2e;">${o.livreurContact.nom}</div>
-             ${o.livreurContact.tel ? `<a href="tel:${o.livreurContact.tel}" style="color:#16a34a;font-weight:700;font-size:0.82rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
+             ${o.livreurContact.tel ? `<a href="tel:${o.livreurContact.tel}" style="color:#0A4220;font-weight:700;font-size:0.82rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
            </div>
          </div>` : ""}
          <div class="detail-title">${IC.message} Chat avec le livreur</div>
          <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.85rem;"></div>
          <div style="display:flex;gap:8px;">
-           <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
-           <button id="chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+           <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;"/>
+           <button id="chat-send" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
          </div>
        </div>`
     : "";
@@ -67,7 +67,7 @@ function activeOrderHtml(o) {
   const confirmBlock = (o.statut === "en_livraison" && o.confirmedLivreurAt && !o.confirmedClientAt)
     ? `<div style="grid-column:1/-1;background:#fef9c3;border-radius:12px;padding:16px;text-align:center;">
          <div style="font-weight:800;color:#92400e;margin-bottom:10px;">Le livreur indique avoir livré votre commande.</div>
-         <button id="btn-confirm-received" data-id="${o.id}" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 24px;font-weight:800;cursor:pointer;">${IC.check} J'ai bien reçu ma commande</button>
+         <button id="btn-confirm-received" data-id="${o.id}" style="background:#0F5B2C;color:white;border:none;border-radius:10px;padding:11px 24px;font-weight:800;cursor:pointer;">${IC.check} J'ai bien reçu ma commande</button>
        </div>`
     : "";
 
@@ -100,10 +100,10 @@ function activeOrderHtml(o) {
           <div class="detail-title">Articles Commandés</div>
           <ul class="articles-list">${o.items.map(i => `<li>${i.qty}× ${i.name}</li>`).join("")}</ul>
           <div class="order-total">
-            Sous-total : ${(o.total - (o.fraisLivraison || 0) + (o.discount || 0)).toLocaleString()} FCFA<br/>
-            ${o.discount ? `Remise${o.promoCode ? ` (${o.promoCode})` : ""} : -${o.discount.toLocaleString()} FCFA<br/>` : ""}
-            Frais de livraison${o.distanceKm ? ` (${o.distanceKm} km)` : ""} : ${(o.fraisLivraison || 0).toLocaleString()} FCFA<br/>
-            <strong>Total : ${o.total.toLocaleString()} FCFA</strong>
+            Sous-total : ${(o.total - (o.fraisLivraison || 0) + (o.discount || 0)).toLocaleString(window.CLOCLO_LOCALE())} FCFA<br/>
+            ${o.discount ? `Remise${o.promoCode ? ` (${o.promoCode})` : ""} : -${o.discount.toLocaleString(window.CLOCLO_LOCALE())} FCFA<br/>` : ""}
+            Frais de livraison${o.distanceKm ? ` (${o.distanceKm} km)` : ""} : ${(o.fraisLivraison || 0).toLocaleString(window.CLOCLO_LOCALE())} FCFA<br/>
+            <strong>Total : ${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</strong>
           </div>
         </div>
         <div class="detail-block">
@@ -131,9 +131,9 @@ function recentOrderHtml(o) {
       </div>
       <div class="recent-right">
         <div class="badge-livre">${o.statut === "livree" ? IC.check + " Livré" : o.statut === "annulee" ? IC.errorX + " Annulé" : IC.truck + " " + (STATUT_LABEL[o.statut] || o.statut)}</div>
-        <div class="recent-price">${o.total.toLocaleString()} FCFA</div>
+        <div class="recent-price">${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</div>
         ${needsRating ? `<button class="btn-rate" data-id="${o.id}" style="margin-top:6px;background:#f59e0b;color:white;border:none;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">⭐ Noter</button>` : ""}
-        ${o.statut === "livree" ? `<button class="btn-reorder" data-id="${o.id}" style="margin-top:6px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC.truck} Recommander</button>` : ""}
+        ${o.statut === "livree" ? `<button class="btn-reorder" data-id="${o.id}" style="margin-top:6px;background:white;color:#0F5B2C;border:1.5px solid #0F5B2C;border-radius:8px;padding:6px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC.truck} Recommander</button>` : ""}
       </div>
     </div>`;
 }
@@ -158,7 +158,7 @@ async function loadSuivi() {
   const recents = orders.filter(o => o.id !== active?.id).slice(0, 5);
 
   let html = `<section class="section-block"><h2 class="section-title">Commande en Cours</h2>`;
-  html += active ? activeOrderHtml(active) : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:24px 0;">Aucune commande en cours. <a href="menu.html" style="color:#22c55e;">Commander →</a></p>`;
+  html += active ? activeOrderHtml(active) : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:24px 0;">Aucune commande en cours. <a href="menu.html" style="color:#0F5B2C;">Commander →</a></p>`;
   html += `</section><section class="section-block"><h2 class="section-title">Commandes Récentes</h2>`;
   html += recents.length ? recents.map(recentOrderHtml).join("") : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:16px 0;">Aucune commande récente.</p>`;
   html += `</section>`;
@@ -246,14 +246,14 @@ function openRatingModal(orderId) {
     <div class="rating-modal-inner">
       <h3 style="margin-bottom:14px;">Noter votre livraison</h3>
       <div id="stars" style="font-size:2rem;letter-spacing:6px;cursor:pointer;margin-bottom:14px;">★★★★★</div>
-      <textarea id="rating-comment" placeholder="Un commentaire ? (facultatif)" style="width:100%;min-height:70px;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;margin-bottom:14px;"></textarea>
+      <textarea id="rating-comment" placeholder="Un commentaire ? (facultatif)" style="width:100%;min-height:70px;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;margin-bottom:14px;"></textarea>
       <label style="display:block;font-weight:700;font-size:0.85rem;margin-bottom:6px;">Pourboire pour le livreur (FCFA)</label>
       <div style="display:flex;gap:8px;margin-bottom:16px;">
         ${[0, 200, 500, 1000].map(v => `<button class="tip-choice" data-v="${v}" style="flex:1;background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;">${v === 0 ? "Aucun" : v}</button>`).join("")}
       </div>
       <div style="display:flex;gap:10px;">
         <button id="rating-cancel" style="flex:1;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Annuler</button>
-        <button id="rating-submit" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Envoyer</button>
+        <button id="rating-submit" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Envoyer</button>
       </div>
     </div>`;
   Object.assign(modal.style, {
@@ -276,7 +276,7 @@ function openRatingModal(orderId) {
     btn.addEventListener("click", () => {
       tip = Number(btn.dataset.v);
       modal.querySelectorAll(".tip-choice").forEach(b => b.style.borderColor = "#e5e7eb");
-      btn.style.borderColor = "#22c55e";
+      btn.style.borderColor = "#0F5B2C";
     });
   });
   modal.querySelector("#rating-cancel").addEventListener("click", () => modal.remove());
@@ -304,7 +304,7 @@ async function initChat(orderId) {
       ? messages.map(m => {
           const mine = m.sender === "client";
           const isAdmin = m.sender === "admin";
-          const bg = mine ? "#22c55e" : isAdmin ? "#1a1a2e" : "#e5e7eb";
+          const bg = mine ? "#0F5B2C" : isAdmin ? "#1a1a2e" : "#e5e7eb";
           const color = mine || isAdmin ? "white" : "#1a1a2e";
           return `<div style="margin-bottom:6px;text-align:${mine ? "right" : "left"};">
           ${isAdmin ? `<div style="font-size:0.68rem;color:#9ca3af;font-weight:800;">ADMIN</div>` : ""}
@@ -405,7 +405,7 @@ function setupLocationSharing(orderId) {
       const { lat, lng, at } = loc.livreur;
       if (!markerLivreur) markerLivreur = L.marker([lat, lng], { icon: livreurIcon }).addTo(map).bindPopup("Livreur");
       else markerLivreur.setLatLng([lat, lng]);
-      if (statusEl) statusEl.innerHTML = `${IC.truck} Position mise à jour à ${new Date(at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+      if (statusEl) statusEl.innerHTML = `${IC.truck} Position mise à jour à ${new Date(at).toLocaleTimeString(window.CLOCLO_LOCALE(), { hour: "2-digit", minute: "2-digit" })}`;
       updateEta(lat, lng);
     }
     if (loc.client) {

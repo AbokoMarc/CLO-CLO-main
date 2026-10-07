@@ -110,7 +110,7 @@ Ouvrez `http://localhost:5500/index.html` (adaptez le port affiché).
 - **Notifications temps réel** (SSE) : admin, livreurs et clients sont
   notifiés instantanément (nouvelle commande, assignation, annulation).
 - **Annulation de commande** : le client peut annuler tant que sa
-  commande est encore "en préparation" (bouton sur `suivie.html`).
+  commande est encore "en préparation" (bouton sur `suivi.html`).
 - **Paie des livreurs** : l'admin fixe un salaire journalier ou mensuel
   par livreur (`admin-livreurs.html`) — distinct de l'argent que le
   livreur encaisse en cash chez les clients (affiché séparément).

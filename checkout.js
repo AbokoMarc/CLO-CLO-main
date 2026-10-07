@@ -12,17 +12,17 @@ function renderSummary() {
   const wrap = document.getElementById("checkout-summary");
   if (!wrap) return;
   if (APP.cart.length === 0) {
-    wrap.innerHTML = `<p style="text-align:center;color:#9ca3af;font-weight:700;">Votre panier est vide. <a href="menu.html" style="color:#22c55e;">Voir le menu →</a></p>`;
+    wrap.innerHTML = `<p style="text-align:center;color:#9ca3af;font-weight:700;">Votre panier est vide. <a href="menu.html" style="color:#0F5B2C;">Voir le menu →</a></p>`;
     document.getElementById("btn-confirm").disabled = true;
     return;
   }
   wrap.innerHTML = APP.cart.map(i => `
     <div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;font-size:0.92rem;color:#1a1a2e;">
-      <span>${i.qty} × ${i.name}</span><span>${(i.price * i.qty).toLocaleString()} FCFA</span>
+      <span>${i.qty} × ${i.name}</span><span>${(i.price * i.qty).toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
     </div>`).join("") + `
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0;"/>
-    <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1.05rem;color:#22c55e;">
-      <span>Total</span><span>${APP.getCartTotal().toLocaleString()} FCFA</span>
+    <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1.05rem;color:#0F5B2C;">
+      <span>Total</span><span>${APP.getCartTotal().toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
     </div>`;
 }
 
@@ -121,7 +121,7 @@ document.addEventListener("cloclo:ready", async () => {
         promoCode, scheduledFor,
       });
       showToast("Commande confirmée !");
-      setTimeout(() => window.location.href = `suivie.html?order=${order.id}`, 1000);
+      setTimeout(() => window.location.href = `suivi.html?order=${order.id}`, 1000);
     } catch (err) {
       btn.disabled = false;
       btn.textContent = "Confirmer et payer à la livraison";

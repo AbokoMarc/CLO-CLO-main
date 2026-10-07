@@ -53,9 +53,9 @@ function showToast(msg, color = "green") {
   t.innerHTML = `${color === "red" ? IC.errorX : IC.check}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
-    background: color === "red" ? "#ef4444" : "#22c55e",
+    background: color === "red" ? "#ef4444" : "#0F5B2C",
     color: "white", padding: "14px 24px", borderRadius: "12px",
-    fontFamily: "'Nunito', sans-serif", fontWeight: "700", fontSize: "0.95rem",
+    fontFamily: "DM Sans, sans-serif", fontWeight: "700", fontSize: "0.95rem",
     boxShadow: "0 6px 24px rgba(0,0,0,0.2)", zIndex: "9999",
     opacity: "1", transition: "opacity 0.3s",
   });
@@ -139,7 +139,7 @@ function initAdminNotifications() {
     }
     const order = data;
     if (event === "order:new") {
-      showToast(`Nouvelle commande CMD-${order.id} (${order.total.toLocaleString()} FCFA)`);
+      showToast(`Nouvelle commande CMD-${order.id} (${order.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA)`);
       if (page.includes("admin-dashboard")) initDashboard();
       if (page.includes("admin-livraisons")) initLivraisons();
     } else if (event === "order:cancelled") {
@@ -167,7 +167,7 @@ function showSosAlert(order) {
   Object.assign(banner.style, {
     position: "fixed", top: "0", left: "0", right: "0", zIndex: "99999",
     background: "#dc2626", color: "white", display: "flex", alignItems: "center",
-    justifyContent: "space-between", padding: "14px 18px", fontFamily: "'Nunito', sans-serif",
+    justifyContent: "space-between", padding: "14px 18px", fontFamily: "DM Sans, sans-serif",
     fontWeight: "800", fontSize: "0.9rem", boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
   });
   banner.querySelector("button").addEventListener("click", () => banner.remove());
@@ -178,9 +178,9 @@ function showSosAlert(order) {
 async function initDashboard() {
   const stats = await AdminService.stats();
 
-  document.getElementById("stat-revenus").textContent = stats.revenuJour.toLocaleString() + " FCFA";
-  document.getElementById("stat-revenus-mois").textContent = stats.revenuMois.toLocaleString() + " FCFA";
-  document.getElementById("stat-revenus-annee").textContent = stats.revenuAnnee.toLocaleString() + " FCFA";
+  document.getElementById("stat-revenus").textContent = stats.revenuJour.toLocaleString(window.CLOCLO_LOCALE()) + " FCFA";
+  document.getElementById("stat-revenus-mois").textContent = stats.revenuMois.toLocaleString(window.CLOCLO_LOCALE()) + " FCFA";
+  document.getElementById("stat-revenus-annee").textContent = stats.revenuAnnee.toLocaleString(window.CLOCLO_LOCALE()) + " FCFA";
   const moisLabelEl = document.getElementById("stat-mois-label");
   if (moisLabelEl) moisLabelEl.textContent = `Revenus de ${stats.moisLabel}`;
   const anneeLabelEl = document.getElementById("stat-annee-label");
@@ -196,14 +196,14 @@ async function initDashboard() {
       type: "bar",
       data: {
         labels: stats.ventesParJour.map(d => d.label),
-        datasets: [{ label: "Ventes (FCFA)", data: stats.ventesParJour.map(d => d.total), backgroundColor: "#22c55e", borderRadius: 8, borderSkipped: false }],
+        datasets: [{ label: "Ventes (FCFA)", data: stats.ventesParJour.map(d => d.total), backgroundColor: "#0F5B2C", borderRadius: 8, borderSkipped: false }],
       },
       options: {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { family: "Nunito", weight: "700" } } },
-          y: { grid: { color: "#f3f4f6", borderDash: [4, 4] }, ticks: { font: { family: "Nunito" } } },
+          x: { grid: { display: false }, ticks: { font: { family: "DM Sans", weight: "700" } } },
+          y: { grid: { color: "#f3f4f6", borderDash: [4, 4] }, ticks: { font: { family: "DM Sans" } } },
         },
       },
     });
@@ -227,8 +227,8 @@ async function initDashboard() {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { family: "Nunito", weight: "700" } } },
-          y: { grid: { color: "#f3f4f6", borderDash: [4, 4] }, ticks: { font: { family: "Nunito" } } },
+          x: { grid: { display: false }, ticks: { font: { family: "DM Sans", weight: "700" } } },
+          y: { grid: { color: "#f3f4f6", borderDash: [4, 4] }, ticks: { font: { family: "DM Sans" } } },
         },
       },
     });
@@ -268,7 +268,7 @@ async function renderTopProducts() {
       <div class="product-rank">
         <div class="rank-num">${i + 1}</div>
         <div class="rank-info"><div class="rank-name">${p.name}</div><div class="rank-cmds">${p.qty} commande${p.qty > 1 ? "s" : ""}</div></div>
-        <div class="rank-rev">${p.revenue.toLocaleString()} FC</div>
+        <div class="rank-rev">${p.revenue.toLocaleString(window.CLOCLO_LOCALE())} FC</div>
       </div>`).join("")
     : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Aucune commande pour l'instant.</p>`;
 }
@@ -287,7 +287,7 @@ async function renderRecentOrders() {
         return `
       <div class="cmd-item">
         <div><div class="cmd-id">CMD-${o.id}</div><div class="cmd-meta">${clientById.get(o.userId) || "Client"} • ${nbArticles} article${nbArticles > 1 ? "s" : ""}</div></div>
-        <div class="cmd-right"><div class="cmd-price">${o.total.toLocaleString()} FC</div><span class="badge ${badge.cls}">${badge.label}</span></div>
+        <div class="cmd-right"><div class="cmd-price">${o.total.toLocaleString(window.CLOCLO_LOCALE())} FC</div><span class="badge ${badge.cls}">${badge.label}</span></div>
       </div>`;
       }).join("")
     : `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:20px 0;">Aucune commande pour l'instant.</p>`;
@@ -317,7 +317,7 @@ function clientCardHtml(c, unlocked) {
       </div>
       <div class="client-body">${contactBlock}</div>
       ${unlocked ? `<div class="client-body" style="padding-top:0;">
-        <button class="btn-reset-pwd" data-id="${c.id}" data-nom="${c.nom}" style="width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.key} Réinitialiser le mot de passe</button>
+        <button class="btn-reset-pwd" data-id="${c.id}" data-nom="${c.nom}" style="width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.key} Réinitialiser le mot de passe</button>
       </div>` : ""}
     </div>`;
 }
@@ -332,11 +332,11 @@ function isClientsUnlocked() {
 
 function unlockBarHtml(unlocked) {
   if (unlocked) {
-    return `<div style="grid-column:1/-1;background:#dcfce7;color:#166534;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;">${IC.unlock} Coordonnées déverrouillées pour cette session</div>`;
+    return `<div style="grid-column:1/-1;background:#EAF3EA;color:#166534;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-weight:700;font-size:0.85rem;">${IC.unlock} Coordonnées déverrouillées pour cette session</div>`;
   }
   return `<div style="grid-column:1/-1;background:white;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
     <span style="font-weight:700;font-size:0.85rem;color:#6b7280;">${IC.lock} Coordonnées clients masquées par confidentialité</span>
-    <button id="btn-unlock-clients" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:9px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">Déverrouiller</button>
+    <button id="btn-unlock-clients" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">Déverrouiller</button>
   </div>`;
 }
 
@@ -396,8 +396,8 @@ function productCardHtml(p) {
       <img src="${p.img}" alt="${p.name}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"/>
       <div class="pcard-body">
         <div class="pcard-name">${p.name}${p.popular ? " " + IC.star : ""}</div>
-        <div class="pcard-cat">${p.category} · <span style="color:${dispo ? "#22c55e" : "#ef4444"};font-weight:700;">${dispo ? "Disponible" : "Indisponible"}</span></div>
-        <div class="pcard-price">${p.price.toLocaleString()} FCFA</div>
+        <div class="pcard-cat">${p.category} · <span style="color:${dispo ? "#0F5B2C" : "#ef4444"};font-weight:700;">${dispo ? "Disponible" : "Indisponible"}</span></div>
+        <div class="pcard-price">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</div>
         <div class="pcard-actions">
           <button class="btn-edit" data-id="${p.id}">${IC.edit} Modifier</button>
           <button class="btn-toggle-dispo" data-id="${p.id}" data-dispo="${dispo}">${dispo ? IC.slash + " Marquer indisponible" : IC.check + " Marquer disponible"}</button>
@@ -594,7 +594,7 @@ async function initPromoCodes() {
       ? codes.map(c => `
         <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 14px rgba(0,0,0,0.06);${c.active ? "" : "opacity:0.5;"}">
           <div style="font-weight:900;font-size:1rem;color:#1a1a2e;">${c.code}</div>
-          <div style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-bottom:10px;">${c.type === "percent" ? `-${c.value}%` : `-${c.value.toLocaleString()} FCFA`}</div>
+          <div style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-bottom:10px;">${c.type === "percent" ? `-${c.value}%` : `-${c.value.toLocaleString(window.CLOCLO_LOCALE())} FCFA`}</div>
           <div style="display:flex;gap:8px;">
             <button class="btn-toggle-promo" data-id="${c.id}" data-active="${c.active}" style="flex:1;background:white;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px;font-weight:700;font-size:0.78rem;cursor:pointer;">${c.active ? "Désactiver" : "Activer"}</button>
             <button class="btn-delete-promo" data-id="${c.id}" style="flex:1;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:8px;padding:7px;font-weight:700;font-size:0.78rem;cursor:pointer;">Supprimer</button>
@@ -648,8 +648,8 @@ function openLivreurChatPanel(livreurId, livreurNom) {
     </div>
     <div id="livreur-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
     <div style="display:flex;gap:8px;">
-      <input id="livreur-chat-input" type="text" placeholder="Écrire…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
-      <button id="livreur-chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+      <input id="livreur-chat-input" type="text" placeholder="Écrire…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;"/>
+      <button id="livreur-chat-send" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
     </div>`;
   Object.assign(panel.style, {
     position: "fixed", bottom: "22px", right: "22px", zIndex: "9991",
@@ -664,7 +664,7 @@ function openLivreurChatPanel(livreurId, livreurNom) {
     const messages = await AdminService.listLivreurMessages(livreurId).catch(() => []);
     box.innerHTML = messages.length
       ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "admin" ? "right" : "left"};">
-          <span style="display:inline-block;background:${m.sender === "admin" ? "#1a1a2e" : "#22c55e"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+          <span style="display:inline-block;background:${m.sender === "admin" ? "#1a1a2e" : "#0F5B2C"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
         </div>`).join("")
       : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
     box.scrollTop = box.scrollHeight;
@@ -686,7 +686,7 @@ function openLivreurChatPanel(livreurId, livreurNom) {
 function livreurCardHtml(l) {
   const statutClass = l.statut === "disponible" ? "badge-disponible" : l.statut === "en_livraison" ? "badge-en-livraison" : "badge-hors-ligne";
   const paieLabel = l.paieMontant > 0
-    ? `${l.paieMontant.toLocaleString()} FCFA / ${l.paieType === "mensuel" ? "mois" : "jour"}`
+    ? `${l.paieMontant.toLocaleString(window.CLOCLO_LOCALE())} FCFA / ${l.paieType === "mensuel" ? "mois" : "jour"}`
     : "Non définie";
   return `
     <div class="livreur-card anim">
@@ -704,14 +704,14 @@ function livreurCardHtml(l) {
           <div><div class="lm-label">Véhicule</div><div class="lm-val">${l.vehicule}</div></div>
           <div><div class="lm-label">Paie</div><div class="lm-val">${paieLabel}</div></div>
         </div>
-        <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#22c55e;border:1.5px solid #22c55e;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.money} Définir la paie</button>
-        <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#22c55e" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#22c55e" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? IC.check + " Remettre en service" : IC.stop + " Mettre hors service"}</button>
+        <button class="btn-set-paie" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:12px;background:white;color:#0F5B2C;border:1.5px solid #0F5B2C;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${IC.money} Définir la paie</button>
+        <button class="btn-toggle-service" data-id="${l.id}" data-statut="${l.statut}" style="width:100%;margin-top:8px;background:white;color:${l.statut === "hors_service" ? "#0F5B2C" : "#f97316"};border:1.5px solid ${l.statut === "hors_service" ? "#0F5B2C" : "#fed7aa"};border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">${l.statut === "hors_service" ? IC.check + " Remettre en service" : IC.stop + " Mettre hors service"}</button>
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <a class="btn-call-livreur" href="tel:${l.tel}" style="flex:1;text-align:center;background:white;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:none;display:block;">${IC.phone} Appeler</a>
-          <button class="btn-chat-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#1a1a2e;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.message} Contacter</button>
+          <a class="btn-call-livreur" href="tel:${l.tel}" style="flex:1;text-align:center;background:white;color:#0A4220;border:1.5px solid #CFE3CF;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;text-decoration:none;display:block;">${IC.phone} Appeler</a>
+          <button class="btn-chat-livreur" data-id="${l.id}" data-nom="${l.nom}" style="flex:1;background:white;color:#1a1a2e;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.message} Contacter</button>
         </div>
-        <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.key} Mot de passe</button>
-        <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.trash} Supprimer</button>
+        <button class="btn-reset-livreur-pwd" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#3b82f6;border:1.5px solid #bfdbfe;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.key} Mot de passe</button>
+        <button class="btn-delete-livreur" data-id="${l.id}" data-nom="${l.nom}" style="width:100%;margin-top:8px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;">${IC.trash} Supprimer</button>
       </div>
     </div>`;
 }
@@ -834,12 +834,12 @@ function livraisonBlockHtml(o, livreurs, clients) {
 
   let actionHtml;
   if (!o.livreurId) {
-    actionHtml = `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-weight:700;">
+    actionHtml = `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;font-weight:700;">
       <option value="">Assigner un livreur…</option>
       ${livreurs.filter(l => l.actif !== false).map(l => `<option value="${l.id}">${l.nom}</option>`).join("")}
     </select>`;
   } else if (o.statut === "en_livraison" && o.confirmedLivreurAt && o.confirmedClientAt && !o.confirmedAdminAt) {
-    actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.check} Confirmer la livraison</button>`;
+    actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.check} Confirmer la livraison</button>`;
   } else if (o.statut === "en_livraison") {
     const wait = [];
     if (!o.confirmedLivreurAt) wait.push("livreur");
@@ -854,8 +854,8 @@ function livraisonBlockHtml(o, livreurs, clients) {
          <summary style="cursor:pointer;font-weight:800;font-size:0.82rem;color:#3b82f6;">${IC.message} Chat (livreur / client)</summary>
          <div id="chat-messages-${o.id}" data-order="${o.id}" style="max-height:150px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin:8px 0;font-size:0.82rem;">Chargement…</div>
          <div style="display:flex;gap:8px;">
-           <input id="chat-input-${o.id}" type="text" placeholder="Écrire un message…" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;font-size:0.85rem;"/>
-           <button class="btn-chat-send" data-order="${o.id}" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:0.82rem;">Envoyer</button>
+           <input id="chat-input-${o.id}" type="text" placeholder="Écrire un message…" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;font-size:0.85rem;"/>
+           <button class="btn-chat-send" data-order="${o.id}" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:0.82rem;">Envoyer</button>
          </div>
        </details>`
     : "";
@@ -875,12 +875,12 @@ function livraisonBlockHtml(o, livreurs, clients) {
           <div style="font-weight:700;color:#1a1a2e;">${client ? client.nom : "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${o.adresse || "—"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${items}</div>
-          ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#16a34a;font-weight:800;font-size:0.8rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
+          ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#0A4220;font-weight:800;font-size:0.8rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
         </div>
         <div>
-          <div style="font-size:0.78rem;color:#22c55e;font-weight:800;margin-bottom:4px;">LIVREUR</div>
+          <div style="font-size:0.78rem;color:#0F5B2C;font-weight:800;margin-bottom:4px;">LIVREUR</div>
           <div style="font-weight:700;color:#1a1a2e;">${livreur ? livreur.nom : "Non assigné"}</div>
-          <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString()} FCFA${o.fraisLivraison ? ` (dont ${o.fraisLivraison.toLocaleString()} FCFA livraison)` : ""}</div>
+          <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA${o.fraisLivraison ? ` (dont ${o.fraisLivraison.toLocaleString(window.CLOCLO_LOCALE())} FCFA livraison)` : ""}</div>
         </div>
       </div>
       ${locationBlock}
@@ -926,7 +926,7 @@ async function initLivraisons() {
     try {
       const loc = await AdminService.getLocation(el.dataset.order);
       const parts = [];
-      if (loc.livreur) parts.push(`${IC.truck} Livreur : <a href="https://www.google.com/maps?q=${loc.livreur.lat},${loc.livreur.lng}" target="_blank" style="color:#22c55e;font-weight:800;">voir →</a>`);
+      if (loc.livreur) parts.push(`${IC.truck} Livreur : <a href="https://www.google.com/maps?q=${loc.livreur.lat},${loc.livreur.lng}" target="_blank" style="color:#0F5B2C;font-weight:800;">voir →</a>`);
       if (loc.client) parts.push(`${IC.pin} Client : <a href="https://www.google.com/maps?q=${loc.client.lat},${loc.client.lng}" target="_blank" style="color:#3b82f6;font-weight:800;">voir →</a>`);
       el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : IC.radar + " Aucune position partagée pour l'instant.";
     } catch { el.innerHTML = ""; }
@@ -961,7 +961,7 @@ async function renderAdminChat(orderId, box) {
   if (!box) return;
   const messages = await AdminService.listMessages(orderId).catch(() => []);
   const senderLabel = { admin: "Admin", livreur: "Livreur", client: "Client" };
-  const senderColor = { admin: "#1a1a2e", livreur: "#22c55e", client: "#3b82f6" };
+  const senderColor = { admin: "#1a1a2e", livreur: "#0F5B2C", client: "#3b82f6" };
   box.innerHTML = messages.length
     ? messages.map(m => `<div style="margin-bottom:6px;"><b style="color:${senderColor[m.sender] || "#6b7280"};">${senderLabel[m.sender] || m.sender} :</b> ${m.text}</div>`).join("")
     : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
@@ -985,7 +985,7 @@ async function initHistorique() {
   document.getElementById("stat-hist-total").textContent = done.length;
   document.getElementById("stat-hist-livrees").textContent = livrees.length;
   document.getElementById("stat-hist-annulees").textContent = annulees.length;
-  document.getElementById("stat-hist-revenus").textContent = livrees.reduce((s, o) => s + o.total, 0).toLocaleString() + " FC";
+  document.getElementById("stat-hist-revenus").textContent = livrees.reduce((s, o) => s + o.total, 0).toLocaleString(window.CLOCLO_LOCALE()) + " FC";
 
   function renderRows(list) {
     body.innerHTML = list.length
@@ -994,9 +994,9 @@ async function initHistorique() {
           <td>LIV-${o.id}</td><td>CMD-${o.id}</td>
           <td>${clientById.get(o.userId) || "—"}</td>
           <td>${o.livreurId ? (livreurById.get(o.livreurId) || `#${o.livreurId}`) : "—"}</td>
-          <td>${new Date(o.createdAt).toLocaleDateString("fr-FR")}<br><small style="color:#9ca3af;">${new Date(o.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</small></td>
+          <td>${new Date(o.createdAt).toLocaleDateString(window.CLOCLO_LOCALE())}<br><small style="color:#9ca3af;">${new Date(o.createdAt).toLocaleTimeString(window.CLOCLO_LOCALE(), { hour: "2-digit", minute: "2-digit" })}</small></td>
           <td>${o.items.reduce((s, i) => s + i.qty, 0)}</td>
-          <td>${o.total.toLocaleString()} FCFA</td>
+          <td>${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</td>
           <td>${o.etaMinutes || "-"} min</td>
           <td><span class="badge ${o.statut === "livree" ? "badge-livre" : "badge-annule"}">${o.statut === "livree" ? IC.check + " Livré" : IC.errorX + " Annulé"}</span></td>
         </tr>`).join("")
@@ -1022,7 +1022,7 @@ async function initHistorique() {
   document.getElementById("filter-date-input")?.addEventListener("change", (e) => {
     const label = document.getElementById("filter-date-label");
     if (!e.target.value) { label.textContent = "Filtrer par Date"; renderRows(done); return; }
-    label.textContent = new Date(e.target.value).toLocaleDateString("fr-FR");
+    label.textContent = new Date(e.target.value).toLocaleDateString(window.CLOCLO_LOCALE());
     renderRows(done.filter(o => new Date(o.createdAt).toISOString().slice(0, 10) === e.target.value));
   });
 
@@ -1042,7 +1042,7 @@ function exportTableToPdf(tableId, title) {
   printWin.document.write(`
     <html><head><title>${title}</title>
     <style>
-      body { font-family: 'Nunito', Arial, sans-serif; padding: 24px; color: #1a1a2e; }
+      body { font-family: DM Sans, Arial, sans-serif; padding: 24px; color: #1a1a2e; }
       h1 { font-size: 1.2rem; margin-bottom: 16px; }
       table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
       th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
@@ -1050,7 +1050,7 @@ function exportTableToPdf(tableId, title) {
     </style></head>
     <body>
       <h1>${title}</h1>
-      <p style="color:#6b7280;font-size:0.8rem;margin-bottom:16px;">Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</p>
+      <p style="color:#6b7280;font-size:0.8rem;margin-bottom:16px;">Généré le ${new Date().toLocaleDateString(window.CLOCLO_LOCALE())} à ${new Date().toLocaleTimeString(window.CLOCLO_LOCALE())}</p>
       ${table.outerHTML}
     </body></html>
   `);
@@ -1080,10 +1080,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     admin = await withTimeout(requireAdmin(), 45000, "authentification");
   } catch (err) {
     console.error("Erreur d'authentification admin :", err);
-    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'DM Sans',sans-serif;">
       <div>
         <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">${IC.alertTriangle} Impossible de contacter le serveur.</p>
-        <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
+        <button onclick="window.location.reload()" style="background:#0F5B2C;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
       </div>
     </div>`;
     return;
@@ -1109,7 +1109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const target = document.querySelector(
       "#top-products-list, #recent-orders-list, #products-grid-admin, #clients-grid, #livreurs-grid, #livraisons-list, #hist-body"
     );
-    const message = `${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
+    const message = `${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#0F5B2C;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
     if (target) {
       if (target.tagName === "TBODY") target.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</td></tr>`;
       else target.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#ef4444;font-weight:700;padding:24px;">${message}</p>`;

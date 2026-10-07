@@ -75,7 +75,7 @@ export const PWA = {
       Object.assign(hint.style, {
         position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9997",
         background: "#1a1a2e", color: "white", textAlign: "center",
-        padding: "10px 14px", fontFamily: "'Nunito', sans-serif", fontWeight: "700",
+        padding: "10px 14px", fontFamily: "DM Sans, sans-serif", fontWeight: "700",
         fontSize: "0.8rem",
       });
       hint.querySelector("button").addEventListener("click", () => {
@@ -92,7 +92,7 @@ export const PWA = {
     btn.style.display = "none";
     Object.assign(btn.style, {
       background: "white", border: "1.5px solid #e5e7eb", borderRadius: "8px",
-      padding: "7px 14px", fontFamily: "'Nunito', sans-serif", fontWeight: "800",
+      padding: "7px 14px", fontFamily: "DM Sans, sans-serif", fontWeight: "800",
       fontSize: "0.8rem", cursor: "pointer",
     });
     container.appendChild(btn);

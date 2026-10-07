@@ -36,7 +36,7 @@ window.showToast = function (msg, type = "success") {
   // un toast appelé avec "red" tombait sur aucune clé connue et s'affichait
   // donc en vert par défaut (bug silencieux sur les alertes SOS notamment).
   const normalizedType = type === "red" ? "error" : type === "green" ? "success" : type;
-  const colors = { success: "#22c55e", error: "#ef4444", warning: "#f97316", info: "#3b82f6" };
+  const colors = { success: "#0F5B2C", error: "#ef4444", warning: "#f97316", info: "#3b82f6" };
   const t = document.createElement("div");
   t.className = "toast-g";
   t.style.display = "flex";
@@ -44,10 +44,10 @@ window.showToast = function (msg, type = "success") {
   t.style.gap = "8px";
   t.innerHTML = `${TOAST_ICON[normalizedType] || TOAST_ICON.success}<span>${msg}</span>`;
   Object.assign(t.style, {
-    position: "fixed", bottom: "28px", right: "28px",
-    background: colors[normalizedType] || "#22c55e",
+    position: "fixed", bottom: "28px", right: "28px", zIndex: "99999",
+    background: colors[normalizedType] || "#0F5B2C",
     color: "white", padding: "13px 22px", borderRadius: "14px",
-    fontFamily: "'Nunito',sans-serif", fontWeight: "700", fontSize: "0.93rem",
+    fontFamily: "DM Sans,sans-serif", fontWeight: "700", fontSize: "0.93rem",
     boxShadow: "0 8px 28px rgba(0,0,0,0.18)", zIndex: "99999",
     opacity: "0", transform: "translateY(10px)",
     transition: "opacity 0.28s, transform 0.28s",
@@ -99,27 +99,27 @@ function buildCartItems() {
         style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;"/>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:0.9rem;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.name}</div>
-        <div style="font-size:0.8rem;color:#6b7280;margin-top:3px;">${i.price.toLocaleString()} FCFA / unité</div>
+        <div style="font-size:0.8rem;color:#6b7280;margin-top:3px;">${i.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA / unité</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
           <button onclick="qtyCart(${i.id},-1)" style="width:24px;height:24px;border-radius:6px;border:1.5px solid #e5e7eb;background:white;font-weight:800;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;">−</button>
           <span style="font-weight:800;font-size:0.9rem;min-width:20px;text-align:center;">${i.qty}</span>
           <button onclick="qtyCart(${i.id},+1)" style="width:24px;height:24px;border-radius:6px;border:1.5px solid #e5e7eb;background:white;font-weight:800;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;">+</button>
-          <span style="margin-left:6px;font-weight:700;font-size:0.88rem;color:#22c55e;">${(i.price * i.qty).toLocaleString()} FCFA</span>
+          <span style="margin-left:6px;font-weight:700;font-size:0.88rem;color:#0F5B2C;">${(i.price * i.qty).toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
         </div>
       </div>
       <button onclick="delCart(${i.id})" style="background:none;border:none;color:#ef4444;font-size:1rem;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
     </div>`).join("") + `
     <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:14px;">
       <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1rem;color:#1a1a2e;margin-bottom:6px;">
-        <span>Total</span><span style="color:#22c55e;">${APP.getCartTotal().toLocaleString()} FCFA</span>
+        <span>Total</span><span style="color:#0F5B2C;">${APP.getCartTotal().toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
       </div>
       <div style="font-size:0.78rem;color:#9ca3af;font-weight:600;margin-bottom:14px;">
         ⭐ Vous gagnerez ~${Math.floor(APP.getCartTotal() / 500) * 5} points
       </div>
-      <button onclick="goCheckout()" style="width:100%;background:#22c55e;color:white;border:none;border-radius:12px;padding:13px;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;margin-bottom:8px;" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+      <button onclick="goCheckout()" style="width:100%;background:#0F5B2C;color:white;border:none;border-radius:12px;padding:13px;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:800;cursor:pointer;margin-bottom:8px;" onmouseover="this.style.background='#0A4220'" onmouseout="this.style.background='#0F5B2C'">
         Commander maintenant →
       </button>
-      <button onclick="window.location.href='menu.html'" style="width:100%;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">
+      <button onclick="window.location.href='menu.html'" style="width:100%;background:white;color:#0F5B2C;border:2px solid #0F5B2C;border-radius:12px;padding:11px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;">
         + Ajouter des articles
       </button>
     </div>`;
@@ -167,7 +167,7 @@ window.openMiniCart = function () {
   Object.assign(panel.style, {
     position: "fixed", top: "0", right: "0", width: "380px", height: "100vh",
     background: "white", zIndex: "9991", overflowY: "auto",
-    boxShadow: "-6px 0 28px rgba(0,0,0,0.14)", fontFamily: "'Nunito',sans-serif",
+    boxShadow: "-6px 0 28px rgba(0,0,0,0.14)", fontFamily: "DM Sans,sans-serif",
     animation: "slideInR 0.28s ease",
   });
   panel.innerHTML = `
@@ -194,7 +194,7 @@ function bindAddButtons() {
     APP.addToCart(id);
     window.updateNavbar();
     const orig = btn.innerHTML;
-    btn.innerHTML = "✓ Ajouté !";
+    btn.innerHTML = btn.classList.contains("btn-round") ? "✓" : "✓ Ajouté !";
     btn.disabled = true;
     showToast("✅ Ajouté au panier !", "success");
     setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1200);
@@ -298,10 +298,10 @@ function initAdminReturnBanner() {
   Object.assign(banner.style, {
     position: "fixed", top: "0", left: "0", right: "0", zIndex: "9998",
     background: "#1a1a2e", color: "white", textAlign: "center",
-    padding: "9px 12px", fontFamily: "'Nunito', sans-serif", fontWeight: "700",
+    padding: "9px 12px", fontFamily: "DM Sans, sans-serif", fontWeight: "700",
     fontSize: "0.82rem",
   });
-  banner.querySelector("a").style.cssText = "color:#22c55e;text-decoration:underline;margin-left:6px;";
+  banner.querySelector("a").style.cssText = "color:#0F5B2C;text-decoration:underline;margin-left:6px;";
   document.body.prepend(banner);
   document.body.style.paddingTop = banner.offsetHeight + "px";
 }
@@ -315,7 +315,7 @@ function initHamburger() {
   Object.assign(btn.style, { display: "none", background: "none", border: "none", color: "white", fontSize: "1.5rem", cursor: "pointer", padding: "4px 8px" });
   if (!document.getElementById("hbg-style")) {
     const s = document.createElement("style"); s.id = "hbg-style";
-    s.textContent = `@media(max-width:768px){.hamburger{display:block!important;}.nav-links{display:none!important;}.nav-links.open{display:flex!important;flex-direction:column;position:fixed;top:70px;left:0;right:0;background:#22c55e;padding:14px;gap:2px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.15)}.nav-links.open li a{padding:12px 16px;border-radius:10px;font-size:1rem;}}`;
+    s.textContent = `@media(max-width:768px){.hamburger{display:block!important;}.nav-links{display:none!important;}.nav-links.open{display:flex!important;flex-direction:column;position:fixed;top:70px;left:0;right:0;background:#0F5B2C;padding:14px;gap:2px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.15)}.nav-links.open li a{padding:12px 16px;border-radius:10px;font-size:1rem;}}`;
     document.head.appendChild(s);
   }
   nav.insertBefore(btn, nav.querySelector(".nav-actions"));
@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindNavLinks();
   bindAddButtons();
   initTransitions();
-  initHamburger();
+  // (hamburger retiré : la barre de navigation du bas — widgets.js — le remplace sur mobile)
   initImgFallback();
   initClientNotifications();
   initAdminReturnBanner();
@@ -374,7 +374,7 @@ function showOfflineBanner() {
   Object.assign(banner.style, {
     position: "fixed", bottom: "0", left: "0", right: "0", zIndex: "9999",
     background: "#1a1a2e", color: "white", textAlign: "center",
-    padding: "10px 12px", fontFamily: "'Nunito', sans-serif", fontWeight: "700",
+    padding: "10px 12px", fontFamily: "DM Sans, sans-serif", fontWeight: "700",
     fontSize: "0.82rem",
   });
   document.body.appendChild(banner);

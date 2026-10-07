@@ -1,0 +1,283 @@
+/* ============================================================
+   CLO-CLO | theme.css — Design system blanc & vert
+   Chargé EN DERNIER sur toutes les pages (client, admin, livreur) :
+   il surcharge les variables et composants des feuilles existantes
+   sans toucher à leur logique (mêmes classes, mêmes ids).
+   ============================================================ */
+
+:root {
+  --green:          #0F5B2C;
+  --green-dark:     #0A4220;
+  --green-mid:      #4C9A52;
+  --green-soft:     #EAF3EA;
+  --green-wash:     #F4F9F3;
+  --green-line:     #CFE3CF;
+  --yellow:         #E8A23D;
+  --text-dark:      #12301C;
+  --text-gray:      #5F6F63;
+  --bg-light:       #F7FAF6;
+  --bg-main:        #F7FAF6;
+  --sidebar-bg:     #FFFFFF;
+  --green-sidebar:  #FFFFFF;
+  --radius-card:    20px;
+  --radius-pill:    999px;
+  --shadow-card:    0 6px 22px rgba(15, 91, 44, 0.08);
+  --font-head:      'Bricolage Grotesque', 'DM Sans', sans-serif;
+}
+
+body { font-family: 'DM Sans', sans-serif; background: var(--bg-light); color: var(--text-dark); }
+h1, h2, h3, h4, .hero-title, .menu-title, .section-title, .page-title, .suivi-title,
+.nav-brand-name, .sidebar-brand-name, .footer-brand-name, .card-title { font-family: var(--font-head); }
+
+:focus-visible { outline: 3px solid var(--green-mid); outline-offset: 2px; }
+
+/* ───────── NAVBAR CLIENT (blanche, texte vert) ───────── */
+nav {
+  background: #fff;
+  box-shadow: 0 1px 0 var(--green-line), 0 8px 24px rgba(15, 91, 44, 0.05);
+}
+.nav-logo {
+  background: var(--green-soft); color: var(--green);
+  border: 2px solid var(--green); width: 46px; height: 46px; box-shadow: none;
+}
+.nav-brand-name { color: var(--green); font-weight: 800; font-size: 1.2rem; }
+.nav-brand-sub  { color: var(--green-mid); font-weight: 600; }
+.nav-links a { color: var(--text-gray); padding: 8px 16px; border-radius: var(--radius-pill); transition: background .2s, color .2s; }
+.nav-links svg { stroke: currentColor; }
+.nav-links a:hover { opacity: 1; background: var(--green-soft); color: var(--green); }
+.nav-links a.active, .nav-links a[aria-current="page"] { background: var(--green); color: #fff; }
+.btn-points { background: var(--green-soft); color: var(--green); }
+.btn-points:hover { background: var(--green-line); }
+.btn-points svg { fill: var(--yellow); stroke: var(--yellow); }
+.cart-btn svg, .cart-btn { color: var(--green); }
+.cart-btn svg { stroke: var(--green); }
+.cart-badge { background: var(--green-mid) !important; color: #fff !important; }
+.btn-profile { background: var(--green); color: #fff; border-radius: var(--radius-pill); }
+.btn-profile svg { stroke: #fff; }
+.notif-bell { color: var(--green); }
+
+/* ───────── ACCUEIL : HERO ───────── */
+.hero {
+  background: linear-gradient(135deg, var(--green-wash) 0%, var(--green-soft) 60%, #DCEBDA 100%);
+  color: var(--text-dark);
+}
+.hero-title { color: var(--green); }
+.hero-title .hi { color: var(--green-mid); }
+.hero-desc { color: var(--text-gray); }
+.btn-white-solid, .btn-green-solid, .btn-cta, .btn-main {
+  background: var(--green); color: #fff; border: 0; border-radius: var(--radius-pill);
+  font-weight: 700; box-shadow: 0 8px 20px rgba(15, 91, 44, 0.22);
+}
+.btn-white-solid:hover, .btn-green-solid:hover, .btn-cta:hover, .btn-main:hover { background: var(--green-dark); }
+.btn-outline-white, .btn-login-hero {
+  background: #fff; color: var(--green); border: 2px solid var(--green); border-radius: var(--radius-pill); font-weight: 700;
+}
+.hero-img-card { border-radius: 28px; border: 6px solid #fff; box-shadow: var(--shadow-card); overflow: hidden; }
+.hero-img-card img { object-fit: cover; }
+
+/* ───────── SECTIONS & CARTES ───────── */
+.features, .products, .how { background: transparent; }
+.feature-card, .step, .card, .stat-card, .order-card, .recent-card, .reward-card, .niveau-card,
+.detail-block, .livreur-card, .form-card, .delivery-card, .demande-card, .progression-card, .histo-item {
+  background: #fff; border: 1.5px solid var(--green-line); border-radius: var(--radius-card); box-shadow: var(--shadow-card);
+}
+.feature-icon, .step-num {
+  background: var(--green-soft); color: var(--green); border-radius: 50%;
+}
+.step-num { background: var(--green); color: #fff; }
+.section-title, .how-title, .menu-title { color: var(--green); font-weight: 800; }
+.section-sub, .menu-sub { color: var(--text-gray); }
+
+/* Cartes produit : image sur fond blanc, prix en pastille, bouton « + » rond */
+.product-card {
+  background: #fff; border: 1.5px solid var(--green-line); border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card); overflow: hidden; position: relative;
+}
+.product-img-wrap { background: var(--green-wash); position: relative; }
+.product-price {
+  background: var(--green); color: #fff; border-radius: var(--radius-pill);
+  font-weight: 700; font-size: .78rem; padding: 4px 10px;
+}
+.badge-popular {
+  background: var(--green-mid); color: #fff; border-radius: 8px; font-weight: 700; font-size: .72rem; padding: 3px 9px;
+}
+.product-name { color: var(--text-dark); font-family: var(--font-head); font-weight: 700; }
+.product-desc { color: var(--text-gray); }
+.btn-add, .product-order {
+  background: var(--green-mid); color: #fff; border: 0; border-radius: var(--radius-pill);
+  font-weight: 700; cursor: pointer; transition: background .2s, transform .15s;
+}
+.btn-add:hover, .product-order:hover { background: var(--green); }
+.btn-add:active, .product-order:active { transform: scale(.97); }
+.btn-add svg { stroke: #fff; }
+
+/* Filtres catégories = pastilles à contour vert */
+.filters { gap: 10px; }
+.filter-btn, .filter-chip, .tab-btn {
+  background: #fff; color: var(--green); border: 1.5px solid var(--green); border-radius: 14px; font-weight: 700;
+}
+.filter-btn:hover, .filter-chip:hover, .tab-btn:hover { background: var(--green-soft); }
+.filter-btn.active, .filter-chip.active, .tab-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* CTA + comment ça marche */
+.cta-section { background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%); color: #fff; border-radius: 28px; }
+.cta-title, .cta-desc { color: #fff; }
+.btn-cta { background: #fff; color: var(--green); }
+
+/* ───────── PIED DE PAGE ───────── */
+footer { background: var(--green-dark) !important; color: rgba(255,255,255,.82); }
+footer .footer-brand-name, footer .footer-col-title,
+footer div[style*="#0F5B2C"] { color: #fff !important; font-family: var(--font-head); }
+footer a { color: #fff; }
+footer .contact-item a { text-decoration: none; }
+footer .contact-item a:hover { text-decoration: underline; }
+
+/* ───────── PAGES D'AUTH (connexion / inscription) ───────── */
+.page-bg, .bg-client, .bg-livreur, .bg-directeur {
+  background: linear-gradient(160deg, var(--green-wash) 0%, var(--green-soft) 100%) !important;
+}
+.card-icon, .card-icon-green, .card-icon-dark { background: var(--green) !important; color: #fff; border-radius: 18px; }
+.card-title { color: var(--green); }
+.form-label { color: var(--text-dark); font-weight: 700; }
+.form-input, .input-wrap input, .input-wrap select, input[type="text"], input[type="email"], input[type="tel"],
+input[type="password"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+  border-radius: 14px; border-color: var(--green-line);
+}
+.input-wrap input:focus, .form-input:focus, input:focus, select:focus, textarea:focus {
+  border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(76, 154, 82, .18); outline: none;
+}
+.info-banner, .banner-green, .avantages { background: var(--green-soft); border: 1.5px solid var(--green-line); color: var(--green-dark); border-radius: 18px; }
+.banner-yellow { border-radius: 18px; }
+.forgot-link, .link-connexion, .bottom-links a { color: var(--green); font-weight: 700; }
+.btn-creer, .btn-enregistrer, .btn-utiliser { background: var(--green); color: #fff; border-radius: var(--radius-pill); }
+.btn-secondary { border-color: var(--green); color: var(--green); border-radius: var(--radius-pill); }
+
+/* ───────── PROFIL / SUIVI ───────── */
+.profil-banner { background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 100%); border-radius: 28px; }
+.niveau-bar-fill, .progress-line-fill, .prog-line-fill { background: var(--green-mid); }
+.step-circle.done, .step-item.done .step-circle, .step-item.active .step-circle { background: var(--green); border-color: var(--green); color: #fff; }
+.status-badge, .badge-livre, .badge-green, .badge-livre, .badge-disponible { background: var(--green-soft); color: var(--green); }
+.map-placeholder { background: var(--green-wash); border-radius: var(--radius-card); border: 1.5px dashed var(--green-line); }
+
+/* ───────── MINI-PANIER (injecté par app.js, styles inline → on cible par id) ───────── */
+#mc-panel { border-radius: 28px 0 0 28px; }
+#mc-panel button[onclick="goCheckout()"] { background: var(--green) !important; border-radius: var(--radius-pill) !important; }
+#mc-panel button[onclick^="window.location"] { color: var(--green) !important; border-color: var(--green) !important; border-radius: var(--radius-pill) !important; }
+#mc-panel span[style*="#0F5B2C"] { color: var(--green) !important; }
+.toast-g { border-radius: 16px !important; }
+
+/* ───────── BARRE DU BAS (mobile, générée par widgets.js) ───────── */
+@media (max-width: 768px) {
+  nav { padding: 0 16px; height: 64px; }
+  .nav-brand-sub { display: none; }
+  .hamburger { display: none !important; }
+  .cc-bottom-nav {
+    left: 8px !important; right: 8px !important; bottom: 8px !important;
+    border: 1.5px solid var(--green-line); border-radius: 26px; background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 91, 44, .14);
+  }
+  .cc-bottom-nav-item { color: var(--text-gray); border-radius: 18px; }
+  .cc-bottom-nav-item.cc-active { color: var(--green); font-weight: 800; }
+  .cc-bottom-nav-item.cc-active svg { stroke-width: 2.6; }
+  body.cc-has-bottom-nav { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ───────── ESPACES ADMIN & LIVREUR (barre latérale blanche) ───────── */
+.sidebar { background: #fff; border-right: 1.5px solid var(--green-line); }
+.sidebar-brand, .sidebar-profile, .sidebar-logout, .sidebar-bottom { border-color: var(--green-line); }
+.sidebar-logo { background: var(--green); color: #fff; box-shadow: 0 6px 16px rgba(15, 91, 44, .25); }
+.sidebar-brand-name, .profile-name { color: var(--green); }
+.sidebar-brand-sub, .profile-id, .statut-label { color: var(--text-gray); }
+.profile-avatar { background: var(--green-soft); }
+.profile-avatar svg { stroke: var(--green); }
+.statut-badge { background: var(--green-soft); color: var(--green); }
+.dot-green { background: var(--green-mid); }
+.profile-paie { color: var(--text-dark) !important; }
+.nav-item { color: var(--text-gray); border-radius: var(--radius-pill); }
+.nav-item:hover { background: var(--green-soft); color: var(--green); }
+.nav-item.active { background: var(--green); color: #fff; }
+.btn-logout { color: var(--text-gray); }
+.btn-logout:hover { background: #FEECEC; color: #DC2626; }
+.sidebar-toggle { background: var(--green) !important; }
+.main-content { background: var(--bg-main); }
+.page-title { color: var(--green); }
+.page-sub { color: var(--text-gray); }
+.stat-icon-box { border-radius: 16px; }
+.val-green { color: var(--green); }
+.btn-green, .btn-accept, .btn-livre, .btn-nav { background: var(--green); color: #fff; border-radius: 12px; }
+.btn-green:hover, .btn-accept:hover, .btn-livre:hover { background: var(--green-dark); }
+.btn-outline { border-color: var(--green); color: var(--green); border-radius: 12px; }
+.badge-livre, .badge-disponible { background: var(--green-soft); color: var(--green); }
+.table-wrap { border: 1.5px solid var(--green-line); border-radius: var(--radius-card); background: #fff; }
+.table-wrap th { background: var(--green-wash); color: var(--green); }
+.search-bar { border-radius: var(--radius-pill); border-color: var(--green-line); }
+.admin-toolbar button, .lang-toggle { border-radius: var(--radius-pill); }
+
+/* ───────── BASCULE FR / EN ───────── */
+.lang-toggle {
+  display: inline-flex; align-items: center; gap: 0; padding: 3px; cursor: pointer;
+  background: var(--green-soft); border: 1.5px solid var(--green-line); border-radius: var(--radius-pill);
+  font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: .76rem; color: var(--green); line-height: 1;
+}
+.lang-toggle span { padding: 6px 10px; border-radius: var(--radius-pill); transition: background .2s, color .2s; }
+.lang-toggle span.on { background: var(--green); color: #fff; }
+.lang-toggle-float { position: fixed; top: 12px; right: 12px; z-index: 9990; box-shadow: var(--shadow-card); background: #fff; }
+
+/* ───────── BOUTON WHATSAPP FLOTTANT (avec numéro) ───────── */
+#cc-whatsapp-float {
+  width: auto !important; height: 52px !important; border-radius: var(--radius-pill) !important;
+  padding: 0 18px 0 14px; gap: 10px; display: flex; align-items: center;
+  background: #25D366; color: #fff; font-weight: 800; font-size: .86rem; letter-spacing: .01em;
+}
+#cc-whatsapp-float .cc-wa-num { white-space: nowrap; }
+@media (max-width: 480px) {
+  #cc-whatsapp-float { height: 46px !important; padding: 0 12px; }
+  #cc-whatsapp-float .cc-wa-num { display: none; }
+  #cc-whatsapp-float { width: 46px !important; justify-content: center; padding: 0; }
+}
+@media (max-width: 768px) {
+  body.cc-has-bottom-nav #cc-whatsapp-float, body.cc-has-bottom-nav #cc-theme-toggle { bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+#cc-theme-toggle { background: var(--green) !important; right: auto !important; left: 20px; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ───────── CARTE PRODUIT : pied « prix + bouton + » (maquette) ───────── */
+.product-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.product-price-inline { font-family: var(--font-head); font-weight: 800; color: var(--green); font-size: 1rem; }
+.btn-add.btn-round, .product-order.btn-round {
+  width: 38px; height: 38px; min-width: 38px; padding: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 600; line-height: 1; background: var(--green-mid); color: #fff;
+}
+.btn-add.btn-round:hover { background: var(--green); }
+.btn-add.btn-round:disabled { background: var(--green); opacity: 1; }
+.product-info { padding-bottom: 14px; }
+
+/* ───────── MENU : recherche ───────── */
+.menu-search {
+  display: flex; align-items: center; gap: 10px; max-width: 520px; margin: 18px 0 14px;
+  background: #fff; border: 1.5px solid var(--green-line); border-radius: var(--radius-pill); padding: 0 16px;
+}
+.menu-search svg { width: 18px; height: 18px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+.menu-search input { flex: 1; border: 0 !important; box-shadow: none !important; background: transparent; padding: 13px 0; font: inherit; color: var(--text-dark); }
+.menu-search:focus-within { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(76,154,82,.18); }
+
+.nav-logo svg { width: 24px; height: 24px; }
+@media (max-width: 768px) {
+  .toast-g { left: 16px !important; right: 16px !important; bottom: 96px !important; max-width: none !important; }
+  .products-grid { gap: 12px; }
+}
+.dot-orange { width: 8px; height: 8px; background: var(--yellow); border-radius: 50%; display: inline-block; }
+
+/* ───────── PIED DE PAGE : styles autonomes (inscription.css n'a pas les règles .footer-*) ───────── */
+footer { padding: 44px 6vw 26px; margin-top: 40px; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; margin-bottom: 28px; }
+.footer-brand-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 10px; }
+.footer-col-title { font-size: .95rem; font-weight: 800; margin-bottom: 12px; }
+footer p, .contact-item { font-size: .88rem; color: rgba(255,255,255,.82); line-height: 1.9; }
+.contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.contact-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.footer-copy { text-align: center; font-size: .83rem; color: rgba(255,255,255,.6); }
+footer hr, .divider { border: 0; border-top: 1px solid rgba(255,255,255,.18); margin: 0 0 18px; }
+@media (max-width: 768px) { footer { padding-bottom: 96px; } }

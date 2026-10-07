@@ -39,9 +39,9 @@ function showToast(msg, color = "green") {
   t.innerHTML = `${icon}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
-    background: color === "red" ? "#ef4444" : color === "orange" ? "#f97316" : "#22c55e",
+    background: color === "red" ? "#ef4444" : color === "orange" ? "#f97316" : "#0F5B2C",
     color: "white", padding: "14px 24px", borderRadius: "12px",
-    fontFamily: "'Nunito',sans-serif", fontWeight: "700", fontSize: "0.95rem",
+    fontFamily: "DM Sans,sans-serif", fontWeight: "700", fontSize: "0.95rem",
     boxShadow: "0 6px 24px rgba(0,0,0,0.2)", zIndex: "9999",
     opacity: "1", transition: "opacity 0.3s",
   });
@@ -66,7 +66,7 @@ function fillProfile(livreur) {
   });
   initPhotoUpload(livreur);
   const paieLabel = livreur.paieMontant > 0
-    ? `${livreur.paieMontant.toLocaleString()} FCFA / ${livreur.paieType === "mensuel" ? "mois" : "jour"}`
+    ? `${livreur.paieMontant.toLocaleString(window.CLOCLO_LOCALE())} FCFA / ${livreur.paieType === "mensuel" ? "mois" : "jour"}`
     : "Non définie par l'administrateur";
   document.querySelectorAll(".profile-paie").forEach(el => el.textContent = paieLabel);
   I18n.injectToggle(document.querySelector(".sidebar-bottom"));
@@ -77,9 +77,9 @@ function fillProfile(livreur) {
     let actif = livreur.actif !== false;
     function paintToggle() {
       toggleBtn.innerHTML = actif ? `${IC.check} Actif` : `${IC.stop} Inactif`;
-      toggleBtn.style.background = actif ? "#dcfce7" : "#fef3c7";
-      toggleBtn.style.color = actif ? "#16a34a" : "#d97706";
-      toggleBtn.style.borderColor = actif ? "#16a34a" : "#d97706";
+      toggleBtn.style.background = actif ? "#EAF3EA" : "#fef3c7";
+      toggleBtn.style.color = actif ? "#0A4220" : "#d97706";
+      toggleBtn.style.borderColor = actif ? "#0A4220" : "#d97706";
     }
     paintToggle();
     toggleBtn.addEventListener("click", async () => {
@@ -180,7 +180,7 @@ function injectAdminChatButton(livreurId) {
     Object.assign(callBtn.style, {
       position: "fixed", bottom: "86px", right: "22px", zIndex: "9990",
       width: "46px", height: "46px", borderRadius: "50%", border: "none",
-      background: "#16a34a", color: "white", fontSize: "1.2rem", cursor: "pointer",
+      background: "#0A4220", color: "white", fontSize: "1.2rem", cursor: "pointer",
       boxShadow: "0 4px 16px rgba(0,0,0,0.25)", display: "flex", alignItems: "center",
       justifyContent: "center", textDecoration: "none",
     });
@@ -219,8 +219,8 @@ function openAdminChatPanel(livreurId) {
     </div>
     <div id="admin-chat-messages" style="max-height:260px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:10px;font-size:0.85rem;">Chargement…</div>
     <div style="display:flex;gap:8px;">
-      <input id="admin-chat-input" type="text" placeholder="Écrire à l'admin…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
-      <button id="admin-chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+      <input id="admin-chat-input" type="text" placeholder="Écrire à l'admin…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;"/>
+      <button id="admin-chat-send" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
     </div>`;
   Object.assign(panel.style, {
     position: "fixed", bottom: "86px", right: "22px", zIndex: "9991",
@@ -235,7 +235,7 @@ function openAdminChatPanel(livreurId) {
     const messages = await DeliveryService.listAdminMessages(livreurId).catch(() => []);
     box.innerHTML = messages.length
       ? messages.map(m => `<div style="margin-bottom:6px;text-align:${m.sender === "livreur" ? "right" : "left"};">
-          <span style="display:inline-block;background:${m.sender === "livreur" ? "#22c55e" : "#1a1a2e"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
+          <span style="display:inline-block;background:${m.sender === "livreur" ? "#0F5B2C" : "#1a1a2e"};color:white;padding:6px 10px;border-radius:10px;max-width:80%;">${m.text}</span>
         </div>`).join("")
       : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
     box.scrollTop = box.scrollHeight;
@@ -291,7 +291,7 @@ function showNotifPanel() {
       <button id="notif-panel-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b7280;">✕</button>
     </div>
     ${notifLog.length
-      ? notifLog.slice(0, 15).map(n => `<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;">${n.text}<div style="color:#9ca3af;font-size:0.72rem;margin-top:2px;">${n.at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div></div>`).join("")
+      ? notifLog.slice(0, 15).map(n => `<div style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;">${n.text}<div style="color:#9ca3af;font-size:0.72rem;margin-top:2px;">${n.at.toLocaleTimeString(window.CLOCLO_LOCALE(), { hour: "2-digit", minute: "2-digit" })}</div></div>`).join("")
       : `<p style="color:#9ca3af;font-size:0.85rem;text-align:center;padding:20px 0;">Aucune notification pour l'instant.</p>`}`;
   Object.assign(panel.style, {
     position: "fixed", top: "70px", left: "50%", transform: "translateX(-50%)",
@@ -314,12 +314,12 @@ async function initDashboard(livreur) {
   // inventée) : la paie du livreur est fixée séparément par l'admin, voir sidebar "Ma paie".
   document.getElementById("stat-gains-jour").textContent = deliveries
     .filter(o => o.statut === "livree" && new Date(o.createdAt).toDateString() === new Date().toDateString())
-    .reduce((s, o) => s + o.total, 0).toLocaleString() + " FCFA";
+    .reduce((s, o) => s + o.total, 0).toLocaleString(window.CLOCLO_LOCALE()) + " FCFA";
   // "Ce qu'il a vraiment touché" — les pourboires du jour, son revenu personnel réel
   // par livraison (distinct de l'argent encaissé qui revient à l'entreprise).
   document.getElementById("stat-pourboires-jour").textContent = deliveries
     .filter(o => o.statut === "livree" && new Date(o.createdAt).toDateString() === new Date().toDateString())
-    .reduce((s, o) => s + (o.tip || 0), 0).toLocaleString() + " FCFA";
+    .reduce((s, o) => s + (o.tip || 0), 0).toLocaleString(window.CLOCLO_LOCALE()) + " FCFA";
   document.getElementById("stat-livraisons-total").textContent = deliveries.length;
 
   const wrap = document.getElementById("livreur-content");
@@ -331,7 +331,7 @@ async function initDashboard(livreur) {
         <div style="font-weight:900;font-size:1.1rem;color:#1a1a2e;margin-bottom:6px;">Livraison en cours — CMD-${o.id}</div>
         <div style="color:#6b7280;font-weight:600;margin-bottom:10px;">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</div>
         <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">${IC.pin} ${o.adresse}</div>
-        <a href="livreur-livraison.html" style="display:inline-block;background:#22c55e;color:white;border:none;border-radius:10px;padding:11px 20px;font-weight:800;text-decoration:none;">Voir le détail →</a>
+        <a href="livreur-livraison.html" style="display:inline-block;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:11px 20px;font-weight:800;text-decoration:none;">Voir le détail →</a>
       </div>`).join("");
   }
 
@@ -342,7 +342,7 @@ async function initDashboard(livreur) {
         <div style="color:#6b7280;font-weight:600;margin-bottom:10px;">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</div>
         <div style="color:#1a1a2e;font-weight:700;margin-bottom:14px;">${IC.pin} ${o.adresse}</div>
         <div style="display:flex;gap:10px;">
-          <button class="btn-accept" data-order="${o.id}" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Accepter</button>
+          <button class="btn-accept" data-order="${o.id}" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;">Accepter</button>
         </div>
       </div>`).join("");
   }
@@ -369,27 +369,27 @@ async function initLivraison() {
   const wrap = document.getElementById("livraison-content");
 
   if (!order) {
-    wrap.innerHTML = `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:40px 0;">Aucune livraison active. <a href="livreur-dashboard.html" style="color:#22c55e;">Retour au tableau de bord →</a></p>`;
+    wrap.innerHTML = `<p style="text-align:center;color:#9ca3af;font-weight:700;padding:40px 0;">Aucune livraison active. <a href="livreur-dashboard.html" style="color:#0F5B2C;">Retour au tableau de bord →</a></p>`;
     return;
   }
 
   const alreadyConfirmed = !!order.confirmedLivreurAt;
   const actionButton =
     order.statut === "assignee"
-      ? `<button id="btn-accept" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} Accepter la livraison</button>`
+      ? `<button id="btn-accept" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} Accepter la livraison</button>`
       : order.statut === "acceptee"
       ? `<button id="btn-start" style="flex:1;background:#3b82f6;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.truck} Démarrer la livraison</button>`
       : alreadyConfirmed
-      ? `<div style="flex:1;text-align:center;color:#22c55e;font-weight:800;padding:12px;">${IC.check} Livraison confirmée — en attente du client et de l'admin</div>`
-      : `<button id="btn-livre" style="flex:1;background:#22c55e;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} J'ai livré la commande</button>`;
+      ? `<div style="flex:1;text-align:center;color:#0F5B2C;font-weight:800;padding:12px;">${IC.check} Livraison confirmée — en attente du client et de l'admin</div>`
+      : `<button id="btn-livre" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.check} J'ai livré la commande</button>`;
 
   const chatBlock = ["acceptee", "en_livraison"].includes(order.statut)
     ? `<div style="margin-top:20px;border-top:1px solid #f3f4f6;padding-top:16px;">
          <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:8px;">${IC.message} CHAT AVEC LE CLIENT</div>
          <div id="chat-messages" style="max-height:180px;overflow-y:auto;background:#f9fafb;border-radius:10px;padding:10px;margin-bottom:8px;font-size:0.85rem;"></div>
          <div style="display:flex;gap:8px;">
-           <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'Nunito',sans-serif;"/>
-           <button id="chat-send" style="background:#22c55e;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
+           <input id="chat-input" type="text" placeholder="Écrire un message…" style="flex:1;padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;"/>
+           <button id="chat-send" style="background:#0F5B2C;color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer;">Envoyer</button>
          </div>
        </div>`
     : "";
@@ -397,7 +397,7 @@ async function initLivraison() {
   wrap.innerHTML = `
     <div style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
       <div style="font-weight:900;font-size:1.2rem;color:#1a1a2e;margin-bottom:4px;">Commande CMD-${order.id}</div>
-      <div style="color:#6b7280;font-weight:600;margin-bottom:18px;">Total : ${order.total.toLocaleString()} FCFA</div>
+      <div style="color:#6b7280;font-weight:600;margin-bottom:18px;">Total : ${order.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</div>
       <div style="margin-bottom:16px;">
         <div style="font-size:0.8rem;color:#9ca3af;font-weight:800;margin-bottom:4px;">ADRESSE DE LIVRAISON</div>
         <div style="font-weight:700;color:#1a1a2e;">${IC.pin} ${order.adresse}</div>
@@ -409,10 +409,10 @@ async function initLivraison() {
         </ul>
       </div>
       <div style="display:flex;gap:10px;">
-        <button class="btn-gmaps" style="flex:1;background:white;color:#22c55e;border:2px solid #22c55e;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.map}️ Itinéraire</button>
+        <button class="btn-gmaps" style="flex:1;background:white;color:#0F5B2C;border:2px solid #0F5B2C;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;">${IC.map}️ Itinéraire</button>
         ${actionButton}
       </div>
-      ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#dcfce7;color:#16a34a;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">${IC.phone} Appeler ${order.clientContact.nom}</a>` : ""}
+      ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#EAF3EA;color:#0A4220;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">${IC.phone} Appeler ${order.clientContact.nom}</a>` : ""}
       ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.alertTriangle} SOS urgence</button>` : ""}
       <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
       ${chatBlock}
@@ -492,7 +492,7 @@ async function initChat(orderId) {
       ? messages.map(m => {
           const mine = m.sender === "livreur";
           const isAdmin = m.sender === "admin";
-          const bg = mine ? "#22c55e" : isAdmin ? "#1a1a2e" : "#e5e7eb";
+          const bg = mine ? "#0F5B2C" : isAdmin ? "#1a1a2e" : "#e5e7eb";
           const color = mine || isAdmin ? "white" : "#1a1a2e";
           return `<div style="margin-bottom:6px;text-align:${mine ? "right" : "left"};">
           ${isAdmin ? `<div style="font-size:0.68rem;color:#9ca3af;font-weight:800;">ADMIN</div>` : ""}
@@ -574,7 +574,7 @@ async function initHistorique() {
   document.getElementById("stat-h-total").textContent = done.length;
   document.getElementById("stat-h-completees").textContent = livrees.length;
   document.getElementById("stat-h-annulees").textContent = annulees.length;
-  document.getElementById("stat-h-gagne").textContent = totalTips.toLocaleString() + " FC";
+  document.getElementById("stat-h-gagne").textContent = totalTips.toLocaleString(window.CLOCLO_LOCALE()) + " FC";
   document.getElementById("stat-h-note").textContent = avgRating ? `⭐ ${avgRating.toFixed(1)}` : "—";
 
   wrap.innerHTML = done.length
@@ -584,11 +584,11 @@ async function initHistorique() {
           <div>
             <div style="font-weight:800;color:#1a1a2e;">CMD-${o.id}</div>
             <div style="color:#6b7280;font-size:0.85rem;">${o.adresse}</div>
-            ${o.statut === "livree" ? `<div style="color:#9ca3af;font-size:0.78rem;margin-top:2px;">Encaissé chez le client : ${o.total.toLocaleString()} FCFA${o.tip ? ` · Pourboire reçu : ${o.tip.toLocaleString()} FCFA` : ""}${o.rating ? ` · ${"⭐".repeat(o.rating)}` : ""}</div>` : ""}
+            ${o.statut === "livree" ? `<div style="color:#9ca3af;font-size:0.78rem;margin-top:2px;">Encaissé chez le client : ${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA${o.tip ? ` · Pourboire reçu : ${o.tip.toLocaleString(window.CLOCLO_LOCALE())} FCFA` : ""}${o.rating ? ` · ${"⭐".repeat(o.rating)}` : ""}</div>` : ""}
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:800;color:${o.statut === "livree" ? "#22c55e" : "#ef4444"};">${o.statut === "livree" ? IC.check + " Livrée" : IC.errorX + " Annulée"}</div>
-            <div style="color:#9ca3af;font-size:0.8rem;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div>
+            <div style="font-weight:800;color:${o.statut === "livree" ? "#0F5B2C" : "#ef4444"};">${o.statut === "livree" ? IC.check + " Livrée" : IC.errorX + " Annulée"}</div>
+            <div style="color:#9ca3af;font-size:0.8rem;">${new Date(o.createdAt).toLocaleDateString(window.CLOCLO_LOCALE())}</div>
           </div>
         </div>
       </div>`).join("")
@@ -617,15 +617,15 @@ function exportHistoriqueLivreurToPdf(deliveries) {
     <tr>
       <td>CMD-${o.id}</td>
       <td>${o.adresse || "—"}</td>
-      <td>${new Date(o.createdAt).toLocaleDateString("fr-FR")}</td>
-      <td>${o.total.toLocaleString()} FCFA</td>
+      <td>${new Date(o.createdAt).toLocaleDateString(window.CLOCLO_LOCALE())}</td>
+      <td>${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</td>
       <td>${o.statut === "livree" ? "Livrée" : "Annulée"}</td>
     </tr>`).join("");
   const printWin = window.open("", "_blank");
   printWin.document.write(`
     <html><head><title>Mon historique de livraisons — Clo-Clo</title>
     <style>
-      body { font-family: 'Nunito', Arial, sans-serif; padding: 24px; color: #1a1a2e; }
+      body { font-family: DM Sans, Arial, sans-serif; padding: 24px; color: #1a1a2e; }
       h1 { font-size: 1.2rem; margin-bottom: 4px; }
       table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 16px; }
       th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
@@ -633,7 +633,7 @@ function exportHistoriqueLivreurToPdf(deliveries) {
     </style></head>
     <body>
       <h1>Mon historique de livraisons</h1>
-      <p style="color:#6b7280;font-size:0.8rem;">Généré le ${new Date().toLocaleDateString("fr-FR")}</p>
+      <p style="color:#6b7280;font-size:0.8rem;">Généré le ${new Date().toLocaleDateString(window.CLOCLO_LOCALE())}</p>
       <table>
         <thead><tr><th>Commande</th><th>Adresse</th><th>Date</th><th>Total</th><th>Statut</th></tr></thead>
         <tbody>${rows || '<tr><td colspan="5">Aucune livraison.</td></tr>'}</tbody>
@@ -658,10 +658,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     livreur = await withTimeout(requireLivreur(), 12000, "authentification");
   } catch (err) {
     console.error("Erreur d'authentification livreur :", err);
-    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'Nunito',sans-serif;">
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;font-family:'DM Sans',sans-serif;">
       <div>
         <p style="font-weight:800;color:#ef4444;margin-bottom:14px;">${IC.alertTriangle} Impossible de contacter le serveur.</p>
-        <button onclick="window.location.reload()" style="background:#22c55e;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
+        <button onclick="window.location.reload()" style="background:#0F5B2C;color:white;border:none;border-radius:10px;padding:12px 24px;font-weight:800;cursor:pointer;">Réessayer</button>
       </div>
     </div>`;
     return;
@@ -682,7 +682,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erreur de chargement de la page livreur :", err);
     const target = document.getElementById("livreur-content") || document.getElementById("livraison-content") || document.getElementById("histo-list");
     if (target) {
-      target.innerHTML = `<p style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button onclick="window.location.reload()" style="margin-left:8px;background:#22c55e;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button></p>`;
+      target.innerHTML = `<p style="text-align:center;color:#ef4444;font-weight:700;padding:24px;">${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button onclick="window.location.reload()" style="margin-left:8px;background:#0F5B2C;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button></p>`;
     }
   }
 });

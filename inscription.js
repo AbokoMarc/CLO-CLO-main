@@ -64,9 +64,9 @@ function showToast(message, color = "green") {
   toast.textContent = message;
   Object.assign(toast.style, {
     position: "fixed", bottom: "30px", right: "30px",
-    background: color === "red" ? "#ef4444" : "#22c55e", color: "white",
+    background: color === "red" ? "#ef4444" : "#0F5B2C", color: "white",
     padding: "14px 24px", borderRadius: "12px",
-    fontFamily: "'Nunito', sans-serif", fontWeight: "700", fontSize: "0.95rem",
+    fontFamily: "DM Sans, sans-serif", fontWeight: "700", fontSize: "0.95rem",
     boxShadow: "0 6px 24px rgba(0,0,0,0.2)", zIndex: "9999",
     opacity: "1", transition: "opacity 0.3s",
   });

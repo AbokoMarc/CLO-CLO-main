@@ -143,7 +143,7 @@ function renderRewards() {
         renderProfile();
         await loadHistory();
         this.textContent = "✓ Utilisé !";
-        this.style.background = "#16a34a";
+        this.style.background = "#0A4220";
         showToast(`"${name}" appliqué !`, "green");
         setTimeout(() => { this.textContent = this.dataset.origText; this.style.background = ""; this.disabled = false; }, 2000);
       } catch (err) {
@@ -178,12 +178,12 @@ async function loadOrders() {
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap;">
           <div><div style="font-weight:800;font-size:0.9rem;color:#1a1a2e;">CMD-${o.id}</div><div style="font-size:0.8rem;color:#6b7280;">${names.slice(0, 2).join(", ")}${names.length > 2 ? " ..." : ""}</div></div>
           <div style="display:flex;align-items:center;gap:12px;">
-            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#16a34a;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC_TRUCK} Recommander</button>
-            <div style="text-align:right;"><div style="font-weight:800;color:#22c55e;font-size:0.9rem;">${o.total.toLocaleString()} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString("fr-FR")}</div></div>
+            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#0A4220;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC_TRUCK} Recommander</button>
+            <div style="text-align:right;"><div style="font-weight:800;color:#0F5B2C;font-size:0.9rem;">${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString(window.CLOCLO_LOCALE())}</div></div>
           </div>
         </div>`;
       }).join("")
-    : `<div style="text-align:center;padding:30px;color:#9ca3af;font-weight:600;">Aucune commande pour l'instant<br><a href="menu.html" style="color:#22c55e;font-weight:700;text-decoration:none;display:inline-block;margin-top:10px;">Commander maintenant →</a></div>`;
+    : `<div style="text-align:center;padding:30px;color:#9ca3af;font-weight:600;">Aucune commande pour l'instant<br><a href="menu.html" style="color:#0F5B2C;font-weight:700;text-decoration:none;display:inline-block;margin-top:10px;">Commander maintenant →</a></div>`;
 
   wrap.querySelectorAll(".btn-reorder").forEach(btn => {
     btn.addEventListener("click", () => {

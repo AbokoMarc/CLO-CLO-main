@@ -1,5 +1,17 @@
 {
   "buildCommand": null,
   "outputDirectory": ".",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/suivie.html",
+      "destination": "/suivi.html",
+      "permanent": true
+    },
+    {
+      "source": "/suivie",
+      "destination": "/suivi",
+      "permanent": true
+    }
+  ]
 }

@@ -6,6 +6,7 @@
 import { APP } from "./app-data.js";
 
 let activeFilter = "tous";
+let searchQuery = "";
 
 function cardHtml(p) {
   return `
@@ -13,15 +14,15 @@ function cardHtml(p) {
       <div class="product-img-wrap">
         <img src="${p.img}" alt="${p.name}"/>
         ${p.popular ? '<span class="badge-popular">Populaire</span>' : ""}
-        <span class="product-price">${p.price.toLocaleString()} FCFA</span>
+        <span class="product-price">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
       </div>
       <div class="product-info">
         <div class="product-name">${p.name}</div>
         <p class="product-desc">${p.desc || ""}</p>
-        <button class="btn-add" data-id="${p.id}">
-          <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          Ajouter
-        </button>
+        <div class="product-bottom">
+          <span class="product-price-inline">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
+          <button class="btn-add btn-round" data-id="${p.id}" aria-label="Ajouter au panier">+</button>
+        </div>
       </div>
     </div>`;
 }
@@ -36,6 +37,9 @@ function renderGrid() {
     ? visible
     : visible.filter(p => p.category === activeFilter);
 
+  const q = searchQuery.trim().toLowerCase();
+  const found = q ? items.filter(p => `${p.name} ${p.desc || ""}`.toLowerCase().includes(q)) : items;
+  items.length = 0; items.push(...found);
   grid.innerHTML = items.map(cardHtml).join("");
   if (noResults) noResults.style.display = items.length === 0 ? "block" : "none";
 }
@@ -51,7 +55,15 @@ function bindFilters() {
   });
 }
 
+function bindSearch() {
+  document.getElementById("menu-search")?.addEventListener("input", (e) => {
+    searchQuery = e.target.value;
+    renderGrid();
+  });
+}
+
 document.addEventListener("cloclo:ready", () => {
   renderGrid();
   bindFilters();
+  bindSearch();
 });

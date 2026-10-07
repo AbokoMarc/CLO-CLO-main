@@ -63,7 +63,7 @@ nav {
 /* ── FOND DE PAGE ── */
 .page-bg {
   min-height: calc(100vh - 70px);
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  background: linear-gradient(135deg, #EAF3EA 0%, #bbf7d0 100%);
   display: flex;
   align-items: flex-start;
   justify-content: center;

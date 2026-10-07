@@ -37,9 +37,9 @@ function showToast(msg, color = "green") {
   t.textContent = msg;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
-    background: color === "red" ? "#ef4444" : "#22c55e",
+    background: color === "red" ? "#ef4444" : "#0F5B2C",
     color: "white", padding: "14px 24px", borderRadius: "12px",
-    fontFamily: "'Nunito', sans-serif", fontWeight: "700", fontSize: "0.95rem",
+    fontFamily: "DM Sans, sans-serif", fontWeight: "700", fontSize: "0.95rem",
     boxShadow: "0 6px 24px rgba(0,0,0,0.2)", zIndex: "9999",
     opacity: "1", transition: "opacity 0.3s",
   });
@@ -49,7 +49,7 @@ function showToast(msg, color = "green") {
 
 function success(redirect) {
   const btn = document.getElementById("btn-login");
-  if (btn) { btn.textContent = "✓ Connexion réussie !"; btn.style.background = "#16a34a"; btn.disabled = true; }
+  if (btn) { btn.textContent = "✓ Connexion réussie !"; btn.style.background = "#0A4220"; btn.disabled = true; }
   showToast("✅ Connexion réussie !");
   setTimeout(() => window.location.href = redirect, 1000);
 }

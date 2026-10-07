@@ -1,6 +1,7 @@
 /* ============================================================
    CLO-CLO ADMIN | admin-traiteur.js
    ============================================================ */
+import { I18n } from "./i18n.js";
 import { AuthService } from "./services/authService.js";
 import { ProductService } from "./services/productService.js";
 
@@ -22,9 +23,9 @@ function showToast(msg, color = "green") {
   t.innerHTML = `${color === "red" ? IC.errorX : IC.check}<span>${msg}</span>`;
   Object.assign(t.style, {
     position: "fixed", bottom: "30px", right: "30px",
-    background: color === "red" ? "#ef4444" : "#22c55e",
+    background: color === "red" ? "#ef4444" : "#0F5B2C",
     color: "white", padding: "14px 24px", borderRadius: "12px",
-    fontFamily: "'Nunito', sans-serif", fontWeight: "700", fontSize: "0.95rem",
+    fontFamily: "DM Sans, sans-serif", fontWeight: "700", fontSize: "0.95rem",
     boxShadow: "0 6px 24px rgba(0,0,0,0.2)", zIndex: "9999",
   });
   document.body.appendChild(t);

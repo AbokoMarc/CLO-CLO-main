@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#22c55e"/>
+  <meta name="theme-color" content="#0F5B2C"/>
   <link rel="icon" href="favicon.ico" sizes="any"/>
   <link rel="icon" href="icons/icon-192.png" type="image/png"/>
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
@@ -15,14 +15,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet" href="profil.css"/>
+  <footer>
+    <div class="footer-grid">
+
+      <div>
+        <div class="footer-brand-name">Clo-Clo Bar à Fruits</div>
+        <p class="footer-brand-desc">
+          Des fruits frais, des jus naturels et des délices glacés pour tous les goûts.
+        </p>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Horaires</div>
+        <p>Lundi - Samedi : 8h – 20h</p>
+        <p>Dimanche : 10h – 18h</p>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Contact</div>
+        <div class="contact-item"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span><span><a href="tel:+237699876628">+237 699876628</a></span></div>
+        <div class="contact-item"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span><span><a href="mailto:alpha.b.35@icloud.com">alpha.b.35@icloud.com</a></span></div>
+        <div class="contact-item"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M12 21s7-6.4 7-12a7 7 0 0 0-14 0c0 5.6 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></span><span>Nkolfoulou, Yaoundé, Cameroun</span></div>
+      </div>
+
+    </div>
+
+    <hr class="divider"/>
+    <p class="footer-copy">© 2026 Clo-Clo Bar à Fruits &amp; Délices. Tous droits réservés.</p>
+  </footer>
+
+
   <script src="config.js"></script>
   <script src="widgets.js"></script>
+  <link rel="stylesheet" href="theme.css"/>
 </head>
 <body>
 
   <nav>
     <a href="index.html" class="nav-brand">
-      <div class="nav-logo"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em" aria-hidden="true"><path d="M6 3h12l-1.2 4.8a5 5 0 0 1-4.9 3.9h0a5 5 0 0 1-4.9-3.9Z"/><path d="M12 11.7V21"/><path d="M8 21h8"/><path d="M9 6.2c1 .5 2 .5 3 0s2-.5 3 0"/></svg></div>
+      <div class="nav-logo"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-5 6-8 10-10"/></svg></div>
       <div>
         <div class="nav-brand-name">Clo-Clo</div>
         <div class="nav-brand-sub">Bar à Fruits &amp; Délices</div>
@@ -31,7 +62,7 @@
     <ul class="nav-links">
       <li><a href="index.html">Accueil</a></li>
       <li><a href="menu.html">Menu</a></li>
-      <li><a href="suivie.html">Suivi</a></li>
+      <li><a href="suivi.html">Suivi</a></li>
       <li>
         <a href="traiteur.html">
           <svg viewBox="0 0 24 24">
@@ -95,7 +126,7 @@
       <input class="form-input" type="time" id="input-scheduled-time" style="display:none;margin-top:8px;"/>
     </div>
 
-    <button id="btn-confirm" style="width:100%;background:#22c55e;color:white;border:none;border-radius:14px;padding:16px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;">
+    <button id="btn-confirm" style="width:100%;background:#0F5B2C;color:white;border:none;border-radius:14px;padding:16px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;">
       Confirmer et payer à la livraison
     </button>
     <p id="checkout-error" style="color:#ef4444;font-weight:700;margin-top:12px;text-align:center;"></p>

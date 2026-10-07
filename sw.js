@@ -15,10 +15,11 @@
    fraîches. Seule la coquille statique est mise en cache.
    ============================================================ */
 
-const CACHE_NAME = "cloclo-shell-v4";
+const CACHE_NAME = "cloclo-shell-v6";
 const OFFLINE_URL = "/offline.html";
 
 const SHELL_FILES = [
+  "/admin-traiteur.html", "/admin-traiteur.js", "/theme.css", "/traiteur.html", "/traiteur.js", "/widgets.js",
   "/", "/index.html", "/manifest.json", OFFLINE_URL,
   "/admin-clients.html", "/admin-dashboard.html", "/admin-historique.html",
   "/admin-livraisons.html", "/admin-livreurs.html", "/admin-produits.html",
@@ -40,7 +41,7 @@ const SHELL_FILES = [
   "/services/adminService.js", "/services/apiClient.js", "/services/authService.js",
   "/services/deliveryService.js", "/services/notificationService.js",
   "/services/orderService.js", "/services/productService.js",
-  "/style.css", "/suivi.css", "/suivi.js", "/suivie.html",
+  "/style.css", "/suivi.css", "/suivi.js", "/suivi.html",
 ];
 
 self.addEventListener("install", (event) => {
