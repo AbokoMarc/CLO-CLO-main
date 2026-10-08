@@ -13,6 +13,7 @@ const ALL_EVENTS = [
   "order:new", "order:assigned", "order:accepted", "order:started",
   "order:updated", "order:confirmation", "order:cancelled",
   "order:message", "order:sos", "livreur:message",
+  "traiteur:new", "traiteur:message",
 ];
 
 export const NotificationService = {
@@ -35,6 +36,9 @@ export const NotificationService = {
         // seuls les évènements métier incrémentent le compteur.
         this._unread++;
         this._updateBadge();
+        // Relais DOM : n'importe quel module (boîte de messagerie, centre de notifications…)
+        // peut écouter « cloclo:notif » sans ouvrir une 2ᵉ connexion SSE.
+        document.dispatchEvent(new CustomEvent("cloclo:notif", { detail: { event: evt, data } }));
         onEvent?.(evt, data);
       });
     });

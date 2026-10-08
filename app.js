@@ -5,6 +5,7 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 import { NotificationService } from "./services/notificationService.js";
+import { NotifCenter } from "./notif-center.js";
 import { I18n } from "./i18n.js";
 import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
@@ -267,19 +268,15 @@ function initNotifBell() {
   bell.className = "notif-bell";
   bell.title = "Notifications";
   bell.innerHTML = `${IC.bell}<span class="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;border-radius:10px;min-width:16px;height:16px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px;"></span>`;
-  Object.assign(bell.style, {
-    position: "relative", background: "none", border: "none",
-    fontSize: "1.15rem", cursor: "pointer", padding: "4px 8px",
-  });
-  bell.addEventListener("click", () => NotificationService.clearUnread());
   nav.insertBefore(bell, nav.firstChild);
+  NotifCenter.init({ role: "client", bell });   // panneau accessible : historique, lien direct, alertes push
 }
 
 function initClientNotifications() {
   if (!APP.isLoggedIn() || APP.user?.role !== "client") return;
   initNotifBell();
   NotificationService.connect((event, order) => {
-    if (!order || order.userId !== APP.user?.id) return;
+    if (!order || order.userId !== APP.user?.id) return;   // (les évènements traiteur sont gérés par NotifCenter)
     if (event === "order:cancelled") {
       showToast(`❌ Commande CMD-${order.id} annulée.`, "warning");
     } else {
@@ -382,3 +379,6 @@ function showOfflineBanner() {
 }
 
 window.addEventListener("online", () => document.querySelector(".offline-banner")?.remove());
+
+// Parrainage : si la personne arrive via un lien ?ref=CL12, on garde le code jusqu'à son inscription.
+try { const r = new URLSearchParams(location.search).get("ref"); if (/^CL\d+$/i.test(r || "")) localStorage.setItem("cloclo_ref", r.toUpperCase()); } catch { /* stockage indisponible */ }

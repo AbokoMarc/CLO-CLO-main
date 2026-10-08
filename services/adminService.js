@@ -84,4 +84,8 @@ export const AdminService = {
   deletePromoCode(id) {
     return ApiClient.delete(`/admin/promo-codes/${id}`, { auth: true });
   },
+  /** Valide manuellement un paiement Mobile Money reçu (mode « manual »). */
+  validatePayment(orderId) {
+    return ApiClient.post(`/admin/orders/${orderId}/payment/validate`, {}, { auth: true });
+  },
 };

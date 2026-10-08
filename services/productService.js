@@ -29,7 +29,8 @@ export const ProductService = {
     return ApiClient.delete(`/admin/zones/${id}`, { auth: true });
   },
   createTraiteurRequest(data) {
-    return ApiClient.post("/traiteur", data, { auth: false });
+    // auth: true → le jeton du client (s'il est connecté) est joint : la demande est rattachée à son compte (messagerie).
+    return ApiClient.post("/traiteur", data, { auth: true });
   },
   listTraiteurRequests() {
     return ApiClient.get("/admin/traiteur", { auth: true });

@@ -34,3 +34,25 @@ retour exact au français, sélecteur FR|EN injecté partout (flottant si aucun 
 - Pieds de page ajoutés sur checkout, traiteur et inscription (mêmes contacts). Les espaces admin/livreur restent sans pied de page : ce sont des tableaux de bord à barre latérale.
 - Montants et dates suivent la langue du site (`window.CLOCLO_LOCALE`), et la page se recharge au changement de langue pour tout réaligner (sauf saisie en cours).
 - Mode sombre : conservé par filtre d'inversion, car des centaines de couleurs sont codées en ligne dans les scripts ; une vraie refonte en variables CSS serait un chantier à part.
+
+## Mise à jour du 08/10 — vos retours (captures + liste de suggestions)
+
+**Bugs réels corrigés**
+- Admin › Produits : la liste restait sur « Chargement… » tant qu'on n'avait pas créé un produit (le rendu initial n'était jamais appelé). Promos et zones se chargent maintenant en parallèle.
+- « Recommander » ne marchait pas (les commandes enregistrent `productId`, le code lisait `id`) ; il revérifie maintenant le menu actuel (prix, disponibilité).
+- Demandes traiteur envoyées sans le compte du client (impossible de les relier à une conversation) → corrigé.
+- Annuler une commande gardait les points gagnés → points repris. Quantité négative / produit indisponible acceptés → refusés. Double-clic = 2 commandes → clé d'idempotence (testé : triple clic = 1 commande).
+- Faille : nom/message saisis par un visiteur affichés sans protection dans l'admin → échappés à l'affichage + neutralisés à l'enregistrement.
+- Pas de zone de livraison configurée = impossible de commander → champ « quartier » libre dans ce cas.
+- Page admin traiteur sans barre latérale mobile ni notifications → même socle que les autres pages admin.
+
+**Nouveautés**
+- Messagerie traiteur client ↔ admin (liste des conversations à gauche, défilante, recherche, non lues ; fil à droite ; mobile : liste puis conversation).
+- Paiement Mobile Money : MTN MoMo / Orange Money (mode manuel : numéro marchand + référence SMS + validation admin) ou CinetPay (automatique, nécessite VOS identifiants — voir `backend/.env.example.paiement`).
+- Centre de notifications accessible (cloche, historique, lecteur d'écran, alertes push).
+- Profil : onglet « Mes commandes » (produits déjà commandés, filtres En cours / Terminées / Annulées), parrainage avec vrai lien + statistiques, bloc Aide & WhatsApp.
+- Barre du haut mobile : ne déborde plus ; le bouton thème est dans la barre (plus flottant) ; WhatsApp se range au défilement et n'apparaît plus dans l'admin/livreur ; menu « ⋮ » dans l'admin.
+- WhatsApp : lien universel (WhatsApp, WhatsApp Business, navigateurs intégrés) + aide « Copier / Appeler » si l'application ne s'ouvre pas.
+- Mode sombre réel (plus d'inversion de couleurs).
+
+**Limites honnêtes** : testé sur Chromium (téléphone simulé 390 px) et avec une base de test ; pas testé sur de vrais téléphones, ni avec de vrais paiements CinetPay / Mobile Money.

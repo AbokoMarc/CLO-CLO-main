@@ -1,6 +1,7 @@
 /* ============================================================
    CLO-CLO Backend | services/orderService.js — couche SERVICE
    ============================================================ */
+import { PaymentService } from "./paymentService.js";
 import { Store } from "../repositories/store.js";
 import { CatalogService } from "./catalogService.js";
 import { notifyOrderEvent, notifySos } from "../notify.js";
@@ -26,24 +27,51 @@ async function addPointsHistory(userId, label, pts, type) {
 }
 
 export const OrderService = {
-  async createOrder(userId, { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor }) {
-    if (!Array.isArray(items) || items.length === 0) {
-      const e = new Error("Le panier est vide.");
-      e.status = 400;
-      throw e;
+  async createOrder(userId, { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor, paymentMethod, idempotencyKey }) {
+    const bad = (status, msg) => { const e = new Error(msg); e.status = status; return e; };
+    if (!Array.isArray(items) || items.length === 0) throw bad(400, "Le panier est vide.");
+    if (items.length > 40) throw bad(400, "Panier trop volumineux.");
+
+    // Idempotence : un double-clic / un réseau lent qui renvoie la requête ne crée JAMAIS deux commandes.
+    const idem = idempotencyKey ? String(idempotencyKey).slice(0, 80) : null;
+    if (idem) {
+      const existing = await Store.findOne("orders", "userId = ? AND idempotencyKey = ?", userId, idem);
+      if (existing) return existing;
+    }
+
+    // Quantités : entiers 1..50, regroupement des doublons, produits existants ET disponibles.
+    const merged = new Map();
+    for (const it of items) {
+      const qty = Number(it?.qty);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 50) throw bad(400, "Quantité invalide (1 à 50 par produit).");
+      merged.set(Number(it.productId), (merged.get(Number(it.productId)) || 0) + qty);
     }
     const resolvedItems = [];
-    for (const { productId, qty } of items) {
+    for (const [productId, qty] of merged) {
       const p = await CatalogService.getProduct(productId);
-      if (!p) {
-        const e = new Error(`Produit introuvable (id ${productId}).`);
-        e.status = 404;
-        throw e;
-      }
-      resolvedItems.push({ productId: p.id, name: p.name, price: p.price, qty });
+      if (!p) throw bad(404, `Produit introuvable (id ${productId}).`);
+      if (p.disponible === false) throw bad(409, `« ${p.name} » n'est plus disponible. Retirez-le du panier.`);
+      resolvedItems.push({ productId: p.id, name: p.name, price: p.price, qty: Math.min(qty, 50) });
     }
     const produitsTotal = resolvedItems.reduce((s, i) => s + i.price * i.qty, 0);
     const user = await Store.findById("users", userId);
+    if (!user) throw bad(404, "Client introuvable.");
+
+    const finalAdresse = String(adresse || user.adresse || "").trim();
+    const finalQuartier = String(quartier || user.quartier || "").trim();
+    if (!finalAdresse && !finalQuartier) throw bad(400, "Quartier et adresse requis.");
+
+    let when = null;
+    if (scheduledFor) {
+      const d = new Date(scheduledFor);
+      if (Number.isNaN(d.getTime())) throw bad(400, "Heure de livraison invalide.");
+      if (d.getTime() < Date.now() - 5 * 60 * 1000) throw bad(400, "L'heure de livraison choisie est déjà passée.");
+      when = d.toISOString();
+    }
+
+    const method = paymentMethod || "cash";
+    if (!PaymentService.isValidMethod(method)) throw bad(400, "Mode de paiement indisponible.");
+    const online = PaymentService.isOnline(method);
 
     // Frais de livraison réels, calculés sur la distance (toujours entre 1000 et 2000 FCFA).
     const { fee: fraisLivraison, km: distanceKm } = computeDeliveryFee(clientLat, clientLng);
@@ -51,40 +79,43 @@ export const OrderService = {
     // Code promo (facultatif) : réduction en % ou montant fixe, appliquée sur le total produits.
     let discount = 0, appliedCode = null;
     if (promoCode) {
-      const promo = await Store.findOne("promoCodes", "code = ? AND active = 1", promoCode.trim().toUpperCase());
+      const promo = await Store.findOne("promoCodes", "code = ? AND active = 1", String(promoCode).trim().toUpperCase());
       if (promo) {
         discount = promo.type === "percent" ? Math.round((produitsTotal * promo.value) / 100) : promo.value;
-        discount = Math.min(discount, produitsTotal); // jamais de remise négative
+        discount = Math.max(0, Math.min(discount, produitsTotal)); // jamais de remise négative ni supérieure aux produits
         appliedCode = promo.code;
       }
     }
-
     const total = produitsTotal - discount + fraisLivraison;
 
-    const order = await Store.insert("orders", {
-      userId,
-      items: resolvedItems,
-      total,
-      adresse: adresse || user?.adresse,
-      quartier: quartier || user?.quartier,
-      statut: "en_preparation",
-      livreurId: null,
-      etaMinutes: 25,
-      createdAt: new Date().toISOString(),
-      fraisLivraison,
-      distanceKm,
-      promoCode: appliedCode,
-      discount,
-      tip: 0,
-      scheduledFor: scheduledFor || null,
-    });
+    let order;
+    try {
+      order = await Store.insert("orders", {
+        userId, items: resolvedItems, total,
+        adresse: finalAdresse, quartier: finalQuartier,
+        // Paiement en ligne : la commande n'est transmise à la cuisine qu'une fois le paiement confirmé.
+        statut: online ? "en_attente_paiement" : "en_preparation",
+        livreurId: null, etaMinutes: 25, createdAt: new Date().toISOString(),
+        fraisLivraison, distanceKm, promoCode: appliedCode, discount, tip: 0, scheduledFor: when,
+        paymentMethod: method, paymentStatus: online ? "en_attente" : "a_la_livraison", idempotencyKey: idem,
+      });
+    } catch (err) {
+      // Course entre deux requêtes identiques : l'index unique a refusé la 2ᵉ → on renvoie la 1ʳᵉ.
+      if (idem && /UNIQUE|constraint/i.test(String(err.message))) {
+        const existing = await Store.findOne("orders", "userId = ? AND idempotencyKey = ?", userId, idem);
+        if (existing) return existing;
+      }
+      throw err;
+    }
 
-    if (user) {
+    // Points + compteur : ne doivent JAMAIS faire échouer une commande déjà enregistrée.
+    try {
       const gained = Math.floor(total / 500) * POINTS_PER_500_FCFA;
       await Store.update("users", userId, { points: user.points + gained, commandes: user.commandes + 1 });
       await addPointsHistory(userId, `Commande #CMD-${order.id}`, gained, "gain");
-    }
-    notifyOrderEvent("order:new", order);
+    } catch (err) { console.error("points commande", order.id, err.message); }
+
+    if (!online) notifyOrderEvent("order:new", order);
     return order;
   },
 
@@ -220,12 +251,22 @@ export const OrderService = {
       e.status = 404;
       throw e;
     }
-    if (order.statut !== "en_preparation") {
+    if (order.statut !== "en_preparation" && order.statut !== "en_attente_paiement") {
       const e = new Error("Cette commande ne peut plus être annulée : elle est déjà prise en charge par un livreur.");
       e.status = 400;
       throw e;
     }
     const updated = await Store.update("orders", orderId, { statut: "annulee" });
+    // Les points gagnés à la création sont repris : annuler ne doit pas rapporter de points.
+    try {
+      const user = await Store.findById("users", userId);
+      const gained = Math.floor(order.total / 500) * POINTS_PER_500_FCFA;
+      if (user && gained > 0) {
+        await Store.update("users", userId, { points: Math.max(0, user.points - gained), commandes: Math.max(0, user.commandes - 1) });
+        await addPointsHistory(userId, `Commande #CMD-${order.id} annulée`, -gained, "annulation");
+      }
+    } catch (err) { console.error("reprise points", order.id, err.message); }
+    if (order.paymentStatus === "paye") await Store.update("orders", orderId, { paymentStatus: "a_rembourser" });
     notifyOrderEvent("order:cancelled", updated);
     return updated;
   },

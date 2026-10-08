@@ -43,6 +43,9 @@ export function readJsonBody(req) {
     req.on("end", () => {
       if (!data) return resolve({});
       try {
+        if ((req.headers["content-type"] || "").includes("application/x-www-form-urlencoded")) {
+          return resolve(Object.fromEntries(new URLSearchParams(data)));
+        }
         resolve(JSON.parse(data));
       } catch {
         reject(new Error("Corps de requête JSON invalide."));

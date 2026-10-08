@@ -65,4 +65,5 @@ export const AuthService = {
   logout() {
     ApiClient.clearToken();
   },
+  myReferrals() { return ApiClient.get("/auth/me/referrals", { auth: true }); },
 };

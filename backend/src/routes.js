@@ -8,6 +8,8 @@ import { OrderController } from "./controllers/orderController.js";
 import { AdminController } from "./controllers/adminController.js";
 import { NotificationController } from "./controllers/notificationController.js";
 import { PushController } from "./controllers/pushController.js";
+import { TraiteurController } from "./controllers/traiteurController.js";
+import { PaymentController } from "./controllers/paymentController.js";
 
 export const router = new Router();
 
@@ -20,6 +22,7 @@ router.get("/api/auth/me", AuthController.me);
 router.patch("/api/auth/me", AuthController.updateMe);
 router.patch("/api/auth/me/password", AuthController.changeMyPassword);
 router.patch("/api/auth/me/phone", AuthController.setMyPhone);
+router.get("/api/auth/me/referrals", AuthController.myReferrals);
 router.post("/api/auth/me/addresses", AuthController.addFavoriteAddress);
 router.delete("/api/auth/me/addresses/:id", AuthController.removeFavoriteAddress);
 
@@ -38,6 +41,16 @@ router.delete("/api/admin/zones/:id", AdminController.deleteZone);
 router.post("/api/traiteur", CatalogController.createTraiteurRequest);
 router.get("/api/admin/traiteur", AdminController.listTraiteurRequests);
 router.patch("/api/admin/traiteur/:id", AdminController.updateTraiteurRequest);
+router.get("/api/traiteur/me", TraiteurController.mine);
+router.get("/api/traiteur/:id/messages", TraiteurController.listMessages);
+router.post("/api/traiteur/:id/messages", TraiteurController.sendMessage);
+
+// Paiement en ligne
+router.get("/api/payments/methods", PaymentController.methods);
+router.post("/api/payments/cinetpay/notify", PaymentController.cinetpayNotify);
+router.post("/api/orders/:id/pay", PaymentController.initiate);
+router.post("/api/orders/:id/pay/declare", PaymentController.declare);
+router.post("/api/admin/orders/:id/payment/validate", PaymentController.adminValidate);
 
 // Commandes
 router.post("/api/orders", OrderController.create);

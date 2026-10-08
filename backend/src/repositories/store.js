@@ -135,6 +135,14 @@ async function migrate() {
       createdAt TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS traiteur_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      requestId INTEGER NOT NULL REFERENCES traiteur_requests(id),
+      sender TEXT NOT NULL,
+      text TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS livreur_messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       livreurId INTEGER NOT NULL REFERENCES livreurs(id),
@@ -166,6 +174,15 @@ async function migrate() {
     "ALTER TABLE livreurs ADD COLUMN actif INTEGER DEFAULT 1",
     "ALTER TABLE admins ADD COLUMN tel TEXT",
     "ALTER TABLE products ADD COLUMN disponible INTEGER DEFAULT 1",
+    "ALTER TABLE traiteur_requests ADD COLUMN clientSeenAt TEXT",
+    "ALTER TABLE traiteur_requests ADD COLUMN adminSeenAt TEXT",
+    "ALTER TABLE traiteur_requests ADD COLUMN lastMessageAt TEXT",
+    "ALTER TABLE users ADD COLUMN referredBy INTEGER",
+    "ALTER TABLE orders ADD COLUMN paymentMethod TEXT DEFAULT 'cash'",
+    "ALTER TABLE orders ADD COLUMN paymentStatus TEXT DEFAULT 'a_la_livraison'",
+    "ALTER TABLE orders ADD COLUMN paymentRef TEXT",
+    "ALTER TABLE orders ADD COLUMN idempotencyKey TEXT",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_idem ON orders(userId, idempotencyKey) WHERE idempotencyKey IS NOT NULL",
   ];
   for (const sql of patchColumns) {
     try { await db.execute(sql); } catch { /* colonne déjà présente */ }
@@ -179,20 +196,32 @@ export const schemaReady = () => ready;
 /* Config par collection : table SQL réelle + colonnes spéciales
    (JSON sérialisé, booléens stockés en 0/1) */
 const SCHEMAS = {
-  users:         { table: "users",          columns: ["nom","email","tel","quartier","adresse","points","commandes","niveau","passwordHash","favoriteAddresses"], json: ["favoriteAddresses"] },
+  users:         { table: "users",          columns: ["nom","email","tel","quartier","adresse","points","commandes","niveau","passwordHash","favoriteAddresses","referredBy"], json: ["favoriteAddresses"] },
   livreurs:      { table: "livreurs",        columns: ["matricule","nom","tel","vehicule","statut","passwordHash","paieType","paieMontant","photoUrl","actif"], bool: ["actif"] },
   admins:        { table: "admins",          columns: ["username","passwordHash","tel"] },
   products:      { table: "products",        columns: ["name","price","category","popular","desc","img","disponible"], bool: ["popular","disponible"] },
-  traiteurRequests: { table: "traiteur_requests", columns: ["userId","nom","tel","typeEvenement","nbPersonnes","dateEvenement","message","statut","prixPropose","createdAt"] },
+  traiteurRequests: { table: "traiteur_requests", columns: ["userId","nom","tel","typeEvenement","nbPersonnes","dateEvenement","message","statut","prixPropose","createdAt","clientSeenAt","adminSeenAt","lastMessageAt"] },
+  traiteurMessages: { table: "traiteur_messages", columns: ["requestId","sender","text","createdAt"] },
   rewards:       { table: "rewards",         columns: ["name","desc","cost","available"], bool: ["available"] },
   zones:         { table: "zones",           columns: ["ville","quartier"] },
-  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt","rating","ratingComment","tip","scheduledFor","promoCode","discount","fraisLivraison","distanceKm","confirmedLivreurAt","confirmedClientAt","confirmedAdminAt"], json: ["items"] },
+  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt","rating","ratingComment","tip","scheduledFor","promoCode","discount","fraisLivraison","distanceKm","confirmedLivreurAt","confirmedClientAt","confirmedAdminAt","paymentMethod","paymentStatus","paymentRef","idempotencyKey"], json: ["items"] },
   pointsHistory: { table: "points_history",  columns: ["userId","label","date","pts","type"] },
   pushSubs:      { table: "push_subscriptions", columns: ["channel","endpoint","p256dh","authKey"] },
   promoCodes:    { table: "promo_codes",     columns: ["code","type","value","active"], bool: ["active"] },
   messages:      { table: "messages",        columns: ["orderId","sender","text","createdAt"] },
   livreurMessages: { table: "livreur_messages", columns: ["livreurId","sender","text","createdAt"] },
 };
+
+/* Les textes saisis par des visiteurs sont affichés ailleurs (admin, livreur) : on neutralise < et >
+   à l'écriture — en plus de l'échappement côté affichage. */
+const CLEAN = {
+  users: ["nom","tel","quartier","adresse"],
+  traiteurRequests: ["nom","tel","typeEvenement","dateEvenement","message"],
+  orders: ["adresse","quartier","ratingComment"],
+  messages: ["text"], livreurMessages: ["text"], traiteurMessages: ["text"],
+};
+const stripTags = (v) => (typeof v === "string" ? v.replace(/</g, "‹").replace(/>/g, "›") : v);
+const stripDeep = (v) => (Array.isArray(v) ? v.map(stripDeep) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, stripDeep(x)])) : stripTags(v));
 
 function toRow(collection, record) {
   const schema = SCHEMAS[collection];
@@ -201,6 +230,8 @@ function toRow(collection, record) {
     if (!(col in record)) continue;
     let val = record[col];
     if (schema.bool?.includes(col)) val = val ? 1 : 0;
+    if (CLEAN[collection]?.includes(col)) val = stripTags(val);
+    if (collection === "users" && col === "favoriteAddresses") val = stripDeep(val);
     if (schema.json?.includes(col)) val = JSON.stringify(val);
     row[col] = val === undefined ? null : val;
   }

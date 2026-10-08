@@ -39,6 +39,11 @@ export const AuthController = {
     if (payload.role !== "admin") return sendJson(res, 403, { error: "Réservé à l'administrateur." });
     sendJson(res, 200, await AuthService.setAdminPhone(payload.sub, body.tel));
   },
+  async myReferrals({ req, res }) {
+    const payload = requireAuth(req);
+    if (payload.role !== "client") return sendJson(res, 403, { error: "Réservé aux comptes client." });
+    sendJson(res, 200, await AuthService.myReferrals(payload.sub));
+  },
   async addFavoriteAddress({ req, res, body }) {
     const payload = requireAuth(req);
     if (payload.role !== "client") return sendJson(res, 403, { error: "Réservé aux comptes client." });

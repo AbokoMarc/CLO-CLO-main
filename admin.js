@@ -8,6 +8,9 @@ import { AuthService } from "./services/authService.js";
 import { AdminService } from "./services/adminService.js";
 import { ProductService } from "./services/productService.js";
 import { NotificationService } from "./services/notificationService.js";
+import { mountInbox, esc } from "./traiteur-inbox.js";
+import { NotifCenter } from "./notif-center.js";
+import { TraiteurService } from "./services/traiteurService.js";
 import { I18n } from "./i18n.js";
 import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
@@ -86,18 +89,35 @@ function injectAdminToolbar() {
   const bar = document.createElement("div");
   bar.className = "admin-toolbar";
   bar.innerHTML = `
-    <button class="notif-bell" title="Notifications">
+    <button class="notif-bell" type="button" title="Notifications" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false">
       ${IC.bell}<span class="notif-badge" style="display:none;"></span>
     </button>
-    <button class="btn-view-site" title="Voir le site (mode client)">${IC.globe} Voir le site</button>
-    <button class="btn-change-pwd" title="Changer mon mot de passe">${IC.key} Mon mot de passe</button>`;
+    <div class="more-menu">
+      <button class="more-btn" type="button" title="Plus d'actions" aria-label="Plus d'actions" aria-haspopup="menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+      </button>
+      <div class="more-list" role="menu" hidden>
+        <button class="btn-view-site" type="button" role="menuitem">${IC.globe} Voir le site</button>
+        <button class="btn-change-pwd" type="button" role="menuitem">${IC.key} Mon mot de passe</button>
+      </div>
+    </div>`;
   host.appendChild(bar);
-  I18n.injectToggle(bar);
-  PWA.injectInstallButton(bar);
+  I18n.injectToggle(bar);                       // FR | EN toujours visible, jamais caché dans le menu
+  PWA.injectInstallButton(bar.querySelector(".more-list"));
 
-  bar.querySelector(".notif-bell").addEventListener("click", () => NotificationService.clearUnread());
+  NotifCenter.init({ role: "admin", bell: bar.querySelector(".notif-bell") });
+  const moreBtn = bar.querySelector(".more-btn"), moreList = bar.querySelector(".more-list");
+  const closeMore = () => { moreList.hidden = true; moreBtn.setAttribute("aria-expanded", "false"); };
+  moreBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    moreList.hidden = !moreList.hidden;
+    moreBtn.setAttribute("aria-expanded", String(!moreList.hidden));
+  });
+  document.addEventListener("click", closeMore);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMore(); });
+
   bar.querySelector(".btn-view-site").addEventListener("click", () => window.location.href = "index.html");
-  bar.querySelector(".btn-change-pwd").addEventListener("click", handleChangeOwnPassword);
+  bar.querySelector(".btn-change-pwd").addEventListener("click", () => { closeMore(); handleChangeOwnPassword(); });
 }
 
 /* ── SIDEBAR MOBILE : la sidebar n'a aucun bouton pour l'ouvrir sur petit écran, on en ajoute un ── */
@@ -106,10 +126,11 @@ function injectSidebarToggle() {
   const btn = document.createElement("button");
   btn.className = "sidebar-toggle";
   btn.setAttribute("aria-label", "Ouvrir le menu");
+  btn.setAttribute("aria-expanded", "false");
   btn.innerHTML = IC.menu;
   document.body.appendChild(btn);
   const sidebar = document.querySelector(".sidebar");
-  btn.addEventListener("click", () => sidebar?.classList.toggle("sidebar-open"));
+  btn.addEventListener("click", () => { const o = sidebar?.classList.toggle("sidebar-open"); btn.setAttribute("aria-expanded", String(!!o)); });
   document.querySelector(".main-content")?.addEventListener("click", () => sidebar?.classList.remove("sidebar-open"));
 }
 
@@ -132,6 +153,12 @@ async function handleChangeOwnPassword() {
 function initAdminNotifications() {
   NotificationService.connect((event, data) => {
     if (!data) return;
+    if (event === "traiteur:new") { showToast(`Nouvelle demande traiteur — ${data.nom || ""}`); return; }
+    if (event === "traiteur:message") {
+      // le fil ouvert se met à jour tout seul (évènement « cloclo:notif ») ; ailleurs, on prévient par un toast
+      if (data.message?.sender === "client" && !page.includes("admin-traiteur")) showToast("Nouveau message — service traiteur");
+      return;
+    }
     if (event === "livreur:message") {
       showToast("Nouveau message d'un livreur");
       if (document.querySelector(".livreur-chat-panel")) initLivreurs();
@@ -172,6 +199,41 @@ function showSosAlert(order) {
   });
   banner.querySelector("button").addEventListener("click", () => banner.remove());
   document.body.prepend(banner);
+}
+
+/* ── TRAITEUR : boîte de messagerie (liste à gauche, conversation à droite) ── */
+const TRAITEUR_STATUTS = [
+  ["nouvelle", "Nouvelle"], ["en_negociation", "En négociation"], ["confirmee", "Confirmée"], ["refusee", "Refusée"],
+];
+async function initTraiteur() {
+  const root = document.getElementById("traiteur-inbox");
+  if (!root) return;
+  await mountInbox(root, {
+    role: "admin",
+    fetchList: () => TraiteurService.adminList(),
+    fetchMessages: (id) => TraiteurService.messages(id),
+    sendMessage: (id, text) => TraiteurService.send(id, text),
+    titleOf: (r) => r.nom,
+    openId: Number(new URLSearchParams(location.search).get("id")) || null,
+    renderTools: (r) => `
+      <select class="tm-statut" aria-label="Statut">${TRAITEUR_STATUTS.map(([v, l]) => `<option value="${v}" ${v === r.statut ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <input class="tm-prix" type="number" min="0" inputmode="numeric" placeholder="Prix proposé (FCFA)" aria-label="Prix proposé (FCFA)" value="${esc(r.prixPropose ?? "")}"/>
+      <button type="button" class="tm-tool-btn tm-save">Enregistrer</button>
+      <a href="tel:${esc((r.tel || "").replace(/[^0-9+]/g, ""))}">${IC.phone} ${esc(r.tel)}</a>
+      <a href="https://wa.me/${esc((r.tel || "").replace(/[^0-9]/g, ""))}" target="_blank" rel="noopener">WhatsApp</a>
+      <div class="tm-brief">${esc(r.typeEvenement || "Événement")} · ${r.nbPersonnes ? esc(r.nbPersonnes) + " pers." : "? pers."} · ${esc(r.dateEvenement || "date non précisée")}${r.message ? " — « " + esc(r.message) + " »" : ""}</div>`,
+    bindTools: (el, r, h) => {
+      el.querySelector(".tm-save")?.addEventListener("click", async () => {
+        const statut = el.querySelector(".tm-statut").value;
+        const prix = el.querySelector(".tm-prix").value;
+        try {
+          await TraiteurService.update(r.id, { statut, prixPropose: prix === "" ? undefined : prix });
+          showToast("✅ Demande mise à jour.");
+          h.reload();
+        } catch (err) { showToast(err.message || "Impossible de mettre à jour.", "red"); }
+      });
+    },
+  });
 }
 
 /* ── DASHBOARD : stats + graphiques réels ── */
@@ -239,6 +301,7 @@ async function initDashboard() {
 }
 
 const STATUT_BADGE = {
+  en_attente_paiement: { cls: "badge-preparation", label: "Paiement en attente" },
   en_preparation: { cls: "badge-preparation", label: "Préparation" },
   assignee:       { cls: "badge-preparation", label: "Assignée" },
   acceptee:       { cls: "badge-en-route",    label: "Acceptée" },
@@ -393,7 +456,7 @@ function productCardHtml(p) {
   const dispo = p.disponible !== false;
   return `
     <div class="pcard" data-id="${p.id}" style="${dispo ? "" : "opacity:0.55;"}">
-      <img src="${p.img}" alt="${p.name}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"/>
+      <img src="${p.img || window.CLOCLO_IMG_FALLBACK}" alt="${p.name}" onerror="this.onerror=null;this.src=window.CLOCLO_IMG_FALLBACK"/>
       <div class="pcard-body">
         <div class="pcard-name">${p.name}${p.popular ? " " + IC.star : ""}</div>
         <div class="pcard-cat">${p.category} · <span style="color:${dispo ? "#0F5B2C" : "#ef4444"};font-weight:700;">${dispo ? "Disponible" : "Indisponible"}</span></div>
@@ -538,8 +601,12 @@ async function initProduits() {
     }
   }
 
-  await initPromoCodes();
-  await initZones();
+  // BUG CORRIGÉ : render() n'était appelé qu'après une création / suppression / modification,
+  // donc la liste restait sur « Chargement… » tant qu'on n'avait pas ajouté un produit.
+  render();
+
+  // promos et zones se chargent en parallèle (l'une ne bloque plus l'autre)
+  await Promise.allSettled([initPromoCodes(), initZones()]);
 }
 
 /* ── ZONES DE LIVRAISON ── */
@@ -820,6 +887,7 @@ async function renderLivreurStats() {
 
 /* ── LIVRAISONS EN COURS ── */
 const STATUT_LABEL_ADMIN = {
+  en_attente_paiement: "paiement en attente",
   en_preparation: "en préparation", assignee: "en attente d'acceptation",
   acceptee: "acceptée (chat ouvert)", en_livraison: "en livraison", livree: "livrée",
 };
@@ -827,16 +895,20 @@ const STATUT_LABEL_ADMIN = {
 function livraisonBlockHtml(o, livreurs, clients) {
   const livreur = livreurs.find(l => l.id === o.livreurId);
   const client = clients?.find(c => c.id === o.userId);
-  const items = o.items.map(i => `${i.qty}× ${i.name}`).join(", ");
+  const items = esc(o.items.map(i => `${i.qty}× ${i.name}`).join(", "));
+  const payLabels = { a_la_livraison: "Cash à la livraison", en_attente: "Paiement en attente", a_verifier: "Paiement à vérifier", paye: "Payé ✓", echoue: "Paiement refusé", a_rembourser: "À rembourser" };
+  const payLine = `<div class="pay-line ${o.paymentStatus === "paye" ? "ok" : ""}">${esc(payLabels[o.paymentStatus] || "Cash à la livraison")}${o.paymentRef ? " — réf. " + esc(o.paymentRef) : ""}${o.paymentMethod && o.paymentMethod !== "cash" ? " (" + esc(o.paymentMethod) + ")" : ""}</div>`;
   const locationBlock = o.statut === "en_livraison"
     ? `<div class="location-block" data-order="${o.id}" style="margin-bottom:14px;font-size:0.82rem;color:#6b7280;font-weight:700;">${IC.radar} Chargement des positions…</div>`
     : "";
 
   let actionHtml;
-  if (!o.livreurId) {
+  if (o.statut === "en_attente_paiement") {
+    actionHtml = `<button class="btn-validate-pay" data-order="${o.id}" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.check} Valider le paiement reçu</button>`;
+  } else if (!o.livreurId) {
     actionHtml = `<select class="assign-select" data-order="${o.id}" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;font-family:'DM Sans',sans-serif;font-weight:700;">
       <option value="">Assigner un livreur…</option>
-      ${livreurs.filter(l => l.actif !== false).map(l => `<option value="${l.id}">${l.nom}</option>`).join("")}
+      ${livreurs.filter(l => l.actif !== false).map(l => `<option value="${l.id}">${esc(l.nom)}</option>`).join("")}
     </select>`;
   } else if (o.statut === "en_livraison" && o.confirmedLivreurAt && o.confirmedClientAt && !o.confirmedAdminAt) {
     actionHtml = `<button class="btn-confirm-admin" data-order="${o.id}" style="flex:1;background:#0F5B2C;color:white;border:none;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.check} Confirmer la livraison</button>`;
@@ -872,17 +944,18 @@ function livraisonBlockHtml(o, livreurs, clients) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
         <div>
           <div style="font-size:0.78rem;color:#3b82f6;font-weight:800;margin-bottom:4px;">CLIENT</div>
-          <div style="font-weight:700;color:#1a1a2e;">${client ? client.nom : "—"}</div>
-          <div style="color:#6b7280;font-size:0.85rem;">${o.adresse || "—"}</div>
+          <div style="font-weight:700;color:#1a1a2e;">${client ? esc(client.nom) : "—"}</div>
+          <div style="color:#6b7280;font-size:0.85rem;">${esc(o.adresse || "—")}</div>
           <div style="color:#6b7280;font-size:0.85rem;">${items}</div>
           ${client?.tel ? `<a href="tel:${client.tel}" style="display:inline-block;margin-top:6px;color:#0A4220;font-weight:800;font-size:0.8rem;text-decoration:none;">${IC.phone} Appeler</a>` : ""}
         </div>
         <div>
           <div style="font-size:0.78rem;color:#0F5B2C;font-weight:800;margin-bottom:4px;">LIVREUR</div>
-          <div style="font-weight:700;color:#1a1a2e;">${livreur ? livreur.nom : "Non assigné"}</div>
+          <div style="font-weight:700;color:#1a1a2e;">${livreur ? esc(livreur.nom) : "Non assigné"}</div>
           <div style="color:#6b7280;font-size:0.85rem;">Total : ${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA${o.fraisLivraison ? ` (dont ${o.fraisLivraison.toLocaleString(window.CLOCLO_LOCALE())} FCFA livraison)` : ""}</div>
         </div>
       </div>
+      ${payLine}
       ${locationBlock}
       <div style="display:flex;gap:10px;">${actionHtml}</div>
       ${chatBlock}
@@ -895,7 +968,7 @@ async function initLivraisons() {
     AdminService.listLivreurs(),
     AdminService.listClients(),
   ]);
-  const active = orders.filter(o => ["en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut));
+  const active = orders.filter(o => ["en_attente_paiement", "en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut));
   const wrap = document.getElementById("livraisons-list");
   wrap.innerHTML = active.length
     ? active.map(o => livraisonBlockHtml(o, livreurs, clients)).join("")
@@ -909,6 +982,14 @@ async function initLivraisons() {
         showToast("Livreur assigné ! En attente de son acceptation.");
         initLivraisons();
       } catch (err) { showToast(err.message || "Erreur", "red"); }
+    });
+  });
+  wrap.querySelectorAll(".btn-validate-pay").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Confirmer que le paiement de cette commande a bien été reçu ?")) return;
+      btn.disabled = true;
+      try { await AdminService.validatePayment(btn.dataset.order); showToast("Paiement validé — commande envoyée en préparation."); initLivraisons(); }
+      catch (err) { showToast(err.message || "Erreur", "red"); btn.disabled = false; }
     });
   });
   wrap.querySelectorAll(".btn-confirm-admin").forEach(btn => {
@@ -1102,12 +1183,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     else if (page.includes("admin-livreurs")) await withTimeout(initLivreurs(), 45000, "livreurs");
     else if (page.includes("admin-livraisons")) await withTimeout(initLivraisons(), 45000, "livraisons");
     else if (page.includes("admin-historique")) await withTimeout(initHistorique(), 45000, "historique");
+    else if (page.includes("admin-traiteur")) await withTimeout(initTraiteur(), 45000, "traiteur");
   } catch (err) {
     // Ne JAMAIS laisser la page bloquée sur "Chargement…" sans explication —
     // ça ressemblait à un chargement infini alors que c'était une erreur silencieuse.
     console.error("Erreur de chargement de la page admin :", err);
     const target = document.querySelector(
-      "#top-products-list, #recent-orders-list, #products-grid-admin, #clients-grid, #livreurs-grid, #livraisons-list, #hist-body"
+      "#top-products-list, #recent-orders-list, #products-grid-admin, #clients-grid, #livreurs-grid, #livraisons-list, #hist-body, #traiteur-inbox"
     );
     const message = `${IC.alertTriangle} Erreur de chargement : ${err.message || "problème de connexion au serveur"}. <button id="btn-retry-admin" style="margin-left:8px;background:#0F5B2C;color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer;">Réessayer</button>`;
     if (target) {

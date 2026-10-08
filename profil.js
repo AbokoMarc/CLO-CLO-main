@@ -6,6 +6,7 @@
 import { APP } from "./app-data.js";
 import { AuthService } from "./services/authService.js";
 import { ProductService } from "./services/productService.js";
+import { esc } from "./traiteur-inbox.js";
 
 const IC_TRUCK = `<svg class="ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
 
@@ -39,28 +40,34 @@ function renderProfile() {
 
   renderNiveau(u.points);
 
+  initReferral(u);
+}
+
+/* ── PARRAINAGE : lien personnel, copie, partage natif / WhatsApp, et vraies statistiques ── */
+function initReferral(u) {
   const code = `CL${u.id}`;
   const link = `${window.location.origin}/inscription.html?ref=${code}`;
-  const codeEl = document.getElementById("parrain-code");
-  if (codeEl) codeEl.textContent = code;
-  const linkEl = document.getElementById("parrain-link");
-  if (linkEl) linkEl.textContent = link;
-  const copyBtn = document.getElementById("parrain-copy");
-  if (copyBtn) {
-    copyBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(link);
-        showToast("Lien copié.");
-      } catch {
-        showToast("Impossible de copier le lien.", "red");
-      }
-    });
-  }
+  const msg = `Rejoins Clo-Clo (jus, smoothies, glaces livrés à Yaoundé) avec mon lien de parrainage, on gagne chacun 100 points : ${link}`;
+  val("parrain-link-input", link);
+  sel("#parrain-code", code);
   const shareEl = document.getElementById("parrain-share");
-  if (shareEl) {
-    const msg = `Rejoins Clo-Clo (jus, smoothies, glaces livrés à Yaoundé) via mon lien de parrainage, on gagne chacun 100 points : ${link}`;
-    shareEl.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  if (shareEl) shareEl.href = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(link); showToast("Lien copié."); }
+    catch { const f = document.getElementById("parrain-link-input"); f?.select(); document.execCommand?.("copy"); showToast("Lien copié."); }
+  };
+  document.getElementById("parrain-copy")?.addEventListener("click", copy);
+  document.getElementById("parrain-link-input")?.addEventListener("focus", (e) => e.target.select());
+  const nativeBtn = document.getElementById("parrain-native");
+  if (nativeBtn) {
+    if (navigator.share) nativeBtn.addEventListener("click", () => navigator.share({ title: "Clo-Clo", text: msg, url: link }).catch(() => {}));
+    else nativeBtn.style.display = "none";   // pas de partage natif (ordinateur) : Copier + WhatsApp suffisent
   }
+  AuthService.myReferrals?.().then((r) => {
+    sel("#ref-count", r.count);
+    sel("#ref-points", r.pointsEarned);
+  }).catch(() => { /* statistiques indisponibles : le lien reste utilisable */ });
 }
 
 // Paliers réels de fidélité — doivent rester alignés avec ceux affichés
@@ -168,28 +175,86 @@ async function loadHistory() {
   }
 }
 
+const STATUT_TXT = { en_attente_paiement: "En attente de paiement", en_preparation: "En préparation", assignee: "Livreur assigné", acceptee: "Acceptée", en_livraison: "En livraison", livree: "Livrée", annulee: "Annulée" };
+
+/** Agrège toutes les commandes : un produit = une carte (quantité totale, dernière commande). */
+function aggregateProducts(orders) {
+  const map = new Map();
+  for (const o of orders) {
+    if (o.statut === "annulee") continue;
+    for (const it of o.items) {
+      const e = map.get(it.productId) || { productId: it.productId, name: it.name, price: it.price, qty: 0, orders: 0, last: o.createdAt };
+      e.qty += it.qty; e.orders += 1;
+      if (o.createdAt > e.last) { e.last = o.createdAt; e.price = it.price; }
+      map.set(it.productId, e);
+    }
+  }
+  return [...map.values()].sort((a, b) => b.qty - a.qty);
+}
+
 async function loadOrders() {
   const orders = await APP.loadMyOrders();
+  const fmt = (n) => Number(n).toLocaleString(window.CLOCLO_LOCALE());
+  const when = (iso) => new Date(iso).toLocaleDateString(window.CLOCLO_LOCALE(), { day: "numeric", month: "short", year: "numeric" });
+
+  const prodWrap = document.getElementById("ordered-products-wrap");
+  if (prodWrap) {
+    const prods = aggregateProducts(orders);
+    prodWrap.innerHTML = prods.length ? prods.map((p) => `
+      <div class="ordered-card">
+        <div class="ordered-name">${esc(p.name)}</div>
+        <div class="ordered-meta">Commandé ${p.qty} fois · dernière fois le ${when(p.last)}</div>
+        <div class="ordered-bottom"><b>${fmt(p.price)} FCFA</b>
+          <button type="button" class="btn-add btn-round js-readd" data-id="${p.productId}" aria-label="Ajouter au panier">+</button></div>
+      </div>`).join("")
+      : `<p class="tm-none">Vous n'avez pas encore commandé. <a href="menu.html" style="color:var(--green);font-weight:800;">Découvrir le menu</a></p>`;
+    prodWrap.querySelectorAll(".js-readd").forEach((btn) => btn.addEventListener("click", () => {
+      const p = prods.find((x) => String(x.productId) === btn.dataset.id);
+      if (!p) return;
+      const added = APP.reorderItems([{ productId: p.productId, name: p.name, price: p.price, qty: 1 }]);
+      showToast(added === 0 ? "Ces produits ne sont plus disponibles au menu." : "Ajouté au panier !", added === 0 ? "red" : undefined);
+    }));
+  }
+
   const wrap = document.getElementById("recent-orders-wrap");
   if (!wrap) return;
-  wrap.innerHTML = orders.length
-    ? orders.slice(0, 5).map(o => {
-        const names = o.items.map(i => i.name);
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f3f4f6;gap:10px;flex-wrap:wrap;">
-          <div><div style="font-weight:800;font-size:0.9rem;color:#1a1a2e;">CMD-${o.id}</div><div style="font-size:0.8rem;color:#6b7280;">${names.slice(0, 2).join(", ")}${names.length > 2 ? " ..." : ""}</div></div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <button class="btn-reorder" data-id="${o.id}" style="background:#f0fdf4;color:#0A4220;border:none;border-radius:8px;padding:7px 12px;font-weight:800;font-size:0.78rem;cursor:pointer;">${IC_TRUCK} Recommander</button>
-            <div style="text-align:right;"><div style="font-weight:800;color:#0F5B2C;font-size:0.9rem;">${o.total.toLocaleString(window.CLOCLO_LOCALE())} FCFA</div><div style="font-size:0.75rem;color:#9ca3af;">${new Date(o.createdAt).toLocaleDateString(window.CLOCLO_LOCALE())}</div></div>
-          </div>
+  const GROUPS = {
+    all: () => true,
+    open: (o) => ["en_attente_paiement", "en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut),
+    done: (o) => o.statut === "livree",
+    cancelled: (o) => o.statut === "annulee",
+  };
+  const bar = document.getElementById("orders-filter");
+  if (bar && !bar.dataset.bound) {
+    bar.dataset.bound = "1";
+    bar.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-g]"); if (!b) return;
+      bar.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+      wrap.dataset.group = b.dataset.g; loadOrders();
+    });
+  }
+  const group = wrap.dataset.group || "all";
+  const shown = orders.filter(GROUPS[group]);
+  wrap.innerHTML = shown.length
+    ? shown.map((o) => {
+        const names = o.items.map((i) => `${i.qty}× ${esc(i.name)}`);
+        return `<div class="order-row">
+          <div><div class="order-row-id">CMD-${o.id} <span class="order-row-st st-${esc(o.statut)}">${esc(STATUT_TXT[o.statut] || o.statut)}</span></div>
+            <div class="order-row-items">${names.join(", ")}</div>
+            <div class="order-row-date">${when(o.createdAt)}</div></div>
+          <div class="order-row-right"><b>${fmt(o.total)} FCFA</b>
+            ${o.statut !== "annulee" ? `<button type="button" class="ref-btn btn-reorder" data-id="${o.id}">Recommander</button>` : ""}
+            ${["en_attente_paiement", "en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut) ? `<a class="ref-btn" href="suivi.html?order=${o.id}">Suivre</a>` : ""}</div>
         </div>`;
       }).join("")
-    : `<div style="text-align:center;padding:30px;color:#9ca3af;font-weight:600;">Aucune commande pour l'instant<br><a href="menu.html" style="color:#0F5B2C;font-weight:700;text-decoration:none;display:inline-block;margin-top:10px;">Commander maintenant →</a></div>`;
+    : `<p class="tm-none">Aucune commande pour l'instant. <a href="menu.html" style="color:var(--green);font-weight:800;">Voir le menu</a></p>`;
 
-  wrap.querySelectorAll(".btn-reorder").forEach(btn => {
+  wrap.querySelectorAll(".btn-reorder").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const order = orders.find(o => String(o.id) === btn.dataset.id);
+      const order = orders.find((o) => String(o.id) === btn.dataset.id);
       if (!order) return;
-      APP.reorderItems(order.items);
+      const added = APP.reorderItems(order.items);
+      if (added === 0) { showToast("Ces produits ne sont plus disponibles au menu.", "red"); return; }
       showToast("Articles ajoutés au panier !");
       setTimeout(() => { window.location.href = "checkout.html"; }, 700);
     });

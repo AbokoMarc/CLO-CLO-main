@@ -1,6 +1,7 @@
 /* ============================================================
    CLO-CLO Backend | services/adminService.js — couche SERVICE
    ============================================================ */
+import { TraiteurService } from "./traiteurService.js";
 import { Store } from "../repositories/store.js";
 import { hashPassword } from "../auth.js";
 import crypto from "node:crypto";
@@ -177,13 +178,24 @@ export const AdminService = {
 
   /* ── SERVICE TRAITEUR ── */
   listTraiteurRequests() {
-    return Store.all("traiteurRequests");
+    return TraiteurService.listForAdmin();
   },
   async updateTraiteurRequest(id, { statut, prixPropose }) {
     const patch = {};
     if (statut) patch.statut = statut;
-    if (prixPropose !== undefined) patch.prixPropose = Number(prixPropose);
-    return Store.update("traiteurRequests", id, patch);
+    const before = await Store.findById("traiteurRequests", id);
+    if (!before) { const e = new Error("Demande introuvable."); e.status = 404; throw e; }
+    if (prixPropose !== undefined && prixPropose !== null && prixPropose !== "") {
+      const prix = Number(prixPropose);
+      if (!Number.isFinite(prix) || prix < 0) { const e = new Error("Montant invalide."); e.status = 400; throw e; }
+      patch.prixPropose = prix;
+    }
+    const updated = await Store.update("traiteurRequests", id, patch);
+    // Le prix proposé apparaît aussi dans la conversation (le client est prévenu).
+    if (patch.prixPropose !== undefined && patch.prixPropose !== before.prixPropose) {
+      await TraiteurService.adminNote(id, `💰 Prix proposé : ${patch.prixPropose.toLocaleString("fr-FR")} FCFA`).catch(() => {});
+    }
+    return updated;
   },
 
   /** Statistiques calculées à partir des VRAIES commandes en base (aucune donnée inventée) */

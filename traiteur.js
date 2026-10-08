@@ -3,6 +3,33 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 import { ProductService } from "./services/productService.js";
+import { TraiteurService } from "./services/traiteurService.js";
+import { mountInbox, esc } from "./traiteur-inbox.js";
+
+const STATUT_LABEL = { nouvelle: "Nouvelle", en_negociation: "En négociation", confirmee: "Confirmée", refusee: "Refusée" };
+
+/** Boîte de messagerie du client : conversations à gauche, fil à droite. */
+let inboxMounted = false;
+async function loadInbox(openId = null) {
+  const wrap = document.getElementById("traiteur-inbox");
+  const hint = document.getElementById("traiteur-login-hint");
+  if (!APP.isLoggedIn()) { hint.style.display = "block"; wrap.style.display = "none"; return; }
+  hint.style.display = "none"; wrap.style.display = "block";
+  if (inboxMounted && !openId) return;
+  inboxMounted = true;
+  await mountInbox(wrap, {
+    role: "client",
+    fetchList: () => TraiteurService.mine(),
+    fetchMessages: (id) => TraiteurService.messages(id),
+    sendMessage: (id, text) => TraiteurService.send(id, text),
+    titleOf: (r) => `${r.typeEvenement || "Événement"} — demande n°${r.id}`,
+    openId: openId || Number(new URLSearchParams(location.search).get("id")) || null,
+    renderTools: (r) => `
+      <span><b>${esc(STATUT_LABEL[r.statut] || r.statut)}</b></span>
+      ${r.prixPropose ? `<span>Prix proposé : <b>${Number(r.prixPropose).toLocaleString(window.CLOCLO_LOCALE())} FCFA</b></span>` : ""}
+      <div class="tm-brief">${r.nbPersonnes ? esc(r.nbPersonnes) + " pers." : ""} ${r.dateEvenement ? "· " + esc(r.dateEvenement) : ""}${r.message ? " — « " + esc(r.message) + " »" : ""}</div>`,
+  });
+}
 
 function showError(msg) {
   const el = document.getElementById("traiteur-error");
@@ -37,9 +64,12 @@ function initSubmit() {
     btn.textContent = "Envoi en cours...";
 
     try {
-      await ProductService.createTraiteurRequest({ nom, tel, typeEvenement, nbPersonnes, dateEvenement, message });
+      const created = await ProductService.createTraiteurRequest({ nom, tel, typeEvenement, nbPersonnes, dateEvenement, message });
       document.getElementById("traiteur-form-block").style.display = "none";
       document.getElementById("traiteur-success").style.display = "block";
+      // La conversation s'ouvre tout de suite : le client peut écrire sans attendre un rappel.
+      await loadInbox(created?.id || null);
+      document.getElementById("traiteur-inbox-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
       showError(err.message || "Impossible d'envoyer la demande pour le moment. Réessayez plus tard.");
       btn.disabled = false;
@@ -51,4 +81,5 @@ function initSubmit() {
 document.addEventListener("cloclo:ready", () => {
   prefillFromUser();
   initSubmit();
+  loadInbox();
 });

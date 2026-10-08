@@ -23,6 +23,19 @@ function publicAdmin(a) {
 const COLLECTION_BY_ROLE = { client: "users", livreur: "livreurs", admin: "admins" };
 
 export const AuthService = {
+  /** Filleuls du client + points gagnés grâce au parrainage (pour la carte « Parrainez un ami »). */
+  async myReferrals(userId) {
+    const users = await Store.all("users");
+    const mine = users.filter((u) => Number(u.referredBy) === Number(userId));
+    return {
+      code: `CL${userId}`,
+      count: mine.length,
+      pointsEarned: mine.length * PARRAINAGE_POINTS,
+      bonusPerFriend: PARRAINAGE_POINTS,
+      friends: mine.map((u) => ({ prenom: String(u.nom || "").split(" ")[0] })),
+    };
+  },
+
   async registerClient({ nom, email, tel, mdp, quartier, adresse, codeParrainage }) {
     if (!nom || !email || !tel || !mdp) {
       const e = new Error("Champs obligatoires manquants (nom, email, tel, mdp).");
@@ -52,7 +65,7 @@ export const AuthService = {
       nom, email, tel,
       quartier: quartier || "Nkolfoulou",
       adresse: adresse || "Nkolfoulou, Yaoundé",
-      points: WELCOME_POINTS + (parrain ? PARRAINAGE_POINTS : 0), commandes: 0, niveau: "Bronze",
+      points: WELCOME_POINTS + (parrain ? PARRAINAGE_POINTS : 0), referredBy: parrain ? parrain.id : null, commandes: 0, niveau: "Bronze",
       passwordHash: hashPassword(mdp),
     });
     await Store.insert("pointsHistory", {

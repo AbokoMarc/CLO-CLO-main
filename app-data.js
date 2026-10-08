@@ -68,17 +68,37 @@ export const APP = {
 
   clearCart() { this.cart = []; this._saveCart(); },
 
-  /** "Recommander" : réinjecte les articles d'une commande passée dans le
-      panier actuel (fusionne les quantités avec ce qui y est déjà).
-      N'exige pas que le produit soit encore dans le catalogue affiché —
-      on réutilise nom/prix/image tels qu'ils étaient sur la commande. */
+  /** "Recommander" : réinjecte dans le panier les articles d'une commande passée.
+      Les commandes enregistrent « productId » (pas « id ») ; on revérifie chaque produit
+      dans le menu ACTUEL (prix à jour, produit encore disponible). Retourne le nombre
+      d'articles réellement ajoutés (0 = plus rien de disponible). */
   reorderItems(items) {
+    let added = 0;
     for (const it of items) {
-      const ex = this.cart.find((x) => x.id === it.id);
-      if (ex) ex.qty += it.qty;
-      else this.cart.push({ id: it.id, name: it.name, price: it.price, qty: it.qty, img: it.img });
+      const id = it.productId ?? it.id;
+      const p = this.products.find((x) => x.id === id && x.disponible !== false);
+      if (!p) continue;
+      const qty = Math.max(1, Math.min(50, Number(it.qty) || 1));
+      const ex = this.cart.find((x) => x.id === id);
+      if (ex) ex.qty = Math.min(50, ex.qty + qty);
+      else this.cart.push({ id: p.id, name: p.name, price: p.price, qty, img: p.img });
+      added++;
     }
     this._saveCart();
+    return added;
+  },
+
+  /** Aligne le panier sur le menu actuel (prix modifiés, produits retirés). Retourne la liste des produits retirés. */
+  syncCart() {
+    const removed = [];
+    this.cart = this.cart.filter((i) => {
+      const p = this.products.find((x) => x.id === i.id && x.disponible !== false);
+      if (!p) { removed.push(i.name); return false; }
+      i.price = p.price; i.name = p.name; i.qty = Math.max(1, Math.min(50, i.qty));
+      return true;
+    });
+    this._saveCart();
+    return removed;
   },
 
   _saveCart() {
@@ -95,7 +115,9 @@ export const APP = {
     const items = this.cart.map((i) => ({ productId: i.id, qty: i.qty }));
     const order = await OrderService.create({ items, adresse: adresse || this.user.adresse, ...extra });
     this.clearCart();
-    this.user = await AuthService.me();
+    // La commande est DÉJÀ enregistrée : un échec de rafraîchissement du profil ne doit pas
+    // être présenté comme un échec de commande.
+    try { this.user = await AuthService.me(); } catch { /* sera rechargé à la prochaine page */ }
     return order;
   },
 

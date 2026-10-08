@@ -8,10 +8,11 @@ I18n.injectToggle(document.querySelector(".nav-actions"));
 
 // Pré-remplit le code de parrainage si la personne arrive via un lien
 // de type inscription.html?ref=CL12 (partagé depuis le profil d'un ami).
-const refCode = new URLSearchParams(window.location.search).get("ref");
+const refCode = new URLSearchParams(window.location.search).get("ref") || localStorage.getItem("cloclo_ref");
 if (refCode) {
   const field = document.getElementById("input-parrainage");
   if (field) { field.value = refCode; field.readOnly = true; }
+  const banner = document.getElementById("err-parrainage"); if (banner) { banner.style.color = "var(--green)"; banner.textContent = "Code de parrainage appliqué : 100 points offerts en plus !"; }
 }
 
 document.querySelectorAll(".toggle-pwd").forEach(btn => {

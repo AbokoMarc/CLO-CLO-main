@@ -4,9 +4,14 @@
 import { ApiClient } from "./apiClient.js";
 
 export const OrderService = {
-  create({ items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor }) {
-    return ApiClient.post("/orders", { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor }, { auth: true });
+  create({ items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor, paymentMethod, idempotencyKey }) {
+    return ApiClient.post("/orders", { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor, paymentMethod, idempotencyKey }, { auth: true });
   },
+  /** Modes de paiement réellement disponibles côté serveur (cash, MoMo, Orange Money, CinetPay…). */
+  paymentMethods() { return ApiClient.get("/payments/methods"); },
+  /** Démarre le paiement : { mode:"cinetpay", paymentUrl } ou { mode:"manual", number, amount }. */
+  pay(orderId, phone) { return ApiClient.post(`/orders/${orderId}/pay`, { phone }, { auth: true }); },
+  declarePayment(orderId, reference) { return ApiClient.post(`/orders/${orderId}/pay/declare`, { reference }, { auth: true }); },
   myOrders() {
     return ApiClient.get("/orders/me", { auth: true });
   },

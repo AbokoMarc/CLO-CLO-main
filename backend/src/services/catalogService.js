@@ -2,6 +2,7 @@
    CLO-CLO Backend | services/catalogService.js — couche SERVICE
    Produits, récompenses, zones géographiques (Nkolfoulou/Yaoundé)
    ============================================================ */
+import { TraiteurService } from "./traiteurService.js";
 import { Store } from "../repositories/store.js";
 
 export const CatalogService = {
@@ -36,7 +37,7 @@ export const CatalogService = {
       e.status = 400;
       throw e;
     }
-    return Store.insert("traiteurRequests", {
+    const created = await Store.insert("traiteurRequests", {
       userId: userId || null,
       nom, tel, typeEvenement: typeEvenement || null,
       nbPersonnes: nbPersonnes ? Number(nbPersonnes) : null,
@@ -46,5 +47,7 @@ export const CatalogService = {
       prixPropose: null,
       createdAt: new Date().toISOString(),
     });
+    TraiteurService.announceNew(created);
+    return created;
   },
 };

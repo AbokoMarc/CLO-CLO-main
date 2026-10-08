@@ -5,6 +5,9 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 
+/* Produit sans photo : visuel de remplacement (évite une requête vers « /null » et une icône cassée). */
+const NO_IMG = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#EAF3EA"/><text x="60" y="76" font-size="52" text-anchor="middle">🍹</text></svg>');
+
 let activeFilter = "tous";
 let searchQuery = "";
 
@@ -12,7 +15,7 @@ function cardHtml(p) {
   return `
     <div class="product-card" data-category="${p.category}">
       <div class="product-img-wrap">
-        <img src="${p.img}" alt="${p.name}"/>
+        <img src="${p.img || NO_IMG}" alt="${p.name}" loading="lazy"/>
         ${p.popular ? '<span class="badge-popular">Populaire</span>' : ""}
         <span class="product-price">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
       </div>
@@ -33,13 +36,12 @@ function renderGrid() {
   if (!grid) return;
 
   const visible = APP.products.filter(p => p.disponible !== false);
-  const items = activeFilter === "tous"
+  const byCategory = activeFilter === "tous"
     ? visible
     : visible.filter(p => p.category === activeFilter);
 
   const q = searchQuery.trim().toLowerCase();
-  const found = q ? items.filter(p => `${p.name} ${p.desc || ""}`.toLowerCase().includes(q)) : items;
-  items.length = 0; items.push(...found);
+  const items = q ? byCategory.filter(p => `${p.name} ${p.desc || ""}`.toLowerCase().includes(q)) : byCategory;
   grid.innerHTML = items.map(cardHtml).join("");
   if (noResults) noResults.style.display = items.length === 0 ? "block" : "none";
 }

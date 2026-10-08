@@ -24,6 +24,16 @@ export const config = {
   // existants. Définissez-les une fois pour de bon en production.
   vapidPublicKey: process.env.VAPID_PUBLIC_KEY?.trim() || undefined,
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY?.trim() || undefined,
+  // Paiement en ligne (Mobile Money). PAYMENT_PROVIDER = "cinetpay" (paiement automatique MTN/Orange via CinetPay)
+  // ou "manual" (le client envoie l'argent sur votre numéro Mobile Money, l'admin valide à la main).
+  // Si rien n'est défini : "manual" si MOMO_NUMBER / OM_NUMBER existent, sinon seul le paiement à la livraison est proposé.
+  paymentProvider: (process.env.PAYMENT_PROVIDER || "").toLowerCase(),
+  cinetpayApiKey: process.env.CINETPAY_API_KEY || "",
+  cinetpaySiteId: process.env.CINETPAY_SITE_ID || "",
+  momoNumber: process.env.MOMO_NUMBER || "",   // numéro MTN MoMo du commerçant (mode manuel)
+  omNumber: process.env.OM_NUMBER || "",       // numéro Orange Money du commerçant (mode manuel)
+  publicApiUrl: process.env.PUBLIC_API_URL || "", // URL publique de CE backend (pour le webhook CinetPay)
+  frontUrl: process.env.FRONT_URL || "",          // URL du site (retour après paiement)
 };
 
 if (!config.jwtSecret) {

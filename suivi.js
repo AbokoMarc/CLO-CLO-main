@@ -5,6 +5,7 @@
    (posé par checkout.js) sinon on prend la plus récente.
    ============================================================ */
 import { APP } from "./app-data.js";
+import { startPayment } from "./payment-ui.js";
 import { OrderService } from "./services/orderService.js";
 import { NotificationService } from "./services/notificationService.js";
 
@@ -23,17 +24,27 @@ const IC = {
 };
 
 const STEP_LABELS = ["Préparation", "Acceptée", "En Route", "Livré"];
-const STATUS_PROGRESS = { en_preparation: 1, assignee: 1, acceptee: 2, en_livraison: 3, livree: 4, annulee: 0 };
+const STATUS_PROGRESS = { en_attente_paiement: 0, en_preparation: 1, assignee: 1, acceptee: 2, en_livraison: 3, livree: 4, annulee: 0 };
 const STATUT_LABEL = {
-  en_preparation: "en préparation", assignee: "livreur en cours d'affectation",
+  en_attente_paiement: "en attente de paiement", en_preparation: "en préparation", assignee: "livreur en cours d'affectation",
   acceptee: "livreur en route vers le bar", en_livraison: "en livraison",
   livree: "livrée", annulee: "annulée",
 };
 
+const PAY_LABEL = { a_la_livraison: "À la livraison", en_attente: "En attente de paiement", a_verifier: "Paiement à vérifier par l'équipe", paye: "Payé ✓", echoue: "Paiement refusé", a_rembourser: "À rembourser" };
+function paymentBlockHtml(o) {
+  if (!o.paymentStatus || o.paymentStatus === "a_la_livraison") return "";
+  const needsAction = o.paymentStatus === "en_attente" || o.paymentStatus === "echoue";
+  return `<div class="pay-banner ${o.paymentStatus === "paye" ? "ok" : ""}" style="grid-column:1/-1;">
+    <div><b>Paiement :</b> ${PAY_LABEL[o.paymentStatus] || o.paymentStatus}</div>
+    ${needsAction && o.statut !== "annulee" ? `<button type="button" id="btn-pay-now" data-id="${o.id}" class="pay-primary">Payer maintenant</button>` : ""}
+  </div>`;
+}
+
 function activeOrderHtml(o) {
   const step = STATUS_PROGRESS[o.statut] ?? 1;
   const pct = Math.round((step / 4) * 100);
-  const cancelBtn = o.statut === "en_preparation"
+  const cancelBtn = (o.statut === "en_preparation" || o.statut === "en_attente_paiement")
     ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-weight:800;cursor:pointer;">${IC.close} Annuler ma commande</button>`
     : "";
 
@@ -114,6 +125,7 @@ function activeOrderHtml(o) {
         ${confirmBlock}
         ${chatBlock}
         ${sosBlock}
+        ${paymentBlockHtml(o)}
       </div>
       ${cancelBtn}
     </div>`;
@@ -154,7 +166,7 @@ async function loadSuivi() {
 
   const active = orderId
     ? orders.find(o => String(o.id) === orderId)
-    : orders.find(o => ["en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut));
+    : orders.find(o => ["en_attente_paiement", "en_preparation", "assignee", "acceptee", "en_livraison"].includes(o.statut));
   const recents = orders.filter(o => o.id !== active?.id).slice(0, 5);
 
   let html = `<section class="section-block"><h2 class="section-title">Commande en Cours</h2>`;
@@ -164,6 +176,13 @@ async function loadSuivi() {
   html += `</section>`;
 
   wrap.innerHTML = html;
+
+  document.getElementById("btn-pay-now")?.addEventListener("click", async (e) => {
+    const btn = e.currentTarget; btn.disabled = true;
+    try { await startPayment({ id: Number(btn.dataset.id) }, { onDone: () => loadSuivi() }); }
+    catch (err) { showToast(err.message || "Paiement indisponible pour le moment.", "red"); }
+    btn.disabled = false;
+  });
 
   document.getElementById("btn-cancel-order")?.addEventListener("click", async (e) => {
     if (!confirm("Annuler cette commande ? Cette action est définitive.")) return;

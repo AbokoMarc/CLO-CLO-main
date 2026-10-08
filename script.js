@@ -5,6 +5,9 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 
+/* Produit sans photo : visuel de remplacement (évite une requête vers « /null » et une icône cassée). */
+const NO_IMG = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#EAF3EA"/><text x="60" y="76" font-size="52" text-anchor="middle">🍹</text></svg>');
+
 function renderPopularProducts() {
   const grid = document.getElementById("products-grid");
   if (!grid) return;
@@ -19,7 +22,7 @@ function renderPopularProducts() {
   grid.innerHTML = items.map(p => `
     <div class="product-card">
       <div class="product-img-wrap">
-        <img src="${p.img}" alt="${p.name}"/>
+        <img src="${p.img || NO_IMG}" alt="${p.name}" loading="lazy"/>
         <span class="product-price">${p.price.toLocaleString(window.CLOCLO_LOCALE())} FCFA</span>
       </div>
       <div class="product-info">

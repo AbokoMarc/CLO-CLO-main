@@ -7,6 +7,55 @@
    ============================================================ */
 import { APP } from "./app-data.js";
 import { ProductService } from "./services/productService.js";
+import { OrderService } from "./services/orderService.js";
+import { startPayment } from "./payment-ui.js";
+
+/* Clé d'idempotence : identique tant que le panier + l'adresse ne changent pas, même si la page est
+   rechargée ou si l'on réessaie après une coupure réseau → le serveur ne crée jamais 2 commandes. */
+function idemKey(signature) {
+  const k = sessionStorage.getItem("cloclo_idem");
+  const s = sessionStorage.getItem("cloclo_idem_sig");
+  if (k && s === signature) return k;
+  const nk = (crypto.randomUUID?.() || String(Date.now()) + Math.random().toString(16).slice(2));
+  sessionStorage.setItem("cloclo_idem", nk); sessionStorage.setItem("cloclo_idem_sig", signature);
+  return nk;
+}
+
+const PAY_BRAND = {
+  cash: { cls: "cash", name: "Payer à la livraison", sub: "Espèces au livreur" },
+  orange_money: { cls: "orange", name: "Payer avec Orange Money", sub: "Orange Money" },
+  momo: { cls: "mtn", name: "Payer avec MTN MoMo", sub: "MTN Mobile Money" },
+  mobile_money: { cls: "mm", name: "Payer avec Mobile Money", sub: "MTN MoMo ou Orange Money" },
+};
+
+async function loadPaymentMethods() {
+  const wrap = document.getElementById("pay-methods");
+  const hint = document.getElementById("pay-hint");
+  try {
+    const { methods } = await OrderService.paymentMethods();
+    wrap.innerHTML = methods.map((m, i) => {
+      const b = PAY_BRAND[m.id] || { cls: "mm", name: m.label, sub: "" };
+      return `<label class="pay-opt pay-${b.cls}"><input type="radio" name="pay" value="${m.id}" ${i === 0 ? "checked" : ""}/>
+        <span class="pay-opt-ico" aria-hidden="true">${b.cls === "cash" ? "💵" : b.cls === "orange" ? "OM" : b.cls === "mtn" ? "M" : "📱"}</span>
+        <span class="pay-opt-txt"><b>${b.name}</b><small>${b.sub}</small></span></label>`;
+    }).join("") + `
+      <div id="pay-phone-row" class="pay-phone" hidden>
+        <label for="pay-phone">Numéro Mobile Money</label>
+        <div class="pay-phone-field"><span>🇨🇲 +237</span><input id="pay-phone" type="tel" inputmode="tel" maxlength="12" placeholder="6XX XXX XXX" autocomplete="tel-national"/></div>
+      </div>
+      <p class="pay-secure">🔒 Paiement sécurisé · Votre commande part en cuisine dès la confirmation</p>`;
+    const phoneInput = () => document.getElementById("pay-phone");
+    if (APP.user?.tel && phoneInput()) phoneInput().value = String(APP.user.tel).replace(/^\+?237/, "").replace(/\s/g, "");
+    const refresh = () => {
+      const v = wrap.querySelector("input[name=pay]:checked")?.value;
+      const online = v && v !== "cash";
+      document.getElementById("pay-phone-row").hidden = v !== "mobile_money";   // le numéro n'est demandé que pour le paiement automatique
+      hint.textContent = online ? "Vous recevrez les instructions de paiement juste après la validation de la commande." : "Vous réglez en espèces au livreur.";
+      document.getElementById("btn-confirm").textContent = online ? "Confirmer et payer" : "Confirmer la commande";
+    };
+    wrap.addEventListener("change", refresh); refresh();
+  } catch { hint.textContent = "Vous réglez en espèces au livreur."; }
+}
 
 function renderSummary() {
   const wrap = document.getElementById("checkout-summary");
@@ -31,6 +80,15 @@ async function fillZones() {
   if (!select) return;
   try {
     const zones = await ProductService.listZones();
+    if (!zones.length) {
+      // Aucune zone enregistrée par l'admin : la liste serait vide et bloquerait toute commande.
+      // On la remplace par un champ libre (même id, même logique de lecture).
+      const input = document.createElement("input");
+      input.className = "form-input"; input.id = "input-quartier"; input.type = "text";
+      input.placeholder = "Quartier (ex : Nkolfoulou)"; input.value = APP.user?.quartier || "";
+      select.replaceWith(input);
+      return;
+    }
     select.innerHTML = zones.map(z => `<option value="${z.quartier}">${z.quartier} — ${z.ville}</option>`).join("");
     if (APP.user?.quartier) select.value = APP.user.quartier;
   } catch {
@@ -59,7 +117,10 @@ document.addEventListener("cloclo:ready", async () => {
     window.location.href = "connexion.html";
     return;
   }
+  const removed = APP.syncCart();
+  if (removed.length) showToast(`Retiré du panier (plus disponible) : ${removed.join(", ")}`, "red");
   renderSummary();
+  loadPaymentMethods();
   await fillZones();
   fillSavedAddresses();
   document.getElementById("input-adresse").value = APP.user.adresse || "";
@@ -112,20 +173,31 @@ document.addEventListener("cloclo:ready", async () => {
       scheduledFor = d.toISOString();
     }
 
+    if (!quartier) { errorEl.textContent = "Quartier et adresse précise sont requis."; return; }
     const btn = document.getElementById("btn-confirm");
-    btn.disabled = true;
+    if (btn.dataset.busy === "1") return;               // anti double-clic
+    btn.dataset.busy = "1"; btn.disabled = true;
+    const idleLabel = btn.textContent;
     btn.textContent = "Envoi en cours…";
+    const paymentMethod = document.querySelector("#pay-methods input[name=pay]:checked")?.value || "cash";
+    const signature = JSON.stringify([APP.cart.map(i => [i.id, i.qty]), adresse, promoCode, scheduledFor, paymentMethod]);
     try {
       const order = await APP.passCommande(adresse, {
-        clientLat: clientCoords?.lat, clientLng: clientCoords?.lng,
-        promoCode, scheduledFor,
+        quartier, clientLat: clientCoords?.lat, clientLng: clientCoords?.lng,
+        promoCode, scheduledFor, paymentMethod, idempotencyKey: idemKey(signature),
       });
+      sessionStorage.removeItem("cloclo_idem"); sessionStorage.removeItem("cloclo_idem_sig");
       showToast("Commande confirmée !");
-      setTimeout(() => window.location.href = `suivi.html?order=${order.id}`, 1000);
+      const goTrack = () => { window.location.href = `suivi.html?order=${order.id}`; };
+      if (paymentMethod !== "cash") {
+        try { await startPayment(order, { onDone: goTrack, phone: document.getElementById("pay-phone")?.value ? "+237" + document.getElementById("pay-phone").value.replace(/\D/g, "") : undefined }); return; }
+        catch (err) { showToast(err.message || "Paiement indisponible : réglez à la livraison ou réessayez depuis le suivi.", "red"); }
+      }
+      setTimeout(goTrack, 900);
     } catch (err) {
-      btn.disabled = false;
-      btn.textContent = "Confirmer et payer à la livraison";
+      btn.dataset.busy = "0"; btn.disabled = false; btn.textContent = idleLabel;
       errorEl.textContent = err.message || "Impossible de confirmer la commande.";
+      if (err.isNetworkError) errorEl.textContent += " Vous pouvez réessayer : aucune commande en double ne sera créée.";
     }
   });
 });

@@ -42,16 +42,6 @@
   /* ---------- Styles injectés (widgets + mode sombre) ---------- */
   const style = document.createElement("style");
   style.textContent = `
-    html[data-theme="dark"] {
-      filter: invert(1) hue-rotate(180deg);
-      background: #fff;
-    }
-    html[data-theme="dark"] img,
-    html[data-theme="dark"] video,
-    html[data-theme="dark"] iframe,
-    html[data-theme="dark"] .no-invert {
-      filter: invert(1) hue-rotate(180deg);
-    }
 
     #cc-whatsapp-float {
       position: fixed; bottom: 22px; right: 20px; z-index: 9999;
@@ -74,10 +64,6 @@
     #cc-theme-toggle:hover { transform: scale(1.07); }
     #cc-theme-toggle svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
     /* Le bouton lui-même ne doit jamais être ré-inversé par le filtre du mode sombre */
-    html[data-theme="dark"] #cc-theme-toggle,
-    html[data-theme="dark"] #cc-whatsapp-float {
-      filter: invert(1) hue-rotate(180deg);
-    }
 
     @media (max-width: 480px) {
       #cc-whatsapp-float { bottom: 16px; right: 14px; width: 50px; height: 50px; }
@@ -126,6 +112,16 @@
      tout simplement inaccessibles. On reprend ces mêmes liens (icône +
      libellé) pour construire une barre fixe en bas de l'écran, sans
      toucher aux fichiers HTML qui dupliquent la navbar. */
+  /* Certaines pages (traiteur…) n'ont pas d'icône dans la barre du haut : on en fournit une par défaut. */
+  const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const FALLBACK_ICONS = {
+    "index.html": svg('<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>'),
+    "menu.html": svg('<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>'),
+    "suivi.html": svg('<path d="M12 21s7-5.6 7-11a7 7 0 0 0-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>'),
+    "traiteur.html": svg('<path d="M6 13a4 4 0 0 1 2-7 4 4 0 0 1 8 0 4 4 0 0 1 2 7v6H6z"/><line x1="6" y1="17" x2="18" y2="17"/>'),
+    "profil.html": svg('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+  };
+
   function initMobileNav() {
     const nav = document.querySelector("nav");
     const links = nav?.querySelectorAll(".nav-links > li > a");
@@ -138,7 +134,7 @@
       const href = a.getAttribute("href") || "#";
       const hrefFile = href.split("/").pop();
       const isActive = hrefFile === path || (hrefFile === "index.html" && (path === "" || path === "index.html"));
-      const icon = a.querySelector("svg")?.outerHTML || "";
+      const icon = a.querySelector("svg")?.outerHTML || FALLBACK_ICONS[hrefFile] || "";
       const label = a.textContent.trim();
       const item = document.createElement("a");
       item.href = href;
@@ -180,19 +176,27 @@
       refreshIcon();
     });
 
-    document.body.appendChild(btn);
+    // Pages client : le bouton thème vit dans la barre du haut (plus rien de flottant qui recouvre les formulaires).
+    // Espaces admin / livreur : il reste flottant (CSS le range dans la barre supérieure sur mobile).
+    const slot = document.querySelector("nav .nav-actions");
+    if (slot) { btn.classList.add("cc-theme-inline"); slot.insertBefore(btn, slot.querySelector(".lang-toggle")?.nextSibling || slot.firstChild); }
+    else document.body.appendChild(btn);
   }
 
   /* ---------- Bouton WhatsApp flottant ---------- */
   function initWhatsapp() {
     const number = window.CLOCLO_CONFIG?.WHATSAPP_NUMBER;
     if (!number) return; // pas de numéro configuré → pas de bouton
+    // Le bouton WhatsApp s'adresse aux CLIENTS : inutile (et gênant) dans les espaces admin / livreur.
+    if (/admin-|livreur|directeur/.test(location.pathname)) return;
 
     const link = document.createElement("a");
     link.id = "cc-whatsapp-float";
     const display = window.CLOCLO_CONFIG?.CONTACT_PHONE_DISPLAY || "+" + number;
     const refresh = () => {
-      link.href = `https://wa.me/${number}?text=${encodeURIComponent(WTXT[wl()].waMsg)}`;
+      // api.whatsapp.com : fonctionne avec WhatsApp, WhatsApp Business et dans les navigateurs intégrés
+      // (Facebook, Instagram, WebView de l'application) où wa.me échoue parfois.
+      link.href = `https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(WTXT[wl()].waMsg)}`;
       link.setAttribute("aria-label", `${WTXT[wl()].waAria} (${display})`);
       link.title = `WhatsApp ${display}`;
     };
@@ -201,6 +205,20 @@
       const tb = document.getElementById("cc-theme-toggle");
       if (tb) { tb.setAttribute("aria-label", WTXT[wl()].themeAria); tb.setAttribute("title", WTXT[wl()].themeTitle); }
     });
+    // Sur téléphone : si WhatsApp ne s'est pas ouvert au bout de 2,5 s, on propose le numéro (copier / appeler).
+    link.addEventListener("click", () => {
+      if (!/Android|iPhone|iPad/i.test(navigator.userAgent)) return;
+      setTimeout(() => {
+        if (document.hidden || document.getElementById("cc-wa-help")) return;
+        const box = document.createElement("div");
+        box.id = "cc-wa-help"; box.setAttribute("role", "status");
+        box.innerHTML = `<span>${wl() === "en" ? "WhatsApp did not open?" : "WhatsApp ne s'ouvre pas ?"} <b>${display}</b></span>
+          <a href="tel:+${number}">${wl() === "en" ? "Call" : "Appeler"}</a><button type="button">${wl() === "en" ? "Copy" : "Copier"}</button>`;
+        box.querySelector("button").onclick = () => { navigator.clipboard?.writeText(display); box.remove(); };
+        document.body.appendChild(box);
+        setTimeout(() => box.remove(), 9000);
+      }, 2500);
+    });
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     refresh();
@@ -208,7 +226,25 @@
     document.body.appendChild(link);
   }
 
+  /* Les boutons flottants se retirent quand on descend dans la page (ils ne cachent plus le contenu)
+     et reviennent dès qu'on remonte ou qu'on s'arrête. */
+  function initFloatAutoHide() {
+    let last = window.scrollY, ticking = false;
+    const set = (hide) => document.querySelectorAll("#cc-whatsapp-float, #cc-theme-toggle").forEach((el) => el.classList.toggle("cc-float-hidden", hide));
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (Math.abs(y - last) > 8) set(y > last && y > 120);
+        last = y; ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("touchend", () => setTimeout(() => set(false), 900), { passive: true });
+  }
+
   function init() {
+    initFloatAutoHide();
     initMobileNav();
     initThemeToggle();
     initWhatsapp();
