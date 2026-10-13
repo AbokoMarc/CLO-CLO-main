@@ -6,6 +6,9 @@ import { AuthService } from "./services/authService.js";
 import { I18n } from "./i18n.js";
 I18n.injectToggle(document.querySelector(".nav-actions"));
 
+// already-auth : une personne déjà connectée n'a rien à faire ici (ni se reconnecter, ni s'inscrire).
+if (AuthService.isAuthenticated()) location.replace("index.html");
+
 // Pré-remplit le code de parrainage si la personne arrive via un lien
 // de type inscription.html?ref=CL12 (partagé depuis le profil d'un ami).
 const refCode = new URLSearchParams(window.location.search).get("ref") || localStorage.getItem("cloclo_ref");

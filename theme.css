@@ -826,3 +826,30 @@ html[data-theme="dark"] .info-banner, html[data-theme="dark"] .info-banner * { c
 .tm-count[hidden], .tm-badge[hidden] { display: none !important; }
 .avantages, .avantages * { color: var(--green-dark) !important; opacity: 1 !important; }
 html[data-theme="dark"] .avantages, html[data-theme="dark"] .avantages * { color: var(--text-dark) !important; }
+
+/* ============================================================
+   Session : un utilisateur connecté ne voit plus « S'inscrire / Se connecter »
+   (la classe is-auth est posée par widgets.js dès le chargement, sans clignotement)
+   ============================================================ */
+html.is-auth a[href="inscription.html"], html.is-auth a[href="connexion.html"],
+html.is-auth .btn-login-hero, html.is-auth .btn-outline-white[href*="inscription"] { display: none !important; }
+
+/* Bouton de langue flottant (livreur…) : dans la barre du haut sur mobile */
+.lang-toggle-float { top: 10px; right: 12px; z-index: 216; }
+@media (min-width: 769px) { body:has(.sidebar) .lang-toggle-float { top: 16px; right: 24px; } }
+
+/* ============================================================
+   TABLEAUX ADMIN sur mobile : une carte par ligne (fini les lettres empilées de l'historique)
+   ============================================================ */
+@media (max-width: 768px) {
+  .table-wrap { overflow: visible !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+  .table-wrap table, .table-wrap tbody { display: block; width: 100%; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: block; background: var(--surface, #fff); border: 1.5px solid var(--green-line); border-radius: 18px; padding: 10px 14px; margin-bottom: 12px; box-shadow: var(--shadow-card); }
+  .table-wrap td { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 7px 0 !important; border: 0 !important; border-bottom: 1px dashed var(--green-line) !important; text-align: right; overflow-wrap: anywhere; }
+  .table-wrap td:last-child { border-bottom: 0 !important; }
+  .table-wrap td::before { content: attr(data-label); flex: 0 0 36%; text-align: left; font-weight: 800; font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; color: var(--green); }
+  .table-wrap td[colspan] { display: block; text-align: center; }
+  .table-wrap td[colspan]::before { display: none; }
+}
+html.is-auth [data-guest-only] { display: none !important; }

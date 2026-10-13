@@ -1,3 +1,4 @@
+import { signToken } from "../auth.js";
 import { AuthService } from "../services/authService.js";
 import { sendJson, requireAuth } from "../http.js";
 
@@ -38,6 +39,12 @@ export const AuthController = {
     const payload = requireAuth(req);
     if (payload.role !== "admin") return sendJson(res, 403, { error: "Réservé à l'administrateur." });
     sendJson(res, 200, await AuthService.setAdminPhone(payload.sub, body.tel));
+  },
+  /** Renouvelle le jeton (30 jours de plus) : un utilisateur actif ne se fait plus jamais déconnecter. */
+  async refresh({ req, res }) {
+    const payload = requireAuth(req);
+    const { iat, exp, ...claims } = payload;
+    sendJson(res, 200, { token: signToken(claims) });
   },
   async myReferrals({ req, res }) {
     const payload = requireAuth(req);

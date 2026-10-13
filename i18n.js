@@ -666,12 +666,14 @@ export const I18n = {
   },
   /** Sélecteur FR | EN (même nom/emplacement qu'avant : navbar, barre admin, sidebar livreur). */
   injectToggle(container) {
-    if (!container || container.querySelector(".lang-toggle")) return;
+    // Un seul sélecteur par page, quel que soit le nombre d'appels (avant : doublons côté admin).
+    if (!container || document.querySelector(".lang-toggle")) return;
     const btn = document.createElement("button");
     btn.className = "lang-toggle";
     btn.type = "button";
     btn.innerHTML = `<span data-lang="fr">FR</span><span data-lang="en">EN</span>`;
     btn.addEventListener("click", () => this.toggle());
+    if (container === document.body) btn.classList.add("lang-toggle-float");
     container.insertBefore(btn, container.firstChild);
     refreshToggles();
   },

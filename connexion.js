@@ -7,6 +7,12 @@ import { AuthService } from "./services/authService.js";
 import { I18n } from "./i18n.js";
 I18n.injectToggle(document.querySelector(".nav-actions"));
 
+// already-auth : une personne déjà connectée n'a rien à faire ici (ni se reconnecter, ni s'inscrire).
+if (AuthService.isAuthenticated()) {
+  const p = location.pathname;
+  location.replace(p.includes("directeur") ? "admin-dashboard.html" : p.includes("livreur") ? "livreur-dashboard.html" : "index.html");
+}
+
 const page = window.location.pathname;
 const isLivreur   = page.includes("connexion-livreur");
 const isDirecteur = page.includes("connexion-directeur");

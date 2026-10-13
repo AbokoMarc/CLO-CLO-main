@@ -69,7 +69,7 @@ function fillProfile(livreur) {
     ? `${livreur.paieMontant.toLocaleString(window.CLOCLO_LOCALE())} FCFA / ${livreur.paieType === "mensuel" ? "mois" : "jour"}`
     : "Non définie par l'administrateur";
   document.querySelectorAll(".profile-paie").forEach(el => el.textContent = paieLabel);
-  I18n.injectToggle(document.querySelector(".sidebar-bottom"));
+  I18n.injectToggle(document.body);   // en haut à droite (le placer dans la barre latérale chevauchait le menu)
 
   // Toggle "Actif" — visible en permanence, pas seulement à la déconnexion.
   const toggleBtn = document.getElementById("btn-toggle-actif");

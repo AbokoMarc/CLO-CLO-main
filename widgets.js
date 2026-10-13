@@ -20,6 +20,14 @@
    cette approche par de vraies variables CSS par page.
    ============================================================ */
 (function () {
+  /* Session : si un jeton existe pour la section courante, la page est marquée « connecté » dès le départ
+     (les boutons « S'inscrire / Se connecter » sont masqués par theme.css, sans clignotement). */
+  try {
+    const p = location.pathname;
+    const role = /admin-|directeur/.test(p) ? "admin" : /livreur/.test(p) ? "livreur" : "client";
+    if (localStorage.getItem("cloclo_token_" + role)) document.documentElement.classList.add("is-auth");
+  } catch { /* stockage indisponible */ }
+
   const THEME_KEY = "cloclo_theme";
   /* Langue courante (même clé que i18n.js) — widgets.js est un script classique,
      il lit donc la préférence directement et se met à jour sur « cloclo:langchange ». */

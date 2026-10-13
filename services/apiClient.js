@@ -24,6 +24,7 @@ function detectRole() {
 const TOKEN_KEY = `cloclo_token_${detectRole()}`;
 
 export const ApiClient = {
+  key: TOKEN_KEY,
   getToken() {
     return localStorage.getItem(TOKEN_KEY);
   },

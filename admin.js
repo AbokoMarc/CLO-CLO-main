@@ -86,6 +86,7 @@ function injectAdminToolbar() {
   const host = document.querySelector(".page-header") || document.querySelector(".sidebar-brand");
   if (!host || document.querySelector(".admin-toolbar")) return;
 
+  if (document.querySelector(".admin-toolbar")) return;     // une seule barre d'outils par page
   const bar = document.createElement("div");
   bar.className = "admin-toolbar";
   bar.innerHTML = `
@@ -233,6 +234,18 @@ async function initTraiteur() {
         } catch (err) { showToast(err.message || "Impossible de mettre à jour.", "red"); }
       });
     },
+  });
+}
+
+/* ── TABLEAUX : sur mobile chaque ligne devient une carte « libellé : valeur » ── */
+function enableResponsiveTables() {
+  const label = (table) => {
+    const heads = [...table.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+    table.querySelectorAll("tbody tr").forEach((tr) => [...tr.children].forEach((td, i) => { if (heads[i] && td.dataset.label !== heads[i]) td.dataset.label = heads[i]; }));
+  };
+  document.querySelectorAll(".table-wrap table").forEach((table) => {
+    label(table);
+    new MutationObserver(() => label(table)).observe(table, { childList: true, subtree: true });
   });
 }
 
@@ -1177,6 +1190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   PWA.subscribeToPush(() => ApiClient.getToken());
 
   try {
+    enableResponsiveTables();
     if (page.includes("admin-dashboard")) await withTimeout(initDashboard(), 45000, "tableau de bord");
     else if (page.includes("admin-produits")) await withTimeout(initProduits(), 45000, "produits");
     else if (page.includes("admin-clients")) await withTimeout(initClients(), 45000, "clients");

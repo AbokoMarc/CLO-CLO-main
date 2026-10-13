@@ -382,3 +382,20 @@ window.addEventListener("online", () => document.querySelector(".offline-banner"
 
 // Parrainage : si la personne arrive via un lien ?ref=CL12, on garde le code jusqu'à son inscription.
 try { const r = new URLSearchParams(location.search).get("ref"); if (/^CL\d+$/i.test(r || "")) localStorage.setItem("cloclo_ref", r.toUpperCase()); } catch { /* stockage indisponible */ }
+
+/* Connecté : on ne propose plus de s'inscrire. Le bandeau final de l'accueil devient une invitation à commander. */
+document.addEventListener("cloclo:ready", () => {
+  if (!APP.isLoggedIn()) { document.documentElement.classList.remove("is-auth"); return; }
+  document.documentElement.classList.add("is-auth");
+  const cta = document.querySelector(".cta-section");
+  if (cta) {
+    const t = cta.querySelector(".cta-title"), d = cta.querySelector(".cta-desc"), b = cta.querySelector("a, button");
+    if (t) t.textContent = "Une petite envie ?";
+    if (d) d.textContent = "Parcourez le menu et commandez en quelques clics — vos points vous attendent !";
+    if (b) {
+      const link = document.createElement("a");                 // le <button> d'origine menait à l'inscription
+      link.className = b.className; link.href = "menu.html"; link.textContent = "Commander maintenant";
+      b.replaceWith(link);
+    }
+  }
+});

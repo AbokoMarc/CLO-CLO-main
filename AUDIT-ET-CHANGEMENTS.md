@@ -56,3 +56,9 @@ retour exact au français, sélecteur FR|EN injecté partout (flottant si aucun 
 - Mode sombre réel (plus d'inversion de couleurs).
 
 **Limites honnêtes** : testé sur Chromium (téléphone simulé 390 px) et avec une base de test ; pas testé sur de vrais téléphones, ni avec de vrais paiements CinetPay / Mobile Money.
+
+## Mise à jour du 08/10 (soir) — session, langue, historique
+- **Session** : la perte de session venait de l'affichage « déconnecté » dès que le serveur (Render gratuit) tardait à répondre. Désormais : profil mis en cache (affiché tout de suite), jamais de déconnexion sauf refus explicite du serveur (401), 4 tentatives en arrière-plan, et renouvellement automatique du jeton (`POST /api/auth/refresh`, session glissante de 30 jours). Testé : serveur injoignable → toujours connecté.
+- **Connecté = plus de « S'inscrire »** : boutons de l'accueil masqués dès le chargement (sans clignotement), bandeau final transformé en « Commander maintenant », pages Connexion / Inscription redirigent vers l'accueil (ou le tableau de bord admin / livreur).
+- **Bouton de langue** : un seul par page (doublon admin supprimé) ; côté livreur il n'est plus dans la barre latérale (il chevauchait « Historique ») mais en haut à droite.
+- **Historique admin et tous les tableaux** : sur mobile chaque ligne devient une carte « libellé : valeur » (fini les lettres empilées).

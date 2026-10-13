@@ -23,6 +23,7 @@ router.patch("/api/auth/me", AuthController.updateMe);
 router.patch("/api/auth/me/password", AuthController.changeMyPassword);
 router.patch("/api/auth/me/phone", AuthController.setMyPhone);
 router.get("/api/auth/me/referrals", AuthController.myReferrals);
+router.post("/api/auth/refresh", AuthController.refresh);
 router.post("/api/auth/me/addresses", AuthController.addFavoriteAddress);
 router.delete("/api/auth/me/addresses/:id", AuthController.removeFavoriteAddress);
 
