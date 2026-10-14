@@ -4,6 +4,7 @@
    ============================================================ */
 import { AuthService } from "./services/authService.js";
 import { I18n } from "./i18n.js";
+import { watchNetwork } from "./net-status.js";
 I18n.injectToggle(document.querySelector(".nav-actions"));
 
 // already-auth : une personne déjà connectée n'a rien à faire ici (ni se reconnecter, ni s'inscrire).
@@ -85,6 +86,7 @@ document.getElementById("btn-creer")?.addEventListener("click", async () => {
   const origText = btn.textContent;
   btn.textContent = "Création en cours...";
   btn.disabled = true;
+  const stopWatch = watchNetwork(btn, "Création en cours...");
 
   try {
     const codeParrainage = document.getElementById("input-parrainage").value.trim();
@@ -101,6 +103,7 @@ document.getElementById("btn-creer")?.addEventListener("click", async () => {
       : "Compte créé ! 50 points de bienvenue offerts !");
     setTimeout(() => { window.location.href = "profil.html"; }, 1500);
   } catch (err) {
+    stopWatch();
     btn.textContent = origText;
     btn.disabled = false;
     showToast(err.message || "Impossible de créer le compte.", "red");

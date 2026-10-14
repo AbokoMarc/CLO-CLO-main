@@ -883,3 +883,7 @@ html.is-auth [data-guest-only] { display: none !important; }
 html[data-theme="dark"] .lm-box { border-color: var(--line); }
 html[data-theme="dark"] .lm-box .leaflet-tile-pane { filter: brightness(.72) contrast(1.1) saturate(.8); }
 html[data-theme="dark"] .lm-bubble { border-color: var(--surface); }
+
+/* FONT_FALLBACK : police système immédiate si Google Fonts est lent ou bloqué (font-display: swap) */
+body { font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+h1, h2, h3, h4, .hero-title, .menu-title, .section-title, .page-title { font-family: "Bricolage Grotesque", "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }

@@ -12,6 +12,7 @@ export function startSSE(res) {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
     "Access-Control-Allow-Origin": config.corsOrigin,
   });
   res.write(": connecté\n\n");
@@ -27,7 +28,11 @@ export function sendJson(res, status, data) {
   const body = JSON.stringify(data, (k, v) => (k === "liveJson" || k === "idempotencyKey" ? undefined : v));
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
+    // Aucun cache : certains opérateurs mobiles (proxys transparents) conservent des réponses d'API
+    // (/auth/me, liste de produits…) et servent des données périmées.
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": config.corsOrigin,
+    "Access-Control-Max-Age": "86400",
     "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   });

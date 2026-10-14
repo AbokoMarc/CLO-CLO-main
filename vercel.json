@@ -13,5 +13,11 @@
       "destination": "/suivi",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://clo-clo-main.onrender.com/api/:path*"
+    }
   ]
 }

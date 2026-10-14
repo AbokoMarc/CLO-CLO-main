@@ -4,8 +4,17 @@
 import { ApiClient } from "./apiClient.js";
 
 export const AuthService = {
-  async register({ nom, email, tel, mdp, quartier, adresse }) {
-    const data = await ApiClient.post("/auth/register", { nom, email, tel, mdp, quartier, adresse });
+  async register({ nom, email, tel, mdp, quartier, adresse, codeParrainage }) {
+    let data;
+    try {
+      data = await ApiClient.post("/auth/register", { nom, email, tel, mdp, quartier, adresse, ...(codeParrainage ? { codeParrainage } : {}) });   // (le code de parrainage n'était jamais transmis au serveur)
+    } catch (err) {
+      // Réseau coupé APRÈS que le serveur ait créé le compte : la reprise reçoit « existe déjà ».
+      // Plutôt qu'une erreur déroutante, on connecte la personne avec les identifiants qu'elle vient de saisir.
+      if (err.afterRetry && /existe d[ée]j[àa]/i.test(err.message || "")) {
+        data = await ApiClient.post("/auth/login/client", { email, mdp });
+      } else throw err;
+    }
     ApiClient.setToken(data.token);
     this._cache(data.user);
     document.documentElement.classList.add("is-auth");

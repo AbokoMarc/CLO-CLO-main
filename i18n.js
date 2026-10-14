@@ -450,6 +450,12 @@ const PHRASES = {
   "WhatsApp ne s'ouvre pas ?": "WhatsApp did not open?",
   "Aide & support ": "Help & support",
 
+  "Le serveur se réveille… patientez (jusqu'à 45 s)": "The server is waking up… please wait (up to 45 s)",
+  "Réseau lent — nouvelle tentative §/§…": "Slow network — retry §/§…",
+  "Connexion au serveur impossible. Vérifiez votre réseau (essayez le Wi-Fi ou un autre opérateur), puis réessayez.": "Unable to reach the server. Check your network (try Wi-Fi or another carrier), then try again.",
+  "Tester ma connexion": "Test my connection",
+  "Problème de connexion ? Tester mon réseau": "Connection problem? Test my network",
+
   // Divers
   "Pas de connexion internet": "No internet connection", "Clo-Clo — Hors ligne": "Clo-Clo — Offline",
   "Cette page n'est pas encore disponible hors-ligne. Reconnectez-vous puis réessayez — vos pages déjà visitées, elles, restent accessibles.":

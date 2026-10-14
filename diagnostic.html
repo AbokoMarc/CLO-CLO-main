@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Test de connexion – Clo-Clo</title>
+  <meta name="theme-color" content="#0F5B2C"/>
+  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🍹&lt;/text&gt;&lt;/svg&gt;"/>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#F7FAF6;color:#12301C;}
+    main{max-width:560px;margin:0 auto;padding:28px 18px 60px;}
+    h1{color:#0F5B2C;font-size:1.6rem;margin:0 0 6px;} p{color:#5F6F63;line-height:1.5;}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border:1.5px solid #CFE3CF;border-radius:16px;padding:14px 16px;margin:10px 0;font-weight:700;}
+    .row small{display:block;color:#5F6F63;font-weight:600;font-size:.78rem;}
+    .ok{color:#0F5B2C}.ko{color:#B91C1C}.wait{color:#B45309}
+    button,a.btn{display:inline-block;border:0;background:#0F5B2C;color:#fff;border-radius:999px;padding:13px 22px;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;margin-top:14px;}
+    #verdict{margin-top:16px;padding:14px 16px;border-radius:16px;font-weight:700;background:#EAF3EA;border:1.5px solid #CFE3CF;display:none;line-height:1.5;}
+  </style>
+  <script src="config.js"></script>
+</head>
+<body>
+<main>
+  <h1>Test de connexion</h1>
+  <p>Si vous n'arrivez pas à vous connecter, ce test vérifie si votre réseau (Orange, MTN, Wi-Fi…) laisse passer le site. Il dure quelques secondes.</p>
+  <div id="rows"></div>
+  <div id="verdict" role="status"></div>
+  <button id="go" type="button">Lancer le test</button>
+  <a class="btn" href="connexion.html" style="background:#fff;color:#0F5B2C;border:2px solid #0F5B2C;margin-left:8px;">Retour</a>
+</main>
+<script>
+  const cfg = window.CLOCLO_CONFIG, bases = cfg.API_BASE_URLS || [cfg.API_BASE_URL];
+  const label = (b) => b.startsWith("/") ? "Serveur via le site (même domaine)" : "Serveur direct (Render)";
+  async function ping(base) {
+    const t0 = performance.now(), ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 50000);
+    try {
+      const r = await fetch(base + "/health", { signal: ctl.signal, cache: "no-store" });
+      const ok = r.ok && (r.headers.get("content-type") || "").includes("json");
+      return { ok, ms: Math.round(performance.now() - t0), status: r.status };
+    } catch (e) { return { ok: false, ms: Math.round(performance.now() - t0), status: e.name === "AbortError" ? "délai dépassé" : "injoignable" }; }
+    finally { clearTimeout(timer); }
+  }
+  document.getElementById("go").addEventListener("click", async () => {
+    const rows = document.getElementById("rows"), verdict = document.getElementById("verdict");
+    rows.innerHTML = ""; verdict.style.display = "none";
+    const results = [];
+    for (const b of bases) {
+      const row = document.createElement("div"); row.className = "row";
+      row.innerHTML = `<span>${label(b)}<small>${b}</small></span><span class="wait">test…</span>`; rows.appendChild(row);
+      const r = await ping(b); results.push(r);
+      row.lastElementChild.className = r.ok ? "ok" : "ko";
+      row.lastElementChild.textContent = r.ok ? `OK · ${r.ms} ms` : `Échec (${r.status})`;
+    }
+    verdict.style.display = "block";
+    const any = results.some((r) => r.ok), slow = results.some((r) => r.ok && r.ms > 8000);
+    verdict.textContent = !any
+      ? "Votre réseau actuel bloque ou coupe l'accès au serveur. Essayez : le Wi-Fi, un autre opérateur, désactiver le mode économie de données, puis relancez le test. Besoin d'aide ? WhatsApp +237 699876628."
+      : slow
+        ? "Le serveur répond mais lentement (il se réveille après une période d'inactivité). Patientez environ 45 secondes puis réessayez de vous connecter."
+        : "Tout fonctionne : vous pouvez retourner vous connecter.";
+  });
+</script>
+<script>
+  if (localStorage.getItem("cloclo_lang") === "en") {
+    document.documentElement.lang = "en"; document.title = "Connection test – Clo-Clo";
+    document.querySelector("h1").textContent = "Connection test";
+    document.querySelector("main > p").textContent = "If you cannot log in, this test checks whether your network (Orange, MTN, Wi-Fi…) lets the site through. It takes a few seconds.";
+    document.getElementById("go").textContent = "Run the test"; document.querySelector("a.btn").textContent = "Back";
+  }
+</script>
+</body>
+</html>

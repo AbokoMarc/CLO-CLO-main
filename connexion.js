@@ -5,6 +5,7 @@
    ============================================================ */
 import { AuthService } from "./services/authService.js";
 import { I18n } from "./i18n.js";
+import { watchNetwork } from "./net-status.js";
 I18n.injectToggle(document.querySelector(".nav-actions"));
 
 // already-auth : une personne déjà connectée n'a rien à faire ici (ni se reconnecter, ni s'inscrire).
@@ -29,6 +30,7 @@ function setError(id, msg) {
   if (el) el.textContent = msg;
 }
 function clearErrors() {
+  document.getElementById("net-error")?.remove();
   document.querySelectorAll(".error-msg").forEach(el => el.textContent = "");
   document.querySelectorAll(".input-wrap").forEach(el => el.classList.remove("error"));
 }
@@ -60,11 +62,29 @@ function success(redirect) {
   setTimeout(() => window.location.href = redirect, 1000);
 }
 
+let stopWatch = () => {};
 function setLoading(btn, loading) {
   if (!btn) return;
   btn.disabled = loading;
   btn.dataset.origText ||= btn.textContent;
   btn.textContent = loading ? "Connexion en cours…" : btn.dataset.origText;
+  stopWatch(); stopWatch = loading ? watchNetwork(btn, "Connexion en cours…") : () => {};
+}
+
+/* Panne réseau ≠ mot de passe faux : le message ne doit PAS s'afficher sous le champ « mot de passe ». */
+function showLoginError(err, inputId, errId, fallback) {
+  if (err?.isNetworkError) {
+    let box = document.getElementById("net-error");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "net-error"; box.setAttribute("role", "alert");
+      box.style.cssText = "background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B;border-radius:14px;padding:12px 14px;font-weight:700;font-size:.88rem;margin:12px 0;";
+      document.getElementById("btn-login")?.before(box);
+    }
+    box.innerHTML = `${err.message} <a href="diagnostic.html" style="color:#0F5B2C;text-decoration:underline;">Tester ma connexion</a>`;
+    return;
+  }
+  markError(inputId, errId, err.message || fallback);
 }
 
 async function loginClient() {
@@ -83,7 +103,7 @@ async function loginClient() {
     success("profil.html");
   } catch (err) {
     setLoading(btn, false);
-    markError("input-mdp", "err-mdp", err.message || "Email ou mot de passe incorrect.");
+    showLoginError(err, "input-mdp", "err-mdp", "Email ou mot de passe incorrect.");
   }
 }
 
@@ -103,7 +123,7 @@ async function loginLivreur() {
     success("livreur-dashboard.html");
   } catch (err) {
     setLoading(btn, false);
-    markError("input-mdp", "err-mdp", err.message || "Identifiant ou mot de passe incorrect.");
+    showLoginError(err, "input-mdp", "err-mdp", "Identifiant ou mot de passe incorrect.");
   }
 }
 
@@ -123,7 +143,7 @@ async function loginDirecteur() {
     success("admin-dashboard.html");
   } catch (err) {
     setLoading(btn, false);
-    markError("input-mdp", "err-mdp", err.message || "Identifiants incorrects.");
+    showLoginError(err, "input-mdp", "err-mdp", "Identifiants incorrects.");
   }
 }
 
