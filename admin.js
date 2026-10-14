@@ -153,7 +153,7 @@ async function handleChangeOwnPassword() {
 /* ── NOTIFICATIONS TEMPS RÉEL ── */
 function initAdminNotifications() {
   NotificationService.connect((event, data) => {
-    if (!data) return;
+    if (!data || event === "order:location") return;     // flux GPS : géré par la carte, pas une notification
     if (event === "traiteur:new") { showToast(`Nouvelle demande traiteur — ${data.nom || ""}`); return; }
     if (event === "traiteur:message") {
       // le fil ouvert se met à jour tout seul (évènement « cloclo:notif ») ; ailleurs, on prévient par un toast
@@ -975,6 +975,39 @@ function livraisonBlockHtml(o, livreurs, clients) {
     </div>`;
 }
 
+let adminMap = null;
+async function mountAdminLiveMap(orders) {
+  const host = document.getElementById("livraisons-list");
+  if (!host) return;
+  const delivering = orders.filter((o) => o.statut === "en_livraison");
+  let card = document.getElementById("admin-live-map-card");
+  if (!delivering.length) { card?.remove(); adminMap?.destroy(); adminMap = null; return; }
+  if (!card) {
+    card = document.createElement("div");
+    card.id = "admin-live-map-card";
+    card.style.cssText = "margin-bottom:20px;";
+    card.innerHTML = `<h2 class="section-title" style="font-size:1.1rem;margin:0 0 10px;">Carte en direct</h2>
+      <div id="admin-live-map" class="lm-box lm-tall"></div>
+      <div class="lm-legend"><span><i style="background:#0F5B2C"></i>Livreurs en route</span><span><i style="background:#DC2626"></i>Adresses clients</span><span><i style="background:#E8A23D"></i>Clo-Clo</span></div>`;
+    host.parentNode.insertBefore(card, host);
+  }
+  const { LiveMap } = await import("./live-map.js");
+  if (!adminMap) { adminMap = new LiveMap(document.getElementById("admin-live-map")); if (!(await adminMap.init())) { adminMap = null; return; } }
+  const paint = (id, loc) => {
+    if (!loc) return;
+    if (loc.shop) adminMap.setShop(loc.shop);
+    const dest = loc.dest || loc.client;
+    if (dest) adminMap.setDestination(dest, { id, label: `Client — CMD-${id}` });
+    if (loc.livreur) adminMap.setDriver(loc.livreur, { id, label: `Livreur — CMD-${id}` });
+  };
+  for (const o of delivering) { try { paint(o.id, await AdminService.getLocation(o.id)); } catch { /* ignoré */ } }
+  adminMap.needFit();
+  if (!adminMap._bound) {
+    adminMap._bound = true;
+    document.addEventListener("cloclo:notif", (e) => { if (e.detail?.event === "order:location") paint(e.detail.data.id, e.detail.data.location); });
+  }
+}
+
 async function initLivraisons() {
   const [orders, livreurs, clients] = await Promise.all([
     AdminService.listOrders(),
@@ -1014,6 +1047,9 @@ async function initLivraisons() {
       } catch (err) { showToast(err.message || "Erreur", "red"); }
     });
   });
+
+  // Carte en direct : tous les livreurs en route, sur une seule carte (mise à jour par le flux temps réel).
+  mountAdminLiveMap(orders);
 
   // Positions en direct (client + livreur) pour chaque livraison active en cours.
   wrap.querySelectorAll(".location-block").forEach(async (el) => {
@@ -1057,7 +1093,7 @@ async function renderAdminChat(orderId, box) {
   const senderLabel = { admin: "Admin", livreur: "Livreur", client: "Client" };
   const senderColor = { admin: "#1a1a2e", livreur: "#0F5B2C", client: "#3b82f6" };
   box.innerHTML = messages.length
-    ? messages.map(m => `<div style="margin-bottom:6px;"><b style="color:${senderColor[m.sender] || "#6b7280"};">${senderLabel[m.sender] || m.sender} :</b> ${m.text}</div>`).join("")
+    ? messages.map(m => `<div style="margin-bottom:6px;"><b style="color:${senderColor[m.sender] || "#6b7280"};">${senderLabel[m.sender] || m.sender} :</b> ${esc(m.text)}</div>`).join("")
     : `<p style="color:#9ca3af;text-align:center;font-size:0.8rem;">Aucun message pour l'instant.</p>`;
   box.scrollTop = box.scrollHeight;
 }

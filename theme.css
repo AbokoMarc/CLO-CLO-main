@@ -853,3 +853,33 @@ html.is-auth .btn-login-hero, html.is-auth .btn-outline-white[href*="inscription
   .table-wrap td[colspan]::before { display: none; }
 }
 html.is-auth [data-guest-only] { display: none !important; }
+
+/* ============================================================
+   CARTE EN DIRECT (live-map.js)
+   ============================================================ */
+.lm-box { position: relative; height: 320px; border-radius: 18px; overflow: hidden; border: 1.5px solid var(--green-line); background: var(--green-wash); z-index: 0; }
+.lm-box.lm-tall { height: 420px; }
+@media (max-width: 768px) { .lm-box { height: 300px; } .lm-box.lm-tall { height: 360px; } }
+.lm-fallback { display: flex; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center; color: var(--text-gray); font-weight: 700; }
+.lm-wrap { background: transparent !important; border: 0 !important; }
+.lm-driver { position: relative; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; }
+.lm-bubble { position: relative; z-index: 2; width: 38px; height: 38px; border-radius: 50%; background: #0F5B2C; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+.lm-pulse { position: absolute; inset: 2px; border-radius: 50%; background: rgba(76,154,82,.45); animation: lmPulse 1.8s ease-out infinite; z-index: 1; }
+.lm-arrow { position: absolute; inset: 0; z-index: 3; pointer-events: none; transition: transform .8s ease; }
+.lm-arrow::before { content: ""; position: absolute; top: -3px; left: 50%; margin-left: -6px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 11px solid #0F5B2C; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+@keyframes lmPulse { 0% { transform: scale(.7); opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
+.lm-pin { width: 36px; height: 36px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+.lm-pin span { transform: rotate(45deg); display: flex; }
+.lm-home { background: #DC2626; }
+.lm-shop { background: #E8A23D; }
+.lm-recenter { position: absolute; z-index: 800; left: 50%; bottom: 14px; transform: translateX(-50%); border: 0; background: #0F5B2C; color: #fff; border-radius: 999px; padding: 10px 18px; font: inherit; font-weight: 800; box-shadow: 0 6px 18px rgba(0,0,0,.3); cursor: pointer; }
+.lm-recenter[hidden] { display: none; }
+.lm-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 10px; font-weight: 700; font-size: .88rem; color: var(--text-gray); }
+.lm-status .lm-eta { color: var(--green); font-weight: 800; font-size: 1rem; }
+.lm-status .lm-stale { color: #B45309; }
+.lm-status .lm-live::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; margin-right: 6px; animation: lmPulse 1.6s ease-out infinite; }
+.lm-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: .78rem; color: var(--text-gray); font-weight: 600; }
+.lm-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+html[data-theme="dark"] .lm-box { border-color: var(--line); }
+html[data-theme="dark"] .lm-box .leaflet-tile-pane { filter: brightness(.72) contrast(1.1) saturate(.8); }
+html[data-theme="dark"] .lm-bubble { border-color: var(--surface); }

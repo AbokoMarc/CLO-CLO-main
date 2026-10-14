@@ -277,6 +277,8 @@ function initClientNotifications() {
   initNotifBell();
   NotificationService.connect((event, order) => {
     if (!order || order.userId !== APP.user?.id) return;   // (les évènements traiteur sont gérés par NotifCenter)
+    // Seuls les vrais changements de statut donnent un toast (pas la position GPS, le chat, etc.).
+    if (!["order:updated", "order:accepted", "order:started", "order:cancelled", "order:assigned"].includes(event)) return;
     if (event === "order:cancelled") {
       showToast(`❌ Commande CMD-${order.id} annulée.`, "warning");
     } else {

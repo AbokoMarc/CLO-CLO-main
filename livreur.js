@@ -414,17 +414,24 @@ async function initLivraison() {
       </div>
       ${order.clientContact?.tel && ["acceptee", "en_livraison"].includes(order.statut) ? `<a href="tel:${order.clientContact.tel}" style="display:block;text-align:center;margin-top:10px;background:#EAF3EA;color:#0A4220;border-radius:10px;padding:10px;font-weight:800;text-decoration:none;">${IC.phone} Appeler ${order.clientContact.nom}</a>` : ""}
       ${order.statut === "en_livraison" ? `<button id="btn-sos" style="width:100%;margin-top:10px;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;">${IC.alertTriangle} SOS urgence</button>` : ""}
+      ${["acceptee", "en_livraison"].includes(order.statut) ? `
+      <div id="livreur-map" class="lm-box" style="margin-top:16px;"></div>
+      <div class="lm-status"><span id="livreur-eta" class="lm-eta"></span></div>
+      <div class="lm-legend"><span><i style="background:#0F5B2C"></i>Moi</span><span><i style="background:#DC2626"></i>Client</span><span><i style="background:#E8A23D"></i>Clo-Clo</span></div>` : ""}
       <div id="location-share-status" style="margin-top:14px;font-size:0.8rem;color:#9ca3af;font-weight:700;text-align:center;"></div>
       ${chatBlock}
     </div>`;
 
   document.querySelector(".btn-gmaps")?.addEventListener("click", () => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.adresse)}`, "_blank");
+    // Coordonnées exactes de la commande si disponibles (bien plus précis qu'une adresse en texte).
+    const dest = order.destLat != null && order.destLng != null ? `${order.destLat},${order.destLng}` : encodeURIComponent(order.adresse);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=driving`, "_blank");
   });
 
   // La géolocalisation ne démarre QUE si la livraison est vraiment en cours
   // (statut "en_livraison") — pas dès l'acceptation.
-  if (order.statut === "en_livraison") startLocationSharing(order.id);
+  // GPS affiché dès l'acceptation (sur la carte, pour le livreur seul) ; envoyé au client/admin seulement une fois la livraison démarrée.
+  if (order.statut === "acceptee" || order.statut === "en_livraison") startLocationSharing(order, order.statut === "en_livraison");
 
   document.getElementById("btn-accept")?.addEventListener("click", async (e) => {
     e.target.disabled = true;
@@ -522,37 +529,99 @@ async function initChat(orderId) {
   });
 }
 
-/* ── PARTAGE DE POSITION EN TEMPS RÉEL (pendant une livraison active) ──
-   Le livreur envoie sa position toutes les 15s ; le client et l'admin
-   peuvent la suivre en direct (voir suivi.js et admin-livraisons). */
-let locationWatchId = null;
-let locationIntervalId = null;
+/* ── PARTAGE DE POSITION EN TEMPS RÉEL ──
+   GPS CONTINU (watchPosition) au lieu d'un relevé isolé toutes les 15 s :
+   • la position est envoyée dès que le livreur a bougé d'au moins 8 m (au plus toutes les 4 s),
+     et au minimum toutes les 20 s à l'arrêt (signal de vie) ;
+   • cap, vitesse et précision sont transmis (flèche orientée côté client) ;
+   • l'écran reste allumé (Wake Lock) pendant la livraison ;
+   • la carte du livreur montre sa position instantanément, sans attendre le serveur. */
+let locationWatchId = null, wakeLock = null, deliveryMap = null, sendTicker = null;
 
-function startLocationSharing(orderId) {
+const toRad = (d) => (d * Math.PI) / 180;
+const metersBetween = (a, b) => {
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371000 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+};
+
+async function acquireWakeLock() {
+  try { wakeLock = await navigator.wakeLock?.request("screen"); } catch { /* non supporté : sans conséquence */ }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && locationWatchId !== null) acquireWakeLock(); });
+
+async function mountDeliveryMap(order) {
+  const el = document.getElementById("livreur-map");
+  if (!el) return null;
+  const { LiveMap } = await import("./live-map.js");
+  deliveryMap?.destroy();
+  const lm = new LiveMap(el, {
+    route: true,
+    onRoute: ({ km, minutes, road }) => {
+      const e = document.getElementById("livreur-eta");
+      if (e) e.textContent = `⏱️ ${minutes} min · ${km.toFixed(1)} km${road ? " par la route" : ""} jusqu'au client`;
+    },
+  });
+  deliveryMap = (await lm.init()) ? lm : null;
+  if (!deliveryMap) return null;
+  let loc = {};
+  try { loc = await DeliveryService.getLocation(order.id); } catch { /* carte sans repères serveur */ }
+  if (loc.shop) lm.setShop(loc.shop);
+  const dest = order.destLat != null ? { lat: order.destLat, lng: order.destLng } : (loc.dest || loc.client);
+  if (dest) lm.setDestination(dest, { label: "Client" });
+  if (loc.trail?.length) lm.setTrail(loc.trail);
+  lm.needFit();
+  return lm;
+}
+
+async function startLocationSharing(order, send = true) {
+  stopLocationSharing();
   const statusEl = document.getElementById("location-share-status");
   if (!navigator.geolocation) {
     if (statusEl) statusEl.textContent = "Géolocalisation non disponible sur cet appareil.";
     return;
   }
-  const sendPosition = () => {
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          await DeliveryService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude);
-          if (statusEl) statusEl.textContent = "Position partagée avec le client et l'admin";
-        } catch { /* silencieux — pas grave si un envoi échoue, le suivant réessaiera */ }
-      },
-      () => { if (statusEl) statusEl.textContent = "Partage de position refusé — activez la localisation pour que le client vous suive."; },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+  const lm = await mountDeliveryMap(order);
+  if (send) acquireWakeLock();
+  let lastSent = 0, lastPoint = null, latest = null;
+
+  // Envoi « au fil de l'eau » : un ticker d'1 s envoie la DERNIÈRE position connue dès que les conditions
+  // sont réunies (≥ 4 s depuis le dernier envoi ET ≥ 8 m parcourus, ou signal de vie toutes les 20 s).
+  // Sans ça, une position reçue trop tôt était perdue tant que le livreur ne bougeait pas à nouveau.
+  const flush = () => {
+    if (!send || !latest) return;
+    const now = Date.now(), moved = lastPoint ? metersBetween(lastPoint, latest) : Infinity;
+    if (now - lastSent >= 4000 && (moved >= 8 || now - lastSent >= 20000)) {
+      lastSent = now; lastPoint = latest;
+      DeliveryService.updateLocation(order.id, latest.lat, latest.lng, { heading: latest.heading, speed: latest.speed, accuracy: latest.accuracy })
+        .catch(() => { lastSent = 0; });                       // échec réseau : renvoi au prochain tour
+    }
   };
-  sendPosition();
-  locationIntervalId = setInterval(sendPosition, 15000);
+  sendTicker = setInterval(flush, 1000);
+
+  locationWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const c = pos.coords;
+      const p = { lat: c.latitude, lng: c.longitude, heading: Number.isFinite(c.heading) ? Math.round(c.heading) : null, speed: Number.isFinite(c.speed) ? c.speed : null, accuracy: Math.round(c.accuracy) };
+      latest = p;
+      lm?.setDriver({ ...p, at: new Date().toISOString() }, { label: "Moi" });
+      if (statusEl) statusEl.textContent = send ? `GPS actif · précision ±${p.accuracy} m · position partagée avec le client` : `GPS actif · précision ±${p.accuracy} m · partage dès le démarrage de la livraison`;
+      flush();
+    },
+    (err) => {
+      if (statusEl) statusEl.textContent = err.code === 1
+        ? "Localisation refusée — autorisez-la dans le navigateur pour que le client vous suive."
+        : "Signal GPS faible — placez-vous à l'extérieur, la recherche continue…";
+    },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 }
+  );
 }
 
 function stopLocationSharing() {
-  if (locationIntervalId) clearInterval(locationIntervalId);
-  locationIntervalId = null;
+  if (locationWatchId !== null) navigator.geolocation.clearWatch(locationWatchId);
+  locationWatchId = null;
+  if (sendTicker) clearInterval(sendTicker); sendTicker = null;
+  wakeLock?.release?.().catch(() => {}); wakeLock = null;
 }
 
 /* ── HISTORIQUE ── */

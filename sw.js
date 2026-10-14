@@ -15,10 +15,11 @@
    fraîches. Seule la coquille statique est mise en cache.
    ============================================================ */
 
-const CACHE_NAME = "cloclo-shell-v9";
+const CACHE_NAME = "cloclo-shell-v10";
 const OFFLINE_URL = "/offline.html";
 
 const SHELL_FILES = [
+  "/live-map.js",
   "/notif-center.js", "/offline.html", "/payment-ui.js",
   "/traiteur-inbox.js", "/services/traiteurService.js",
   "/admin-traiteur.html", "/theme.css", "/traiteur.html", "/traiteur.js", "/widgets.js",

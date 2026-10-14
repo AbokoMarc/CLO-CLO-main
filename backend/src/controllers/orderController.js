@@ -56,7 +56,7 @@ export const OrderController = {
   async updateLocation({ req, res, params, body }) {
     const auth = requireAuth(req);
     requireRole(auth, "client", "livreur");
-    sendJson(res, 200, await OrderService.updateLocation(params.id, auth.role, auth.sub, body.lat, body.lng));
+    sendJson(res, 200, await OrderService.updateLocation(params.id, auth.role, auth.sub, { lat: body?.lat, lng: body?.lng, heading: body?.heading, speed: body?.speed, accuracy: body?.accuracy }));
   },
   /** Admin, client ou livreur concerné peuvent consulter la position en direct. */
   async getLocation({ req, res, params }) {

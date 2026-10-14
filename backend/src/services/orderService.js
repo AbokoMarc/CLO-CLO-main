@@ -2,6 +2,7 @@
    CLO-CLO Backend | services/orderService.js — couche SERVICE
    ============================================================ */
 import { PaymentService } from "./paymentService.js";
+import { BAR_LOCATION, distanceKm } from "../pricing.js";
 import { Store } from "../repositories/store.js";
 import { CatalogService } from "./catalogService.js";
 import { notifyOrderEvent, notifySos } from "../notify.js";
@@ -25,6 +26,16 @@ async function addPointsHistory(userId, label, pts, type) {
     type,
   });
 }
+
+/** Coordonnées plausibles (évite les valeurs absurdes envoyées par un client malveillant ou un GPS cassé). */
+const bearing = (lat1, lng1, lat2, lng2) => {
+  const r = (d) => (d * Math.PI) / 180, y = Math.sin(r(lng2 - lng1)) * Math.cos(r(lat2));
+  const x = Math.cos(r(lat1)) * Math.sin(r(lat2)) - Math.sin(r(lat1)) * Math.cos(r(lat2)) * Math.cos(r(lng2 - lng1));
+  return Math.round(((Math.atan2(y, x) * 180) / Math.PI + 360) % 360);
+};
+const validCoord = (lat, lng) =>
+  Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)) && lat !== null && lng !== null &&
+  Math.abs(Number(lat)) <= 90 && Math.abs(Number(lng)) <= 180 && !(Number(lat) === 0 && Number(lng) === 0);
 
 export const OrderService = {
   async createOrder(userId, { items, adresse, quartier, clientLat, clientLng, promoCode, scheduledFor, paymentMethod, idempotencyKey }) {
@@ -98,6 +109,7 @@ export const OrderService = {
         livreurId: null, etaMinutes: 25, createdAt: new Date().toISOString(),
         fraisLivraison, distanceKm, promoCode: appliedCode, discount, tip: 0, scheduledFor: when,
         paymentMethod: method, paymentStatus: online ? "en_attente" : "a_la_livraison", idempotencyKey: idem,
+        ...(validCoord(clientLat, clientLng) ? { destLat: Number(clientLat), destLng: Number(clientLng) } : {}),
       });
     } catch (err) {
       // Course entre deux requêtes identiques : l'index unique a refusé la 2ᵉ → on renvoie la 1ʳᵉ.
@@ -351,37 +363,83 @@ export const OrderService = {
      Stockée en mémoire seulement (pas en base) : c'est une donnée "live",
      pas un historique à conserver. Redémarrer le serveur la réinitialise,
      ce qui est normal pour ce type de donnée. */
-  _liveLocations: new Map(), // orderId -> { client: {lat,lng,at}, livreur: {lat,lng,at} }
+  _liveLocations: new Map(), // orderId -> { client, livreur, trail: [[lat,lng],...], _saved: ms }
 
-  async updateLocation(orderId, role, userId, lat, lng) {
+  async updateLocation(orderId, role, userId, point, legacyLng) {
+    // Compatibilité : ancien appel (lat, lng) ou nouvel appel { lat, lng, heading, speed, accuracy }.
+    const pt = typeof point === "object" && point !== null ? point : { lat: point, lng: legacyLng };
+    const bad = (status, msg) => { const e = new Error(msg); e.status = status; return e; };
     const order = await Store.findById("orders", Number(orderId));
-    if (!order) {
-      const e = new Error("Commande introuvable.");
-      e.status = 404;
-      throw e;
-    }
+    if (!order) throw bad(404, "Commande introuvable.");
     const authorized =
       (role === "client" && order.userId === Number(userId)) ||
       (role === "livreur" && Number(order.livreurId) === Number(userId));
-    if (!authorized) {
-      const e = new Error("Non autorisé pour cette commande.");
-      e.status = 403;
-      throw e;
-    }
-    // La géolocalisation du livreur ne doit être prise en compte que si la
-    // livraison est VRAIMENT démarrée (statut "en_livraison"), pas dès
-    // l'acceptation — cohérent avec le flux en 2 étapes demandé.
+    if (!authorized) throw bad(403, "Non autorisé pour cette commande.");
+    if (!validCoord(pt.lat, pt.lng)) throw bad(400, "Position invalide.");
+    // La position du livreur n'est prise en compte que livraison VRAIMENT démarrée (flux en 2 étapes).
     if (role === "livreur" && order.statut !== "en_livraison") return {};
 
-    const current = this._liveLocations.get(order.id) || {};
-    current[role] = { lat, lng, at: new Date().toISOString() };
-    this._liveLocations.set(order.id, current);
-    notifyOrderEvent("order:location", { ...order, location: current });
-    return current;
+    const live = await this._loadLive(order);
+    const prev = live[role];
+    const now = Date.now();
+    if (prev && now - new Date(prev.at).getTime() < 1500) return live;      // anti-saturation (2 envois quasi simultanés)
+
+    const lat = Number(pt.lat), lng = Number(pt.lng);
+    const num = (v) => (v === null || v === undefined || v === "" ? NaN : Number(v));   // null ≠ 0 (cap absent quand on est à l'arrêt)
+    let heading = Number.isFinite(num(pt.heading)) ? num(pt.heading) : null;
+    if (heading === null && prev) {                                         // cap déduit du déplacement si le GPS n'en fournit pas
+      const moved = distanceKm(prev.lat, prev.lng, lat, lng) * 1000;
+      if (moved > 5) heading = bearing(prev.lat, prev.lng, lat, lng);
+      else heading = prev.heading ?? null;
+    }
+    live[role] = {
+      lat, lng, at: new Date(now).toISOString(), heading,
+      speed: Number.isFinite(num(pt.speed)) ? Math.max(0, num(pt.speed)) : null,      // m/s
+      accuracy: Number.isFinite(num(pt.accuracy)) ? Math.round(num(pt.accuracy)) : null, // mètres
+    };
+    if (role === "livreur") {                                               // trajet parcouru : un point tous les ≥ 8 m, 150 points max
+      live.trail = live.trail || [];
+      const last = live.trail[live.trail.length - 1];
+      if (!last || distanceKm(last[0], last[1], lat, lng) * 1000 >= 8) live.trail.push([lat, lng]);
+      if (live.trail.length > 150) live.trail.splice(0, live.trail.length - 150);
+    }
+    // Sauvegarde en base au plus toutes les 8 s : la position survit à un redémarrage du serveur.
+    if (!live._saved || now - live._saved > 8000) {
+      live._saved = now;
+      const { _saved, ...toSave } = live;
+      await Store.update("orders", order.id, { liveJson: JSON.stringify(toSave) });
+    }
+    const { trail, _saved, ...forEvent } = live;
+    notifyOrderEvent("order:location", { id: order.id, userId: order.userId, livreurId: order.livreurId, statut: order.statut, location: this._shape(order, forEvent) });
+    return this._shape(order, live);
+  },
+
+  /** Mémoire d'abord ; sinon relecture en base (serveur redémarré / endormi). */
+  async _loadLive(order) {
+    let live = this._liveLocations.get(order.id);
+    if (!live) {
+      try { live = order.liveJson ? JSON.parse(order.liveJson) : {}; } catch { live = {}; }
+      this._liveLocations.set(order.id, live);
+    }
+    return live;
+  },
+
+  /** Réponse complète : positions + repères fixes (bar, destination) pour dessiner la carte. */
+  _shape(order, live) {
+    return {
+      ...live,
+      shop: { lat: BAR_LOCATION.lat, lng: BAR_LOCATION.lng },
+      dest: validCoord(order.destLat, order.destLng) && order.destLat !== null ? { lat: order.destLat, lng: order.destLng } : null,
+      statut: order.statut,
+    };
   },
 
   async getLocation(orderId) {
-    return this._liveLocations.get(Number(orderId)) || {};
+    const order = await Store.findById("orders", Number(orderId));
+    if (!order) return {};
+    const live = await this._loadLive(order);
+    const { _saved, ...out } = live;
+    return this._shape(order, out);
   },
 
   /* ── CHAT (client ↔ livreur) — disponible dès l'acceptation, pas besoin d'attendre le GPS ── */

@@ -14,8 +14,12 @@ export const DeliveryService = {
   updateMyStatut(livreurId, statut) {
     return ApiClient.patch(`/admin/livreurs/${livreurId}/statut`, { statut }, { auth: true });
   },
-  updateLocation(orderId, lat, lng) {
-    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng }, { auth: true });
+  getLocation(orderId) {
+    return ApiClient.get(`/orders/${orderId}/location`, { auth: true });
+  },
+  updateLocation(orderId, lat, lng, extra = {}) {
+    // extra : { heading, speed, accuracy } fournis par le GPS (cap, vitesse en m/s, précision en m)
+    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng, ...extra }, { auth: true });
   },
   /** Étape 1/2 : accepte la course (ouvre le chat, PAS encore le GPS). */
   accept(orderId) {

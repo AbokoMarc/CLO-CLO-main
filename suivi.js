@@ -48,12 +48,15 @@ function activeOrderHtml(o) {
     ? `<button id="btn-cancel-order" data-id="${o.id}" style="margin-top:16px;width:100%;background:white;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-weight:800;cursor:pointer;">${IC.close} Annuler ma commande</button>`
     : "";
 
-  const locationBlock = o.statut === "en_livraison"
+  const locationBlock = (o.statut === "en_livraison" || o.statut === "acceptee")
     ? `<div class="detail-block" id="location-block" style="grid-column:1/-1;">
          <div class="detail-title">Localisation en direct</div>
-         <div id="tracking-map" style="height:220px;border-radius:12px;overflow:hidden;margin-top:6px;background:#f4f4f5;"></div>
-         <div id="location-livreur-status" style="color:#6b7280;font-weight:600;font-size:0.85rem;margin-top:8px;">${IC.radar} En attente de la position du livreur…</div>
-         <div id="eta-live" style="color:#0F5B2C;font-weight:800;font-size:0.95rem;margin-top:6px;"></div>
+         <div id="tracking-map" class="lm-box lm-tall"></div>
+         <div class="lm-status">
+           <span id="location-livreur-status">${IC.radar} En attente de la position du livreur…</span>
+           <span id="eta-live" class="lm-eta"></span>
+         </div>
+         <div class="lm-legend"><span><i style="background:#0F5B2C"></i>Livreur</span><span><i style="background:#DC2626"></i>Votre adresse</span><span><i style="background:#E8A23D"></i>Clo-Clo</span></div>
        </div>`
     : "";
 
@@ -252,7 +255,7 @@ async function loadSuivi() {
 
   if (active) {
     if (["acceptee", "en_livraison"].includes(active.statut)) initChat(active.id);
-    if (active.statut === "en_livraison") setupLocationSharing(active.id);
+    if (active.statut === "en_livraison" || active.statut === "acceptee") setupLocationSharing(active.id, active.statut === "en_livraison");
   }
 }
 
@@ -367,76 +370,65 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function setupLocationSharing(orderId) {
+let liveMap = null, liveMapTimer = null;
+
+async function setupLocationSharing(orderId, delivering = true) {
   if (clientLocationIntervalId) clearInterval(clientLocationIntervalId);
+  if (liveMapTimer) clearInterval(liveMapTimer);
+  liveMap?.destroy(); liveMap = null;
   let myCoords = null;
 
-  if (navigator.geolocation) {
+  // Le client partage sa position (aide le livreur) seulement quand la livraison est démarrée.
+  if (delivering && navigator.geolocation) {
     const sendPosition = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           myCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          OrderService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude).catch(() => {});
+          OrderService.updateLocation(orderId, pos.coords.latitude, pos.coords.longitude, { accuracy: pos.coords.accuracy }).catch(() => {});
         },
-        () => { /* le client peut refuser — pas bloquant, on affiche quand même la position du livreur */ },
-        { enableHighAccuracy: true, timeout: 8000 }
+        () => { /* refus possible : la destination enregistrée à la commande suffit */ },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
       );
     };
     sendPosition();
-    clientLocationIntervalId = setInterval(sendPosition, 15000);
+    clientLocationIntervalId = setInterval(sendPosition, 30000);
   }
 
-  let map = null, markerLivreur = null, markerClient = null;
+  const mapEl = document.getElementById("tracking-map");
   const statusEl = document.getElementById("location-livreur-status");
   const etaEl = document.getElementById("eta-live");
+  if (!mapEl) return;
+  const { LiveMap, ageLabel } = await import("./live-map.js");
+  liveMap = new LiveMap(mapEl, {
+    route: true,
+    onRoute: ({ km, minutes, road }) => { if (etaEl) etaEl.textContent = `⏱️ Arrive dans environ ${minutes} min (${km.toFixed(1)} km${road ? " par la route" : ""})`; },
+  });
+  if (!(await liveMap.init())) return;
 
-  function ensureMap() {
-    const mapEl = document.getElementById("tracking-map");
-    if (!mapEl || map || !window.L) return;
-    map = L.map("tracking-map", { zoomControl: false }).setView([3.848, 11.502], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }).addTo(map);
-  }
-
-  function fitMapToMarkers() {
-    const pts = [markerLivreur, markerClient].filter(Boolean).map((m) => m.getLatLng());
-    if (pts.length === 1) map.setView(pts[0], 15);
-    else if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [30, 30] });
-  }
-
-  // ETA en direct : distance réelle livreur↔client / vitesse moyenne moto (~25 km/h en ville).
-  function updateEta(livreurLat, livreurLng) {
-    if (!etaEl) return;
-    const ref = myCoords; // position du client si partagée, sinon pas d'ETA calculable
-    if (!ref) { etaEl.textContent = ""; return; }
-    const km = haversineKm(livreurLat, livreurLng, ref.lat, ref.lng);
-    const minutes = Math.max(1, Math.round((km / 25) * 60));
-    etaEl.textContent = `⏱️ Arrive dans environ ${minutes} min (${km.toFixed(1)} km)`;
-  }
-
-  const renderLivreurPosition = (loc) => {
-    if (!loc) return;
-    ensureMap();
-    if (!map) return;
-    const livreurIcon = L.divIcon({ html: IC.truck, className: "", iconSize: [28, 28] });
-    const clientIcon = L.divIcon({ html: IC.pin, className: "", iconSize: [28, 28] });
-
-    if (loc.livreur) {
-      const { lat, lng, at } = loc.livreur;
-      if (!markerLivreur) markerLivreur = L.marker([lat, lng], { icon: livreurIcon }).addTo(map).bindPopup("Livreur");
-      else markerLivreur.setLatLng([lat, lng]);
-      if (statusEl) statusEl.innerHTML = `${IC.truck} Position mise à jour à ${new Date(at).toLocaleTimeString(window.CLOCLO_LOCALE(), { hour: "2-digit", minute: "2-digit" })}`;
-      updateEta(lat, lng);
-    }
-    if (loc.client) {
-      const { lat, lng } = loc.client;
-      if (!markerClient) markerClient = L.marker([lat, lng], { icon: clientIcon }).addTo(map).bindPopup("Vous");
-      else markerClient.setLatLng([lat, lng]);
-    }
-    fitMapToMarkers();
+  let lastAt = null;
+  const paintStatus = () => {
+    if (!statusEl) return;
+    if (!lastAt) { statusEl.innerHTML = `${IC.radar} ${delivering ? "En attente de la position du livreur…" : "Le livreur va bientôt démarrer la livraison."}`; return; }
+    const stale = Date.now() - new Date(lastAt).getTime() > 90000;
+    statusEl.innerHTML = stale
+      ? `<span class="lm-stale">⚠️ Dernière position ${ageLabel(lastAt, window.I18n?.current?.())} — le livreur est peut-être sans réseau.</span>`
+      : `<span class="lm-live">En direct · position ${ageLabel(lastAt, window.I18n?.current?.())}</span>`;
   };
 
-  OrderService.getLocation(orderId).then(renderLivreurPosition).catch(() => {});
+  const render = (loc, first = false) => {
+    if (!loc) return;
+    if (loc.shop) liveMap.setShop(loc.shop);
+    const dest = loc.dest || loc.client || myCoords;                 // adresse enregistrée à la commande en priorité
+    if (dest) liveMap.setDestination(dest, { label: "Votre adresse" });
+    if (first && loc.trail?.length) liveMap.setTrail(loc.trail);
+    if (loc.livreur) { lastAt = loc.livreur.at; liveMap.setDriver(loc.livreur, { label: "Livreur" }); }
+    if (first) liveMap.needFit();
+    paintStatus();
+  };
+
+  try { render(await OrderService.getLocation(orderId), true); } catch { paintStatus(); }
+  liveMapTimer = setInterval(paintStatus, 5000);
   NotificationService.connect((event, data) => {
-    if (event === "order:location" && data?.id === orderId) renderLivreurPosition(data.location);
+    if (event === "order:location" && data?.id === orderId) render(data.location);
   });
 }

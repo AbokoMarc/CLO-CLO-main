@@ -8,7 +8,12 @@
    (actuellement centrées sur Nkolfoulou, Yaoundé).
    ============================================================ */
 
-export const BAR_LOCATION = { lat: 3.9010, lng: 11.5850 }; // Nkolfoulou, Yaoundé (à ajuster précisément)
+// Position du bar (point de départ des livraisons et repère sur la carte).
+// À régler PRÉCISÉMENT avec les variables SHOP_LAT / SHOP_LNG (clic droit sur Google Maps → copier les coordonnées).
+export const BAR_LOCATION = {
+  lat: Number(process.env.SHOP_LAT) || 3.9010,
+  lng: Number(process.env.SHOP_LNG) || 11.5850,
+};
 
 const TARIF_PAR_KM = 250; // FCFA/km
 const FRAIS_MIN = 1000;

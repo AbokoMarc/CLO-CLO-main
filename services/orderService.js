@@ -29,8 +29,9 @@ export const OrderService = {
     return ApiClient.patch(`/orders/${id}/cancel`, {}, { auth: true });
   },
   /** Partage de localisation en temps réel (client ou livreur). */
-  updateLocation(orderId, lat, lng) {
-    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng }, { auth: true });
+  updateLocation(orderId, lat, lng, extra = {}) {
+    // extra : { heading, speed, accuracy } fournis par le GPS (cap, vitesse en m/s, précision en m)
+    return ApiClient.post(`/orders/${orderId}/location`, { lat, lng, ...extra }, { auth: true });
   },
   getLocation(orderId) {
     return ApiClient.get(`/orders/${orderId}/location`, { auth: true });

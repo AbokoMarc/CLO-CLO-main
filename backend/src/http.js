@@ -23,7 +23,8 @@ export function startSSE(res) {
 }
 
 export function sendJson(res, status, data) {
-  const body = JSON.stringify(data);
+  // Champs internes jamais exposés (position brute sauvegardée, clé d'idempotence).
+  const body = JSON.stringify(data, (k, v) => (k === "liveJson" || k === "idempotencyKey" ? undefined : v));
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": config.corsOrigin,
