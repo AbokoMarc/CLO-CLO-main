@@ -13,7 +13,7 @@ const ALL_EVENTS = [
   "order:new", "order:assigned", "order:accepted", "order:started",
   "order:updated", "order:confirmation", "order:cancelled",
   "order:message", "order:sos", "livreur:message",
-  "traiteur:new", "traiteur:message",
+  "traiteur:new", "traiteur:message", "reset:new",
 ];
 
 export const NotificationService = {

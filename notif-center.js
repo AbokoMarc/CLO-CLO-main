@@ -30,6 +30,7 @@ function describe(role, evt, d) {
     case "order:confirmation": return admin ? { text: `Confirmation de livraison — CMD-${id}`, href: "admin-livraisons.html" } : null;
     case "order:message": return { text: `Nouveau message sur la commande CMD-${id}`, href: admin ? "admin-livraisons.html" : `suivi.html?order=${id}` };
     case "order:sos": return { text: `ALERTE URGENCE — CMD-${id}`, href: admin ? "admin-livraisons.html" : `suivi.html?order=${id}`, urgent: true };
+    case "reset:new": return admin ? { text: `Mot de passe oublié — ${d?.nom || ""}`, href: "admin-clients.html" } : null;
     case "livreur:message": return admin ? { text: "Nouveau message d'un livreur", href: "admin-livreurs.html" } : null;
     case "traiteur:new": return admin ? { text: `Nouvelle demande traiteur — ${d?.nom || ""}`, href: `admin-traiteur.html?id=${id}` } : null;
     case "traiteur:message": {

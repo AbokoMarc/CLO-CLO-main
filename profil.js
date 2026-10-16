@@ -373,3 +373,25 @@ document.addEventListener("cloclo:ready", async () => {
     setTimeout(() => showToast(`Bienvenue, ${APP.user.nom.split(" ")[0]} ! Vous avez ${APP.user.points} pts`), 600);
   }
 });
+
+/* ── Suppression du compte : confirmation par mot de passe (champ masqué, pas de prompt() en clair) ── */
+document.getElementById("btn-delete-account")?.addEventListener("click", () => {
+  document.getElementById("del-dialog")?.remove();
+  const d = document.createElement("div");
+  d.id = "del-dialog"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
+  d.innerHTML = `<div class="pay-card"><h2>Supprimer mon compte ?</h2>
+    <p style="color:var(--text-gray);line-height:1.5;">Cette action est <b>définitive</b>. Saisissez votre mot de passe pour confirmer.</p>
+    <input id="del-pwd" type="password" autocomplete="current-password" placeholder="Mot de passe" style="width:100%;padding:13px 14px;border:1.5px solid var(--green-line);border-radius:14px;font:inherit;margin:8px 0;"/>
+    <p id="del-err" role="alert" class="pay-err"></p>
+    <div class="pay-actions"><button type="button" id="del-cancel" class="pay-secondary">Annuler</button><button type="button" id="del-ok" class="pay-primary" style="background:#DC2626;">Supprimer</button></div></div>`;
+  d.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;";
+  document.body.appendChild(d);
+  document.getElementById("del-pwd").focus();
+  document.getElementById("del-cancel").onclick = () => d.remove();
+  const okBtn = document.getElementById("del-ok");            // (e.currentTarget vaut null après un await)
+  okBtn.onclick = async () => {
+    okBtn.disabled = true;
+    try { await AuthService.deleteAccount(document.getElementById("del-pwd").value); AuthService.logout(); location.href = "index.html"; }
+    catch (err) { document.getElementById("del-err").textContent = err.message; okBtn.disabled = false; }
+  };
+});

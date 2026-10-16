@@ -1,15 +1,20 @@
 {
   "name": "cloclo-app",
   "version": "1.0.0",
-  "description": "CLO-CLO — empaquetage Android (Capacitor) du site déployé",
+  "description": "CLO-CLO \u2014 empaquetage Android (Capacitor) du site d\u00e9ploy\u00e9",
   "private": true,
   "scripts": {
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "android:setup": "node scripts/android-setup.mjs",
+    "android:apk": "node scripts/android-setup.mjs --build"
   },
   "dependencies": {
-    "@capacitor/core": "^6.1.2"
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/push-notifications": "^6.0.2",
+    "@capacitor-community/background-geolocation": "^1.2.20",
+    "@capacitor/app": "^6.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2",

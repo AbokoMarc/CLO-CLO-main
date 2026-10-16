@@ -887,3 +887,41 @@ html[data-theme="dark"] .lm-bubble { border-color: var(--surface); }
 /* FONT_FALLBACK : police système immédiate si Google Fonts est lent ou bloqué (font-display: swap) */
 body { font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
 h1, h2, h3, h4, .hero-title, .menu-title, .section-title, .page-title { font-family: "Bricolage Grotesque", "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+/* ───────── Mot de passe oublié ───────── */
+.fp-info { background: var(--green-soft); border: 1.5px solid var(--green-line); color: var(--green-dark); border-radius: 14px; padding: 12px 14px; font-weight: 600; font-size: .9rem; margin-bottom: 12px; line-height: 1.45; }
+.fp-wa { display: block; text-align: center; text-decoration: none; margin-bottom: 16px; border-color: #25D366 !important; color: #128C7E !important; }
+section[hidden] { display: none !important; }
+
+/* ───────── Admin : demandes de mot de passe ───────── */
+.reset-box { background: #FEF9C3; border: 1.5px solid #FDE68A; border-radius: 20px; padding: 16px 18px; margin-bottom: 20px; }
+.reset-title { margin: 0 0 4px; font-size: 1.05rem; color: #854D0E; display: flex; align-items: center; gap: 8px; }
+.reset-count { background: #DC2626; color: #fff; border-radius: 999px; font-size: .75rem; padding: 2px 9px; }
+.reset-help { margin: 0 0 12px; color: #854D0E; font-size: .84rem; font-weight: 600; }
+.reset-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-top: 1px dashed #FDE68A; }
+.reset-meta { font-size: .8rem; color: #78716C; font-weight: 600; margin-top: 2px; }
+.reset-sent { color: var(--green); font-weight: 800; } .reset-exp { color: #B91C1C; font-weight: 800; }
+.reset-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.reset-send { border: 0; background: #25D366; color: #fff; border-radius: 999px; padding: 10px 16px; font: inherit; font-weight: 800; cursor: pointer; }
+.reset-no { border: 1.5px solid #D6D3D1; background: #fff; color: #57534E; border-radius: 999px; padding: 10px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.danger-zone { margin-top: 28px; border: 1.5px solid #FECACA; background: #FEF2F2; border-radius: 18px; padding: 16px 18px; }
+.danger-zone h3 { margin: 0 0 6px; color: #B91C1C; }
+.danger-zone p { color: #7F1D1D; font-size: .86rem; line-height: 1.5; margin: 0 0 12px; }
+.danger-btn { border: 0; background: #DC2626; color: #fff; border-radius: 999px; padding: 11px 20px; font: inherit; font-weight: 800; cursor: pointer; }
+html[data-theme="dark"] .reset-box { background: #3A2F0B; border-color: #6B5614; } html[data-theme="dark"] .reset-title, html[data-theme="dark"] .reset-help { color: #FDE68A; }
+html[data-theme="dark"] .reset-no { background: var(--surface); color: var(--text-dark); border-color: var(--line); }
+html[data-theme="dark"] .danger-zone { background: #3F1D1D; border-color: #7F1D1D; } html[data-theme="dark"] .danger-zone p { color: #FCA5A5; }
+
+/* ───────── Pages légales + liens de pied de page ───────── */
+html:not([lang="en"]) .lang-en, html[lang="en"] .lang-fr { display: none !important; }
+.legal { max-width: 820px; margin: 0 auto; padding: 36px 20px 60px; }
+.legal h1 { color: var(--green); font-size: clamp(1.7rem, 5vw, 2.3rem); margin: 0 0 6px; }
+.legal-date { color: var(--text-gray); font-weight: 600; margin: 0 0 20px; }
+.legal-toc { background: var(--green-wash); border: 1.5px solid var(--green-line); border-radius: 18px; padding: 14px 20px; margin-bottom: 24px; }
+.legal-toc ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; } .legal-toc a { color: var(--green); font-weight: 700; text-decoration: none; }
+.legal-sec { margin-bottom: 22px; scroll-margin-top: 80px; } .legal-sec h2 { font-size: 1.15rem; color: var(--green); margin: 0 0 6px; }
+.legal-sec p { line-height: 1.7; color: var(--text-dark); margin: 0; overflow-wrap: anywhere; } .legal-sec a, .legal-links a { color: var(--green); font-weight: 700; }
+.legal-links { margin-top: 30px; text-align: center; }
+.footer-legal { text-align: center; font-size: .85rem; margin: 0 0 8px; } .footer-legal a { color: rgba(255,255,255,.9); text-decoration: underline; }
+html[data-theme="dark"] .legal-toc { background: var(--green-wash); border-color: var(--line); }
+html[data-theme="dark"] .legal-sec p { color: var(--text-dark); }

@@ -5,9 +5,27 @@
   "server": {
     "url": "https://clo-clo-main.vercel.app",
     "cleartext": false,
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": [
+      "clo-clo-main.vercel.app",
+      "clo-clo-main.onrender.com",
+      "*.tile.openstreetmap.org",
+      "router.project-osrm.org",
+      "fonts.googleapis.com",
+      "fonts.gstatic.com"
+    ]
   },
   "android": {
     "allowMixedContent": false
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "BackgroundGeolocation": {}
   }
 }

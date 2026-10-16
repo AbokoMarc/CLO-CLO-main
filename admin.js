@@ -10,6 +10,7 @@ import { ProductService } from "./services/productService.js";
 import { NotificationService } from "./services/notificationService.js";
 import { mountInbox, esc } from "./traiteur-inbox.js";
 import { NotifCenter } from "./notif-center.js";
+import { NativeBridge } from "./native.js";
 import { TraiteurService } from "./services/traiteurService.js";
 import { I18n } from "./i18n.js";
 import { PWA } from "./pwa.js";
@@ -69,6 +70,7 @@ window.showToast = window.showToast || showToast;
 
 async function requireAdmin() {
   const me = await AuthService.me();
+  if (me) NativeBridge.initPush();      // notifications natives (APK) ; sans effet dans le navigateur
   if (!me || me.role !== "admin") {
     window.location.href = "connexion-directeur.html";
     return null;
@@ -154,6 +156,7 @@ async function handleChangeOwnPassword() {
 function initAdminNotifications() {
   NotificationService.connect((event, data) => {
     if (!data || event === "order:location") return;     // flux GPS : géré par la carte, pas une notification
+    if (event === "reset:new") { showToast(`🔑 Mot de passe oublié — ${data.nom || ""}`); return; }
     if (event === "traiteur:new") { showToast(`Nouvelle demande traiteur — ${data.nom || ""}`); return; }
     if (event === "traiteur:message") {
       // le fil ouvert se met à jour tout seul (évènement « cloclo:notif ») ; ailleurs, on prévient par un toast
@@ -416,7 +419,49 @@ function unlockBarHtml(unlocked) {
   </div>`;
 }
 
+/* ── MOT DE PASSE OUBLIÉ : demandes à traiter (l'admin décide d'envoyer le code, par WhatsApp) ── */
+async function initResetRequests() {
+  const box = document.getElementById("reset-requests");
+  if (!box) return;
+  const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000); return m < 1 ? "à l'instant" : m < 60 ? `il y a ${m} min` : `il y a ${Math.round(m / 60)} h`; };
+  async function render() {
+    let list = [];
+    try { list = await AdminService.listPasswordResets(); } catch { /* silencieux : la page clients reste utilisable */ }
+    if (!list.length) { box.innerHTML = ""; return; }
+    box.innerHTML = `<div class="reset-box" role="region" aria-label="Demandes de mot de passe">
+      <h2 class="reset-title">🔑 Mots de passe oubliés <span class="reset-count">${list.length}</span></h2>
+      <p class="reset-help">Vérifiez que la personne est bien le client (vous pouvez l'appeler), puis envoyez-lui le code par WhatsApp. Le code est valable 30 minutes.</p>
+      ${list.map((r) => `<div class="reset-row" data-id="${r.id}">
+        <div><b>${esc(r.nom)}</b><div class="reset-meta">${esc(r.tel || r.email)} · ${ago(r.createdAt)}${r.status === "code_envoye" ? " · <span class='reset-sent'>code envoyé</span>" : ""}${r.status === "expire" ? " · <span class='reset-exp'>expiré</span>" : ""}</div></div>
+        <div class="reset-actions">
+          <button type="button" class="reset-send">${r.status === "code_envoye" ? "Renvoyer un code" : "Envoyer le code par WhatsApp"}</button>
+          <button type="button" class="reset-no" aria-label="Ignorer la demande de ${esc(r.nom)}">Ignorer</button>
+        </div></div>`).join("")}
+    </div>`;
+    box.querySelectorAll(".reset-row").forEach((row) => {
+      const id = row.dataset.id;
+      const sendBtn = row.querySelector(".reset-send");
+      sendBtn.addEventListener("click", async () => {
+        sendBtn.disabled = true;
+        try {
+          const r = await AdminService.issuePasswordReset(id);
+          window.open(r.whatsappUrl, "_blank", "noopener");        // WhatsApp s'ouvre avec le message prêt, vers le numéro enregistré
+          showToast(`Code ${r.code} généré pour ${r.nom}. Envoyez le message WhatsApp.`);
+          render();
+        } catch (err) { showToast(err.message || "Erreur", "red"); sendBtn.disabled = false; }
+      });
+      row.querySelector(".reset-no").addEventListener("click", async () => {
+        if (!confirm("Ignorer cette demande ?")) return;
+        try { await AdminService.dismissPasswordReset(id); render(); } catch (err) { showToast(err.message || "Erreur", "red"); }
+      });
+    });
+  }
+  await render();
+  document.addEventListener("cloclo:notif", (e) => { if (e.detail?.event === "reset:new") render(); });
+}
+
 async function initClients() {
+  initResetRequests();
   const grid = document.getElementById("clients-grid");
 
   async function renderClients() {

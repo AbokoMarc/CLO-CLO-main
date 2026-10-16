@@ -7,6 +7,7 @@ import { AuthService } from "./services/authService.js";
 import { DeliveryService } from "./services/deliveryService.js";
 import { NotificationService } from "./services/notificationService.js";
 import { I18n } from "./i18n.js";
+import { NativeBridge } from "./native.js";
 import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
 
@@ -51,6 +52,7 @@ function showToast(msg, color = "green") {
 
 async function requireLivreur() {
   const me = await AuthService.me();
+  if (me) NativeBridge.initPush();      // notifications natives (APK) ; sans effet dans le navigateur
   if (!me || me.role !== "livreur") {
     window.location.href = "connexion-livreur.html";
     return null;
@@ -536,7 +538,7 @@ async function initChat(orderId) {
    • cap, vitesse et précision sont transmis (flèche orientée côté client) ;
    • l'écran reste allumé (Wake Lock) pendant la livraison ;
    • la carte du livreur montre sa position instantanément, sans attendre le serveur. */
-let locationWatchId = null, wakeLock = null, deliveryMap = null, sendTicker = null;
+let stopWatching = null, wakeLock = null, deliveryMap = null, sendTicker = null;
 
 const toRad = (d) => (d * Math.PI) / 180;
 const metersBetween = (a, b) => {
@@ -548,7 +550,7 @@ const metersBetween = (a, b) => {
 async function acquireWakeLock() {
   try { wakeLock = await navigator.wakeLock?.request("screen"); } catch { /* non supporté : sans conséquence */ }
 }
-document.addEventListener("visibilitychange", () => { if (!document.hidden && locationWatchId !== null) acquireWakeLock(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden && stopWatching) acquireWakeLock(); });
 
 async function mountDeliveryMap(order) {
   const el = document.getElementById("livreur-map");
@@ -577,7 +579,7 @@ async function mountDeliveryMap(order) {
 async function startLocationSharing(order, send = true) {
   stopLocationSharing();
   const statusEl = document.getElementById("location-share-status");
-  if (!navigator.geolocation) {
+  if (!NativeBridge.hasGeolocation()) {
     if (statusEl) statusEl.textContent = "Géolocalisation non disponible sur cet appareil.";
     return;
   }
@@ -599,7 +601,8 @@ async function startLocationSharing(order, send = true) {
   };
   sendTicker = setInterval(flush, 1000);
 
-  locationWatchId = navigator.geolocation.watchPosition(
+  // Dans l'APK Capacitor : GPS en arrière-plan (écran verrouillé) ; dans le navigateur : GPS classique.
+  stopWatching = NativeBridge.watchPosition(
     (pos) => {
       const c = pos.coords;
       const p = { lat: c.latitude, lng: c.longitude, heading: Number.isFinite(c.heading) ? Math.round(c.heading) : null, speed: Number.isFinite(c.speed) ? c.speed : null, accuracy: Math.round(c.accuracy) };
@@ -613,13 +616,12 @@ async function startLocationSharing(order, send = true) {
         ? "Localisation refusée — autorisez-la dans le navigateur pour que le client vous suive."
         : "Signal GPS faible — placez-vous à l'extérieur, la recherche continue…";
     },
-    { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 }
   );
 }
 
 function stopLocationSharing() {
-  if (locationWatchId !== null) navigator.geolocation.clearWatch(locationWatchId);
-  locationWatchId = null;
+  stopWatching?.();
+  stopWatching = null;
   if (sendTicker) clearInterval(sendTicker); sendTicker = null;
   wakeLock?.release?.().catch(() => {}); wakeLock = null;
 }

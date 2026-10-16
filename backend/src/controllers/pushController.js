@@ -27,6 +27,18 @@ export const PushController = {
     sendJson(res, 200, { ok: true });
   },
 
+  /** Enregistre le jeton FCM de l'application Android (Capacitor) pour l'utilisateur connecté. */
+  async registerNative({ req, res, body }) {
+    const auth = requireAuth(req);
+    const token = String(body?.token || "").trim();
+    if (token.length < 20 || token.length > 4096) return sendJson(res, 400, { error: "Jeton de notification invalide." });
+    const endpoint = `fcm:${token}`, channel = channelFor(auth);
+    const existing = await Store.findOne("pushSubs", "endpoint = ?", endpoint);
+    if (existing) await Store.update("pushSubs", existing.id, { channel });      // l'appareil change de compte : on le rattache au bon
+    else await Store.insert("pushSubs", { channel, endpoint, p256dh: "native", authKey: "native" });
+    sendJson(res, 200, { ok: true });
+  },
+
   async unsubscribe({ req, res, body }) {
     requireAuth(req);
     const endpoint = body?.endpoint;

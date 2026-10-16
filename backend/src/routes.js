@@ -9,6 +9,7 @@ import { AdminController } from "./controllers/adminController.js";
 import { NotificationController } from "./controllers/notificationController.js";
 import { PushController } from "./controllers/pushController.js";
 import { TraiteurController } from "./controllers/traiteurController.js";
+import { CronController } from "./controllers/cronController.js";
 import { PaymentController } from "./controllers/paymentController.js";
 
 export const router = new Router();
@@ -24,6 +25,12 @@ router.patch("/api/auth/me/password", AuthController.changeMyPassword);
 router.patch("/api/auth/me/phone", AuthController.setMyPhone);
 router.get("/api/auth/me/referrals", AuthController.myReferrals);
 router.post("/api/auth/refresh", AuthController.refresh);
+router.post("/api/auth/me/delete", AuthController.deleteAccount);
+router.post("/api/auth/forgot", AuthController.forgot);
+router.post("/api/auth/reset", AuthController.resetConfirm);
+router.get("/api/admin/password-resets", AuthController.adminResetList);
+router.post("/api/admin/password-resets/:id/issue", AuthController.adminResetIssue);
+router.post("/api/admin/password-resets/:id/dismiss", AuthController.adminResetDismiss);
 router.post("/api/auth/me/addresses", AuthController.addFavoriteAddress);
 router.delete("/api/auth/me/addresses/:id", AuthController.removeFavoriteAddress);
 
@@ -45,6 +52,10 @@ router.patch("/api/admin/traiteur/:id", AdminController.updateTraiteurRequest);
 router.get("/api/traiteur/me", TraiteurController.mine);
 router.get("/api/traiteur/:id/messages", TraiteurController.listMessages);
 router.post("/api/traiteur/:id/messages", TraiteurController.sendMessage);
+
+// Tâches planifiées déclenchées de l'extérieur
+router.post("/api/cron/run", CronController.run);
+router.get("/api/cron/run", CronController.run);
 
 // Paiement en ligne
 router.get("/api/payments/methods", PaymentController.methods);
@@ -105,3 +116,4 @@ router.get("/api/notifications/stream", NotificationController.stream);
 router.get("/api/push/vapid-public-key", PushController.vapidPublicKey);
 router.post("/api/push/subscribe", PushController.subscribe);
 router.post("/api/push/unsubscribe", PushController.unsubscribe);
+router.post("/api/push/native", PushController.registerNative);

@@ -104,7 +104,13 @@ export const AuthService = {
     return !!ApiClient.getToken();
   },
   logout() {
+    document.dispatchEvent(new CustomEvent("cloclo:logout"));   // native.js désinscrit l'appareil des notifications
     this._forget();
   },
   myReferrals() { return ApiClient.get("/auth/me/referrals", { auth: true }); },
+  /** « Mot de passe oublié » : l'équipe envoie un code par WhatsApp au numéro enregistré. */
+  forgot(identifier) { return ApiClient.post("/auth/forgot", { identifier }); },
+  resetPassword({ identifier, code, mdp }) { return ApiClient.post("/auth/reset", { identifier, code, mdp }); },
+  /** Suppression du compte (anonymisation) : confirmation par mot de passe. */
+  deleteAccount(mdp) { return ApiClient.post("/auth/me/delete", { mdp }, { auth: true }); },
 };

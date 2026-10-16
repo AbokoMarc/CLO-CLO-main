@@ -23,6 +23,23 @@ function publicAdmin(a) {
 const COLLECTION_BY_ROLE = { client: "users", livreur: "livreurs", admin: "admins" };
 
 export const AuthService = {
+  /** Suppression du compte (droit à l'effacement) : les données personnelles sont ANONYMISÉES ; l'historique
+      comptable des commandes est conservé sans lien direct avec une personne identifiable. */
+  async deleteAccount(userId, mdp) {
+    const user = await Store.findById("users", Number(userId));
+    if (!user || !verifyPassword(String(mdp || ""), user.passwordHash)) {
+      const e = new Error("Mot de passe incorrect."); e.status = 401; throw e;
+    }
+    await Store.update("users", user.id, {
+      nom: "Compte supprimé", email: `supprime-${user.id}-${Date.now()}@supprime.invalid`, tel: "", quartier: "", adresse: "",
+      favoriteAddresses: [], points: 0, passwordHash: hashPassword(`${Date.now()}-${Math.random()}`),
+    });
+    for (const sub of (await Store.all("pushSubs")).filter((x) => x.channel === `client:${user.id}`)) await Store.remove("pushSubs", sub.id).catch(() => {});
+    for (const r of (await Store.all("traiteurRequests")).filter((x) => x.userId === user.id)) await Store.update("traiteurRequests", r.id, { nom: "Compte supprimé", tel: "" }).catch(() => {});
+    for (const r of (await Store.all("passwordResets")).filter((x) => x.userId === user.id)) await Store.update("passwordResets", r.id, { status: "annule", codeHash: null }).catch(() => {});
+    return { ok: true };
+  },
+
   /** Filleuls du client + points gagnés grâce au parrainage (pour la carte « Parrainez un ami »). */
   async myReferrals(userId) {
     const users = await Store.all("users");

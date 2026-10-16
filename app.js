@@ -6,6 +6,7 @@
 import { APP } from "./app-data.js";
 import { NotificationService } from "./services/notificationService.js";
 import { NotifCenter } from "./notif-center.js";
+import { NativeBridge } from "./native.js";
 import { I18n } from "./i18n.js";
 import { PWA } from "./pwa.js";
 import { ApiClient } from "./services/apiClient.js";
@@ -388,6 +389,7 @@ try { const r = new URLSearchParams(location.search).get("ref"); if (/^CL\d+$/i.
 /* Connecté : on ne propose plus de s'inscrire. Le bandeau final de l'accueil devient une invitation à commander. */
 document.addEventListener("cloclo:ready", () => {
   if (!APP.isLoggedIn()) { document.documentElement.classList.remove("is-auth"); return; }
+  NativeBridge.initPush();                 // notifications natives (APK) ; sans effet dans le navigateur
   document.documentElement.classList.add("is-auth");
   const cta = document.querySelector(".cta-section");
   if (cta) {

@@ -4,8 +4,9 @@
 import { PaymentService } from "./paymentService.js";
 import { BAR_LOCATION, distanceKm } from "../pricing.js";
 import { Store } from "../repositories/store.js";
+import { once } from "../alerts.js";
 import { CatalogService } from "./catalogService.js";
-import { notifyOrderEvent, notifySos } from "../notify.js";
+import { notifyOrderEvent, notifySos, pushToChannel } from "../notify.js";
 import { computeDeliveryFee } from "../pricing.js";
 
 const POINTS_PER_500_FCFA = 5;
@@ -173,7 +174,7 @@ export const OrderService = {
   /** L'admin désigne un livreur — celui-ci doit encore ACCEPTER (voir acceptDelivery)
       avant que quoi que ce soit ne démarre réellement. */
   async assignLivreur(orderId, livreurId) {
-    const order = await Store.update("orders", orderId, { livreurId: Number(livreurId), statut: "assignee" });
+    const order = await Store.update("orders", orderId, { livreurId: Number(livreurId), statut: "assignee", assignedAt: new Date().toISOString() });
     notifyOrderEvent("order:assigned", order);
     return order;
   },
@@ -207,7 +208,7 @@ export const OrderService = {
       e.status = 400;
       throw e;
     }
-    const updated = await Store.update("orders", orderId, { statut: "en_livraison" });
+    const updated = await Store.update("orders", orderId, { statut: "en_livraison", startedAt: new Date().toISOString() });
     notifyOrderEvent("order:started", updated);
     return updated;
   },
@@ -408,6 +409,13 @@ export const OrderService = {
       live._saved = now;
       const { _saved, ...toSave } = live;
       await Store.update("orders", order.id, { liveJson: JSON.stringify(toSave) });
+    }
+    // Géorepérage : alertes push au CLIENT quand le livreur approche (une seule fois chacune).
+    if (role === "livreur" && validCoord(order.destLat, order.destLng)) {
+      const d = distanceKm(lat, lng, order.destLat, order.destLng);
+      const msg = { url: `/suivi.html?order=${order.id}`, urgent: true };
+      if (d <= 0.25 && (await once(`arrived:${order.id}`))) pushToChannel(`client:${order.userId}`, { ...msg, title: "📍 Votre livreur est arrivé !", body: `Sortez récupérer votre commande CMD-${order.id}.`, tag: `arrived-${order.id}` });
+      else if (d <= 1.5 && (await once(`near:${order.id}`))) pushToChannel(`client:${order.userId}`, { ...msg, title: "🛵 Votre livreur arrive", body: `Il est à environ ${Math.max(1, Math.round(d * 4))} min de chez vous (CMD-${order.id}).`, tag: `near-${order.id}` });
     }
     const { trail, _saved, ...forEvent } = live;
     notifyOrderEvent("order:location", { id: order.id, userId: order.userId, livreurId: order.livreurId, statut: order.statut, location: this._shape(order, forEvent) });

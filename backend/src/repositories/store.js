@@ -135,6 +135,23 @@ async function migrate() {
       createdAt TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
+      status TEXT NOT NULL,
+      codeHash TEXT,
+      expiresAt TEXT,
+      attempts INTEGER DEFAULT 0,
+      createdAt TEXT NOT NULL,
+      sentAt TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS alert_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      alertKey TEXT NOT NULL UNIQUE,
+      createdAt TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS traiteur_messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       requestId INTEGER NOT NULL REFERENCES traiteur_requests(id),
@@ -178,6 +195,8 @@ async function migrate() {
     "ALTER TABLE traiteur_requests ADD COLUMN adminSeenAt TEXT",
     "ALTER TABLE traiteur_requests ADD COLUMN lastMessageAt TEXT",
     "ALTER TABLE users ADD COLUMN referredBy INTEGER",
+    "ALTER TABLE orders ADD COLUMN assignedAt TEXT",
+    "ALTER TABLE orders ADD COLUMN startedAt TEXT",
     "ALTER TABLE orders ADD COLUMN destLat REAL",
     "ALTER TABLE orders ADD COLUMN destLng REAL",
     "ALTER TABLE orders ADD COLUMN liveJson TEXT",
@@ -204,10 +223,12 @@ const SCHEMAS = {
   admins:        { table: "admins",          columns: ["username","passwordHash","tel"] },
   products:      { table: "products",        columns: ["name","price","category","popular","desc","img","disponible"], bool: ["popular","disponible"] },
   traiteurRequests: { table: "traiteur_requests", columns: ["userId","nom","tel","typeEvenement","nbPersonnes","dateEvenement","message","statut","prixPropose","createdAt","clientSeenAt","adminSeenAt","lastMessageAt"] },
+  passwordResets: { table: "password_resets", columns: ["userId","status","codeHash","expiresAt","attempts","createdAt","sentAt"] },
+  alertLog: { table: "alert_log", columns: ["alertKey","createdAt"] },
   traiteurMessages: { table: "traiteur_messages", columns: ["requestId","sender","text","createdAt"] },
   rewards:       { table: "rewards",         columns: ["name","desc","cost","available"], bool: ["available"] },
   zones:         { table: "zones",           columns: ["ville","quartier"] },
-  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt","rating","ratingComment","tip","scheduledFor","promoCode","discount","fraisLivraison","distanceKm","confirmedLivreurAt","confirmedClientAt","confirmedAdminAt","paymentMethod","paymentStatus","paymentRef","idempotencyKey","destLat","destLng","liveJson"], json: ["items"] },
+  orders:        { table: "orders",          columns: ["userId","items","total","adresse","quartier","statut","livreurId","etaMinutes","createdAt","rating","ratingComment","tip","scheduledFor","promoCode","discount","fraisLivraison","distanceKm","confirmedLivreurAt","confirmedClientAt","confirmedAdminAt","paymentMethod","paymentStatus","paymentRef","idempotencyKey","destLat","destLng","liveJson","assignedAt","startedAt"], json: ["items"] },
   pointsHistory: { table: "points_history",  columns: ["userId","label","date","pts","type"] },
   pushSubs:      { table: "push_subscriptions", columns: ["channel","endpoint","p256dh","authKey"] },
   promoCodes:    { table: "promo_codes",     columns: ["code","type","value","active"], bool: ["active"] },

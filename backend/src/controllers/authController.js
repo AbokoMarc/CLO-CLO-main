@@ -1,19 +1,56 @@
 import { signToken } from "../auth.js";
 import { AuthService } from "../services/authService.js";
-import { sendJson, requireAuth } from "../http.js";
+import { sendJson, requireAuth, requireRole } from "../http.js";
+import { ResetService } from "../services/resetService.js";
+import { guardLogin, hit, clientIp, RULES } from "../ratelimit.js";
 
 export const AuthController = {
-  async register({ res, body }) {
+  async register({ req, res, body }) {
+    hit(`register:ip:${clientIp(req)}`, RULES.registerIp);
     sendJson(res, 201, await AuthService.registerClient(body));
   },
-  async loginClient({ res, body }) {
-    sendJson(res, 200, await AuthService.loginClient(body));
+  // Chaque connexion est protégée : 6 essais / 15 min par compte et 30 par adresse IP (puis verrouillage temporaire).
+  async loginClient({ req, res, body }) {
+    const ok = guardLogin(req, "client", body?.email);
+    const result = await AuthService.loginClient(body);
+    ok();
+    sendJson(res, 200, result);
   },
-  async loginLivreur({ res, body }) {
-    sendJson(res, 200, await AuthService.loginLivreur(body));
+  async loginLivreur({ req, res, body }) {
+    const ok = guardLogin(req, "livreur", body?.matricule);
+    const result = await AuthService.loginLivreur(body);
+    ok();
+    sendJson(res, 200, result);
   },
-  async loginAdmin({ res, body }) {
-    sendJson(res, 200, await AuthService.loginAdmin(body));
+  async loginAdmin({ req, res, body }) {
+    const ok = guardLogin(req, "admin", body?.username);
+    const result = await AuthService.loginAdmin(body);
+    ok();
+    sendJson(res, 200, result);
+  },
+
+  /** « Mot de passe oublié » : réponse identique que le compte existe ou non. */
+  async forgot({ req, res, body }) {
+    hit(`forgot:ip:${clientIp(req)}`, RULES.forgotIp);
+    hit(`forgot:id:${String(body?.identifier || "").trim().toLowerCase().slice(0, 120)}`, RULES.forgotId);
+    sendJson(res, 200, await ResetService.request(body?.identifier));
+  },
+  async resetConfirm({ req, res, body }) {
+    hit(`reset:ip:${clientIp(req)}`, RULES.loginIp);
+    hit(`reset:id:${String(body?.identifier || "").trim().toLowerCase().slice(0, 120)}`, RULES.resetId);
+    sendJson(res, 200, await ResetService.confirm(body?.identifier, body?.code, body?.mdp));
+  },
+  async adminResetList({ req, res }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await ResetService.adminList());
+  },
+  async adminResetIssue({ req, res, params }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await ResetService.adminIssue(params.id));
+  },
+  async adminResetDismiss({ req, res, params }) {
+    requireRole(requireAuth(req), "admin");
+    sendJson(res, 200, await ResetService.adminDismiss(params.id));
   },
   async me({ req, res }) {
     const payload = requireAuth(req);
@@ -45,6 +82,12 @@ export const AuthController = {
     const payload = requireAuth(req);
     const { iat, exp, ...claims } = payload;
     sendJson(res, 200, { token: signToken(claims) });
+  },
+  async deleteAccount({ req, res, body }) {
+    const payload = requireAuth(req);
+    if (payload.role !== "client") return sendJson(res, 403, { error: "Réservé aux comptes client." });
+    hit(`delete:id:${payload.sub}`, RULES.loginId);
+    sendJson(res, 200, await AuthService.deleteAccount(payload.sub, body?.mdp));
   },
   async myReferrals({ req, res }) {
     const payload = requireAuth(req);

@@ -88,4 +88,8 @@ export const AdminService = {
   validatePayment(orderId) {
     return ApiClient.post(`/admin/orders/${orderId}/payment/validate`, {}, { auth: true });
   },
+  /** « Mot de passe oublié » : demandes en attente, génération du code, annulation. */
+  listPasswordResets() { return ApiClient.get("/admin/password-resets", { auth: true }); },
+  issuePasswordReset(id) { return ApiClient.post(`/admin/password-resets/${id}/issue`, {}, { auth: true }); },
+  dismissPasswordReset(id) { return ApiClient.post(`/admin/password-resets/${id}/dismiss`, {}, { auth: true }); },
 };
